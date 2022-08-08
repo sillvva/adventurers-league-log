@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       backgroundColor: {
-        primary: "var(--color-bg-primary)"
+        base: "var(--color-bg-primary)"
       },
       textColor: {
         primary: "var(--color-text-primary)",
