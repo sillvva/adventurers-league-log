@@ -59,6 +59,7 @@ model Character {
     name                String
     race                String?
     class               String?
+    campaign            String?
     image_url           String?
     character_sheet_url String?
     user                User     @relation(fields: [userId], references: [id])

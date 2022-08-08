@@ -42,7 +42,8 @@ export const charactersRouter = createRouter()
           ...character,
           total_level,
           total_gold,
-          magic_items
+          magic_items,
+          tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1
         };
       });
     }
@@ -85,7 +86,8 @@ export const charactersRouter = createRouter()
         ...character,
         total_level,
         total_gold,
-        magic_items
+        magic_items,
+        tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1
       };
     }
   });
