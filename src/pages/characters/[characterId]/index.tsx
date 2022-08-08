@@ -1,4 +1,4 @@
-import type { NextPageWithLayout } from "../_app";
+import type { NextPageWithLayout } from "$src/pages/_app";
 import Head from "next/head";
 import { z } from "zod";
 import { trpc } from "$src/utils/trpc";
@@ -12,7 +12,8 @@ const Characters: NextPageWithLayout = () => {
   );
 
   const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
-    ssr: true
+    ssr: true,
+    refetchOnWindowFocus: false
   });
 
   if (!character) return null;

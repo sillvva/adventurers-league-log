@@ -1,17 +1,26 @@
 import type { NextPageWithLayout } from "../_app";
+import type { GetServerSideProps } from "next";
 import Head from "next/head";
 import { trpc } from "$src/utils/trpc";
-import { useSession } from "next-auth/react";
+import { unstable_getServerSession } from "next-auth";
+import type { Session } from "next-auth";
+import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 
-const Characters: NextPageWithLayout = () => {
-  const session = useSession();
-  const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.data?.user?.id }]);
+interface CharactersProps {
+  session: Session;
+}
+
+const Characters: NextPageWithLayout<CharactersProps> = ({ session }) => {
+  const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id }], {
+    enabled: !!session.user,
+    refetchOnWindowFocus: false
+  });
 
   return (
     <>
       <Head>
-        {session.data?.user ? (
-          <title>{session.data.user.name}&apos;s Characters</title>
+        {session.user ? (
+          <title>{session.user.name}&apos;s Characters</title>
         ) : (
           <title>Characters</title>
         )}
@@ -34,3 +43,22 @@ Characters.getLayout = page => {
 };
 
 export default Characters;
+
+export const getServerSideProps: GetServerSideProps = async context => {
+  const session = await unstable_getServerSession(context.req, context.res, authOptions);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false
+      }
+    };
+  }
+
+  return {
+    props: {
+      session
+    }
+  };
+};
