@@ -1,21 +1,17 @@
 import type { NextPageWithLayout } from "../_app";
 import Head from "next/head";
-import { useRouter } from "next/router";
 import { z } from "zod";
-import { qsParse } from "../../utils/misc";
-import { trpc } from "../../utils/trpc";
+import { trpc } from "$src/utils/trpc";
+import { useQueryString } from "$src/utils/hooks";
 
 const Characters: NextPageWithLayout = () => {
-  const router = useRouter();
-
-  const { data: params } = qsParse(
-    router.query,
+  const { data: params } = useQueryString(
     z.object({
-      id: z.string()
+      characterId: z.string()
     })
   );
 
-  const { data: character } = trpc.useQuery(["characters.getOne", { id: params.id }], {
+  const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
     ssr: true
   });
 
@@ -25,7 +21,6 @@ const Characters: NextPageWithLayout = () => {
     <>
       <Head>
         <title>{character.name}</title>
-        <meta name="description" content="" />
       </Head>
 
       <main className="container mx-auto flex flex-col items-center justify-center min-h-screen p-4">
