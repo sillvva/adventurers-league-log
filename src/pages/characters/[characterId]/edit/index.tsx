@@ -14,13 +14,16 @@ import { trpc } from "$src/utils/trpc";
 import { z } from "zod";
 import { useRouter } from "next/router";
 import { concatenate } from "$src/utils/misc";
+import { useQueryString } from "$src/utils/hooks";
+import { newCharacterSchema } from "../../new";
 import { useState } from "react";
 
 interface PageProps {
   session: Session;
 }
 
-export const newCharacterSchema = z.object({
+export const editCharacterSchema = z.object({
+  id: z.string(),
   name: z.string().min(1),
   campaign: z.string().min(1),
   race: z.string().optional(),
@@ -29,7 +32,7 @@ export const newCharacterSchema = z.object({
   image_url: z.union([z.literal(""), z.string().url()])
 });
 
-const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
+const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const {
@@ -40,21 +43,43 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     resolver: zodResolver(newCharacterSchema)
   });
 
-  const mutation = trpc.useMutation(["_characters.new"], {
-    onSuccess(data) {
-      router.push(`/characters/${data.id}`);
+  const { data: params } = useQueryString(
+    z.object({
+      characterId: z.string()
+    })
+  );
+
+  const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
+    ssr: true,
+    refetchOnWindowFocus: false
+  });
+
+  const utils = trpc.useContext();
+  const mutation = trpc.useMutation(["_characters.edit"], {
+    onSuccess() {
+      utils.invalidateQueries(["characters.getOne", { id: params.characterId }]);
+      router.push(`/characters/${params.characterId}`);
     }
   });
 
+  if (!character) return (
+    <Head>
+      <title>Edit Character</title>
+    </Head>
+  );
+
   const submitHandler = handleSubmit(data => {
     setSubmitting(true);
-    mutation.mutate(data);
+    mutation.mutate({
+      id: params.characterId,
+      ...data
+    });
   });
 
   return (
     <>
       <Head>
-        <title>New Character</title>
+        <title>Edit Character - {character.name}</title>
       </Head>
 
       <div className="text-sm breadcrumbs mb-4">
@@ -67,7 +92,12 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <a className="text-neutral-content">Characters</a>
             </Link>
           </li>
-          <li className="text-secondary">New</li>
+          <li>
+            <Link href={`/characters/${params.characterId}`}>
+              <a className="text-neutral-content">{character.name}</a>
+            </Link>
+          </li>
+          <li className="text-secondary">Edit</li>
         </ul>
       </div>
 
@@ -81,7 +111,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                   <span className="text-error">*</span>
                 </span>
               </label>
-              <input type="text" {...register("name", { required: true })} className="input input-bordered focus:border-primary w-full" />
+              <input type="text" {...register("name", { required: true, value: character.name })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.name?.message}</span>
               </label>
@@ -95,7 +125,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                   <span className="text-error">*</span>
                 </span>
               </label>
-              <input type="text" {...register("campaign", { required: true })} className="input input-bordered focus:border-primary w-full" />
+              <input type="text" {...register("campaign", { required: true, value: character.campaign || "" })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.campaign?.message}</span>
               </label>
@@ -106,7 +136,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text">Race</span>
               </label>
-              <input type="text" {...register("race")} className="input input-bordered focus:border-primary w-full" />
+              <input type="text" {...register("race", { value: character.race || "" })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.race?.message}</span>
               </label>
@@ -117,7 +147,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text">Class</span>
               </label>
-              <input type="text" {...register("class")} className="input input-bordered focus:border-primary w-full" />
+              <input type="text" {...register("class", { value: character.class || "" })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.class?.message}</span>
               </label>
@@ -128,7 +158,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text">Character Sheet URL</span>
               </label>
-              <input type="text" {...register("character_sheet_url")} className="input input-bordered focus:border-primary w-full" />
+              <input type="text" {...register("character_sheet_url", { value: character.character_sheet_url || "" })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.character_sheet_url?.message}</span>
               </label>
@@ -139,7 +169,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text">Image URL</span>
               </label>
-              <input type="text" {...register("image_url")} className="input input-bordered focus:border-primary w-full" />
+              <input type="text" {...register("image_url", { value: character.image_url || "" })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.image_url?.message}</span>
               </label>
@@ -147,7 +177,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
           </div>
           <div className="basis-full text-center m-4">
             <button type="submit" className={concatenate("btn btn-primary", submitting && "loading")} disabled={submitting}>
-              Create
+              Update
             </button>
           </div>
         </div>
@@ -156,11 +186,11 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   );
 };
 
-NewCharacter.getLayout = page => {
+EditCharacter.getLayout = page => {
   return <Layout>{page}</Layout>;
 };
 
-export default NewCharacter;
+export default EditCharacter;
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const session = await unstable_getServerSession(context.req, context.res, authOptions);

@@ -24,7 +24,11 @@ const Characters: NextPageWithLayout = () => {
     refetchOnWindowFocus: false
   });
 
-  if (!character) return null;
+  if (!character) return (
+    <Head>
+      <title>Character</title>
+    </Head>
+  );
 
   return (
     <>
@@ -52,7 +56,9 @@ const Characters: NextPageWithLayout = () => {
           </label>
           <ul tabIndex={1} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
             <li>
-              <a>Edit</a>
+              <Link href={`/characters/${params.characterId}/edit`}>
+                <a>Edit</a>
+              </Link>
             </li>
             <li>
               <a>Export</a>
