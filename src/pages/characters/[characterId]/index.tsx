@@ -7,7 +7,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Layout from "$src/layouts/main";
 import Icon from "@mdi/react";
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 
 const Characters: NextPageWithLayout = () => {
   const level = useRef(1);
@@ -141,6 +141,7 @@ const Characters: NextPageWithLayout = () => {
                 <th>Title</th>
                 <th>Advancement</th>
                 <th>Treasure</th>
+                <th>Story Awards</th>
               </tr>
             </thead>
             <tbody>
@@ -149,43 +150,51 @@ const Characters: NextPageWithLayout = () => {
                 if (level_gained) level.current += level_gained.levels;
 
                 return (
-                  <tr key={game.id}>
-                    <td className="align-top">
-                      <p className="text-primary-content font-semibold">{game.name}</p>
-                      <p className="text-sm text-neutral-content">DM: {game.dm.name}</p>
-                      <p className="text-xs text-neutral-content">{game.description}</p>
-                    </td>
-                    <td className="align-top">
-                      {game.experience > 0 && (
+                  <Fragment key={game.id}>
+                    <tr>
+                      <td className="align-top">
+                        <p className="text-primary-content font-semibold">{game.name}</p>
+                        <p className="text-sm text-neutral-content">DM: {game.dm.name}</p>
+                        <p className="text-xs text-neutral-content">{game.description}</p>
+                      </td>
+                      <td className="align-top">
+                        {game.experience > 0 && (
+                          <p>
+                            <span className="font-semibold">Experience:</span> {game.experience}
+                          </p>
+                        )}
+                        {game.acp > 0 && (
+                          <p>
+                            <span className="font-semibold">ACP:</span> {game.acp}
+                          </p>
+                        )}
                         <p>
-                          <span className="font-semibold">Experience:</span> {game.experience}
+                          <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                         </p>
-                      )}
-                      {game.acp > 0 && (
+                      </td>
+                      <td className="align-top">
+                        {game.tcp > 0 && (
+                          <p>
+                            <span className="font-semibold">TCP:</span> {game.tcp}
+                          </p>
+                        )}
                         <p>
-                          <span className="font-semibold">ACP:</span> {game.acp}
+                          <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
                         </p>
-                      )}
-                      <p>
-                        <span className="font-semibold">Levels Gained:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
-                      </p>
-                    </td>
-                    <td className="align-top">
-                      {game.tcp > 0 && (
                         <p>
-                          <span className="font-semibold">TCP:</span> {game.tcp}
+                          <p className="font-semibold">Magic Items:</p>
+                          <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
                         </p>
-                      )}
-                      <p>
-                        <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Magic Items:</span>
-                        <br />
-                        {game.magic_items_gained.map(mi => mi.name).join(" | ")}
-                      </p>
-                    </td>
-                  </tr>
+                      </td>
+                      <td>
+                        <p>
+                          {game.story_awards_gained.map(mi => (
+                            <p key={mi.id}>{mi.name}</p>
+                          ))}
+                        </p>
+                      </td>
+                    </tr>
+                  </Fragment>
                 );
               })}
             </tbody>
