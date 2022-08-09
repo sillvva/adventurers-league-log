@@ -74,7 +74,30 @@ const Layout = (props: PropsWithChildren) => {
           )}
         </nav>
       </header>
-      <main className="relative z-10 container mx-auto p-4 max-w-5xl">{props.children}</main>
+      <main className="container relative z-10 mx-auto p-4 max-w-5xl min-h-[calc(100vh-193px)] sm:min-h-[calc(100vh-145px)]">{props.children}</main>
+      <footer className="footer footer-center relative z-16 p-4 h-28 sm:h-16 bg-base-300/50 text-base-content">
+        <div>
+          <p>
+            All{" "}
+            <a
+              href="https://www.dndbeyond.com/sources/cos/the-lands-of-barovia#BGatesofBarovia"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-secondary">
+              images
+            </a>{" "}
+            and the name{" "}
+            <a href="https://dnd.wizards.com/adventurers-league" target="_blank" rel="noreferrer noopener" className="text-secondary">
+              Adventurers League
+            </a>{" "}
+            are property of Hasbro and{" "}
+            <a href="https://dnd.wizards.com/adventurers-league" target="_blank" rel="noreferrer noopener" className="text-secondary">
+              Wizards of the Coast
+            </a>
+            . This website is affiliated with neither.
+          </p>
+        </div>
+      </footer>
     </>
   );
 };
