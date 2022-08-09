@@ -143,7 +143,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
             </div>
           </div>
           <div className="basis-full text-center m-4">
-            <button className={concatenate("btn btn-primary", isSubmitting && "loading")} disabled={isSubmitting}>
+            <button type="submit" className={concatenate("btn btn-primary", isSubmitting && "loading")} disabled={isSubmitting}>
               Create
             </button>
           </div>
