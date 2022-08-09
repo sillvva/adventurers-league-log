@@ -148,7 +148,7 @@ export const charactersRouter = createRouter()
 function getLevels(games: Game[]) {
   if (!games) games = [];
   let totalLevel = 0;
-  const game_levels: string[] = [];
+  const game_levels: { id: string, levels: number }[] = [];
 
   const xpLevels = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];
   let totalXp = 0;
@@ -156,37 +156,46 @@ function getLevels(games: Game[]) {
   let xpDiff = 0;
   games.forEach(game => {
     totalXp += game.experience;
-    const current = xpLevels[next];
-    if (!current) return;
-    if (totalXp >= current) {
-      totalLevel++;
+    let current = xpLevels[next];
+    let gained = 0;
+    while(current && totalXp >= current) {
+      gained++;
       next++;
-      game_levels.push(game.id);
       if (next < 20) {
         xpDiff = (totalXp - current) / ((xpLevels[next] as number) - current);
       }
+      current = xpLevels[next];
     }
+    game_levels.push({ id: game.id, levels: gained });
   });
 
   if (totalLevel < 20) {
     const acpLevels = [0];
     for (let i = 1; i < 20; i++) acpLevels.push((acpLevels[i - 1] as number) + (i <= 3 ? 4 : 8));
-    let totalAcp = games.reduce(
-      (acc, game) => acc + game.acp,
-      Math.round(((acpLevels[totalLevel] as number) - (acpLevels[totalLevel - 1] as number)) * xpDiff)
-    );
+    let totalAcp = 0;
     let acpDiff = 0;
-    acpLevels.forEach((levelAcp, index) => {
-      if (totalAcp >= levelAcp) {
-        totalLevel = index + 1;
-        if (index < 19) {
-          acpDiff = (totalAcp - levelAcp) / ((acpLevels[index + 1] as number) - levelAcp);
+    next = totalLevel;
+    games.forEach(game => {
+      totalAcp += game.acp;
+      let current = acpLevels[next];
+      let gained = 0;
+      while(current && totalXp >= current) {
+        gained++;
+        next++;
+        if (next < 20) {
+          xpDiff = (totalXp - current) / ((xpLevels[next] as number) - current);
         }
+        current = acpLevels[next];
       }
+      game_levels.push({ id: game.id, levels: gained });
     });
 
     if (totalLevel < 20 && acpDiff > 0) totalLevel++;
   }
+
+  games.forEach(game => {
+    if (game.level > 0) game_levels.push({ id: game.id, levels: game.level });
+  });
 
   totalLevel += games.reduce((acc, game) => acc + game.level, 0);
 

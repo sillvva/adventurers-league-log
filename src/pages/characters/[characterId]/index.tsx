@@ -24,11 +24,12 @@ const Characters: NextPageWithLayout = () => {
     refetchOnWindowFocus: false
   });
 
-  if (!character) return (
-    <Head>
-      <title>Character</title>
-    </Head>
-  );
+  if (!character)
+    return (
+      <Head>
+        <title>Character</title>
+      </Head>
+    );
 
   return (
     <>
@@ -144,8 +145,8 @@ const Characters: NextPageWithLayout = () => {
             </thead>
             <tbody>
               {character.games.map(game => {
-                const level_gained = character.game_levels.includes(game.id) ? 1 : 0;
-                level.current += level_gained;
+                const level_gained = character.game_levels.find(gl => gl.id === game.id);
+                if (level_gained) level.current += level_gained.levels;
 
                 return (
                   <tr key={game.id}>
@@ -166,7 +167,7 @@ const Characters: NextPageWithLayout = () => {
                         </p>
                       )}
                       <p>
-                        <span className="font-semibold">Level:</span> {level_gained} {`(${level.current})`}
+                        <span className="font-semibold">Levels Gained:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                       </p>
                     </td>
                     <td className="align-top">
