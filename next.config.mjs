@@ -15,7 +15,12 @@ function defineNextConfig(config) {
 export default defineNextConfig({
   reactStrictMode: true,
   swcMinify: true,
+	experimental: {
+		images: {
+			allowFutureImage: true
+		}
+	},
   images: {
     domains: ["lh1.googleusercontent.com", "lh2.googleusercontent.com", "lh3.googleusercontent.com", "lh4.googleusercontent.com"]
-  }
+  },
 });

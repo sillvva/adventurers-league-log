@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { signIn, signOut, useSession } from "next-auth/react";
 import background from "../../public/images/barovia-gate.jpg";
 import google from "../../public/images/google.svg";
-import Image from "next/image";
+import Image from "next/future/image";
 import Link from "next/link";
 
 const Layout = (props: PropsWithChildren) => {
@@ -12,7 +12,14 @@ const Layout = (props: PropsWithChildren) => {
 
   return (
     <>
-      <Image src={background} layout="fill" objectFit="cover" objectPosition="center" priority alt="Background" className="!fixed z-0 opacity-25" />
+      <Image
+        src={background}
+        priority
+        alt="Background"
+        width={1280}
+        height={1080}
+        className="!fixed z-0 min-w-full min-h-screen object-cover object-center opacity-20 print:hidden"
+      />
       <div className="flex flex-col min-h-screen">
         <header className="relative z-20 border-b-[1px] border-slate-500 w-screen">
           <nav className="container mx-auto p-4 max-w-5xl flex gap-2">
@@ -32,14 +39,13 @@ const Layout = (props: PropsWithChildren) => {
                   <label tabIndex={0} className="flex cursor-pointer">
                     <div className="px-4 hidden sm:flex items-center text-primary-content">{session.data.user.name}</div>
                     <div className="avatar">
-                      <div className="w-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
+                      <div className="w-12 relative rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
                         <Image
                           src={session.data.user.image || ""}
                           alt={session.data.user.name as string}
-                          layout="fill"
-                          objectFit="cover"
-                          objectPosition="center"
-                          className="rounded-full"
+                          width={48}
+                          height={48}
+                          className="rounded-full object-cover object-center"
                         />
                       </div>
                     </div>
@@ -76,7 +82,7 @@ const Layout = (props: PropsWithChildren) => {
           </nav>
         </header>
         <main className="container flex-1 relative z-10 mx-auto p-4 max-w-5xl">{props.children}</main>
-        <footer className="footer footer-center relative z-16 p-4 bg-base-300/50 text-base-content">
+        <footer className="footer footer-center relative z-16 p-4 bg-base-300/50 text-base-content print:hidden">
           <div>
             <p>
               All{" "}

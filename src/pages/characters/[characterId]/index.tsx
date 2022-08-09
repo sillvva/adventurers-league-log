@@ -36,7 +36,7 @@ const Characters: NextPageWithLayout = () => {
         <title>{character.name}</title>
       </Head>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 print:hidden">
         <div className="flex-1 text-sm breadcrumbs mb-4">
           <ul>
             <li>
@@ -132,7 +132,7 @@ const Characters: NextPageWithLayout = () => {
           </div>
         )}
       </section>
-      <section>
+      <section className="mt-6">
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead>
