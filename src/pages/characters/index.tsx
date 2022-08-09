@@ -36,13 +36,22 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
     <>
       <Head>{session.user ? <title>{session.user.name}&apos;s Characters</title> : <title>Characters</title>}</Head>
 
-      <div className="text-sm breadcrumbs mb-4">
-        <ul>
-          <li>
-            <Icon path={mdiHome} className="w-4" />
-          </li>
-          <li className="text-secondary">Characters</li>
-        </ul>
+      <div className="flex">
+        <div className="text-sm breadcrumbs mb-4">
+          <ul>
+            <li>
+              <Icon path={mdiHome} className="w-4" />
+            </li>
+            <li className="text-secondary">Characters</li>
+          </ul>
+        </div>
+        {characters && characters.length > 0 && (
+          <div className="flex-1 flex justify-end">
+            <Link href="/characters/new">
+              <a className="btn btn-primary btn-sm">New Character</a>
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto w-full rounded-lg">
@@ -82,7 +91,13 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
                       <div className="avatar">
                         <div className="mask mask-squircle w-12 h-12 bg-primary">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={character.image_url || ""} width={48} height={48} className="object-cover object-top hover:scale-125 transition-all" alt={character.name} />
+                          <img
+                            src={character.image_url || ""}
+                            width={48}
+                            height={48}
+                            className="object-cover object-top hover:scale-125 transition-all"
+                            alt={character.name}
+                          />
                         </div>
                       </div>
                     </td>
