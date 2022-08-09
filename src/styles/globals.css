@@ -37,3 +37,9 @@
     overflow-x: hidden;
   }
 }
+
+@layer components {
+  .img-grow:hover img {
+    @apply motion-safe:scale-125 transition-transform;
+  }
+}

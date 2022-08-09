@@ -77,16 +77,16 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
             ) : (
               characters.map(character => (
                 <Link key={character.id} href={`/characters/${character.id}`}>
-                  <tr className="hover cursor-pointer transition-colors">
-                    <td className="w-12 pr-0 sm:pr-2">
+                  <tr className="hover cursor-pointer img-grow">
+                    <td className="w-12 pr-0 sm:pr-2 transition-colors">
                       <div className="avatar">
                         <div className="mask mask-squircle w-12 h-12 bg-primary">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={character.image_url || ""} width={48} height={48} className="object-cover object-top" alt={character.name} />
+                          <img src={character.image_url || ""} width={48} height={48} className="object-cover object-top hover:scale-125 transition-all" alt={character.name} />
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td className="transition-colors">
                       <div className="flex flex-col">
                         <div className="text-base sm:text-xl font-bold text-primary-content">{character.name}</div>
                         <div className="text-xs sm:text-sm text-neutral-content mb-2">
@@ -98,9 +98,9 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
                         </div>
                       </div>
                     </td>
-                    <td className="hidden sm:table-cell">{character.campaign}</td>
-                    <td className="text-center hidden sm:table-cell">{character.tier}</td>
-                    <td className="text-center hidden sm:table-cell">{character.total_level}</td>
+                    <td className="hidden sm:table-cell transition-colors">{character.campaign}</td>
+                    <td className="text-center hidden sm:table-cell transition-colors">{character.tier}</td>
+                    <td className="text-center hidden sm:table-cell transition-colors">{character.total_level}</td>
                   </tr>
                 </Link>
               ))
