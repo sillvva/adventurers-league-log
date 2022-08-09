@@ -36,7 +36,7 @@ const Characters: NextPageWithLayout = () => {
               <a className="text-neutral-content">Characters</a>
             </Link>
           </li>
-          <li className="text-secondary-content">{character.name}</li>
+          <li className="text-secondary">{character.name}</li>
         </ul>
       </div>
 

@@ -33,3 +33,7 @@ export const qsParse = <T>(queryString: string | Record<string, any>, schema: Zo
 			: []
 	};
 };
+
+export const concatenate = (...str: (string | boolean | null | undefined)[]) => {
+	return str.filter(s => !!s && typeof s == "string").join(" ");
+};

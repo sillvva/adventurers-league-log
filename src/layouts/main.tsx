@@ -12,7 +12,7 @@ const Layout = (props: PropsWithChildren) => {
 
   return (
     <>
-      <Image src={background} layout="fill" objectFit="cover" objectPosition="center" priority alt="Background" className="relative z-0 opacity-25" />
+      <Image src={background} layout="fill" objectFit="cover" objectPosition="center" priority alt="Background" className="!fixed z-0 opacity-25" />
       <header className="relative z-20 border-b-[1px] border-slate-500 w-screen">
         <nav className="container mx-auto p-4 max-w-5xl flex gap-2">
           <Link href={session.data?.user ? "/characters" : "/"}>

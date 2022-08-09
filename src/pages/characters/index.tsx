@@ -38,7 +38,9 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 
       <div className="text-sm breadcrumbs mb-4">
         <ul>
-          <li><Icon path={mdiHome} className="w-4" /></li>
+          <li>
+            <Icon path={mdiHome} className="w-4" />
+          </li>
           <li className="text-secondary">Characters</li>
         </ul>
       </div>
@@ -79,15 +81,8 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
                     <td className="w-12 pr-0 sm:pr-2">
                       <div className="avatar">
                         <div className="mask mask-squircle w-12 h-12 bg-primary">
-                          <Image
-                            src={character.image_url || ""}
-                            width={48}
-                            height={48}
-                            layout="fill"
-                            objectFit="cover"
-                            objectPosition="center"
-                            alt={character.name}
-                          />
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={character.image_url || ""} width={48} height={48} className="object-cover object-top" alt={character.name} />
                         </div>
                       </div>
                     </td>
