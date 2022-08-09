@@ -76,7 +76,7 @@ const Layout = (props: PropsWithChildren) => {
           </nav>
         </header>
         <main className="container flex-1 relative z-10 mx-auto p-4 max-w-5xl">{props.children}</main>
-        <footer className="footer footer-center relative z-16 p-4 h-28 sm:h-16 bg-base-300/50 text-base-content">
+        <footer className="footer footer-center relative z-16 p-4 bg-base-300/50 text-base-content">
           <div>
             <p>
               All{" "}
