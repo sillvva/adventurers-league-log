@@ -9,6 +9,7 @@ import Layout from "$src/layouts/main";
 import Icon from "@mdi/react";
 import { Fragment, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { DungeonMaster, Game, MagicItem, StoryAward } from "@prisma/client";
 
 const Characters: NextPageWithLayout = () => {
   const session = useSession();
@@ -234,19 +235,23 @@ const Characters: NextPageWithLayout = () => {
                           <p>
                             <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
                           </p>
-                          <div>
-                            <p className="font-semibold">Magic Items:</p>
-                            <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
-                          </div>
+                          {(game.magic_items_gained.length > 0 || game.magic_items_lost.length > 0) && (
+                            <div>
+                              <p className="font-semibold">Magic Items:</p>
+                              <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                              <p className="text-sm line-through">{game.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+                            </div>
+                          )}
                         </td>
                       </Link>
                       <Link href={`/characters/${params.characterId}/games/${game.id}`}>
                         <td className="align-top hidden sm:table-cell">
-                          <p>
-                            {game.story_awards_gained.map(mi => (
-                              <p key={mi.id}>{mi.name}</p>
-                            ))}
-                          </p>
+                          {(game.story_awards_gained.length > 0 || game.story_awards_lost.length > 0) && (
+                            <div>
+                              <p className="text-sm">{game.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
+                              <p className="text-sm line-through">{game.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                            </div>
+                          )}
                         </td>
                       </Link>
                       <td className="w-8">
