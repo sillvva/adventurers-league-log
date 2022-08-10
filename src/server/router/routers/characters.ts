@@ -1,7 +1,16 @@
 import { createRouter } from "../context";
 import { z } from "zod";
 import type { Character, DungeonMaster, Game, MagicItem, StoryAward } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
+
+// type CharacterEntry = Character & {
+//   games: (Game & {
+//     dm: DungeonMaster;
+//     magic_items_gained: MagicItem[];
+//     magic_items_lost: MagicItem[];
+//     story_awards_gained: StoryAward[];
+//     story_awards_lost: StoryAward[];
+//   })[];
+// }
 
 export const charactersRouter = createRouter()
   .query("getAll", {
@@ -55,15 +64,7 @@ export const charactersRouter = createRouter()
       id: z.string().optional()
     }),
     async resolve({ input, ctx }) {
-      const character: Character & {
-        games: (Game & {
-          dm: DungeonMaster;
-          magic_items_gained: MagicItem[];
-          magic_items_lost: MagicItem[];
-          story_awards_gained: StoryAward[];
-          story_awards_lost: StoryAward[];
-        })[];
-      } = await ctx.prisma.character.findFirstOrThrow({
+      const character = await ctx.prisma.character.findFirstOrThrow({
         include: {
           user: true,
           games: {
@@ -80,38 +81,6 @@ export const charactersRouter = createRouter()
           }
         },
         where: { id: input.id }
-      });
-
-      character.games.push({
-        id: "test",
-        name: "White Plume Mountain",
-        date: new Date(),
-        experience: 400,
-        acp: 0,
-        tcp: 0,
-        level: 1,
-        gold: 10000,
-        description: "This is a test",
-        characterId: character.id,
-        dungeonMasterId: "test",
-        dm: {
-          id: "test",
-          name: "Glenn Berman",
-          DCI: null
-        },
-        created_at: new Date(),
-        magic_items_gained: [
-          {
-            id: "t1",
-            name: "5x Potion of Greater Healing",
-            description: "This is a test",
-            gameGainedId: "test",
-            gameLostId: null
-          }
-        ],
-        magic_items_lost: [],
-        story_awards_gained: [],
-        story_awards_lost: []
       });
 
       const levels = getLevels(character.games);

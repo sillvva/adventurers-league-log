@@ -133,6 +133,11 @@ const Characters: NextPageWithLayout = () => {
           </div>
         )}
       </section>
+      <div className="flex gap-4 print:hidden">
+        <Link href={`/characters/${params.characterId}/game/new`}>
+          <a className="btn btn-primary btn-sm">New Game</a>
+        </Link>
+      </div>
       <section className="mt-6">
         <div className="overflow-x-auto">
           <table className="table w-full">

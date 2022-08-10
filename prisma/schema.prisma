@@ -84,7 +84,7 @@ model Game {
     magic_items_lost    MagicItem[]   @relation("magic_items_lost")
     story_awards_gained StoryAward[]  @relation("story_awards_gained")
     story_awards_lost   StoryAward[]  @relation("story_awards_lost")
-    Character           Character?    @relation(fields: [characterId], references: [id])
+    character           Character?    @relation(fields: [characterId], references: [id])
     characterId         String?
     created_at          DateTime      @default(now())
 }
@@ -100,9 +100,9 @@ model MagicItem {
     id           String  @id @unique @default(cuid())
     name         String
     description  String?
-    GameGained   Game?   @relation("magic_items_gained", fields: [gameGainedId], references: [id])
+    gameGained   Game?   @relation("magic_items_gained", fields: [gameGainedId], references: [id])
     gameGainedId String?
-    GameLost     Game?   @relation("magic_items_lost", fields: [gameLostId], references: [id])
+    gameLost     Game?   @relation("magic_items_lost", fields: [gameLostId], references: [id])
     gameLostId   String?
 }
 
@@ -110,9 +110,8 @@ model StoryAward {
     id           String   @id @unique @default(cuid())
     name         String
     description  String?
-    lost         Boolean?
-    GameGained   Game?    @relation("story_awards_gained", fields: [gameGainedId], references: [id])
+    gameGained   Game?    @relation("story_awards_gained", fields: [gameGainedId], references: [id])
     gameGainedId String?
-    GameLost     Game?    @relation("story_awards_lost", fields: [gameLostId], references: [id])
+    gameLost     Game?    @relation("story_awards_lost", fields: [gameLostId], references: [id])
     gameLostId   String?
 }
