@@ -167,6 +167,32 @@ export const protectedGamesRouter = createProtectedRouter()
       gameId: z.string()
     }),
     async resolve({ input, ctx }) {
+      await ctx.prisma.magicItem.updateMany({
+        where: {
+          gameLostId: input.gameId
+        },
+        data: {
+          gameLostId: null
+        }
+      });
+      await ctx.prisma.magicItem.deleteMany({
+        where: {
+          gameGainedId: input.gameId
+        }
+      });
+      await ctx.prisma.storyAward.updateMany({
+        where: {
+          gameLostId: input.gameId
+        },
+        data: {
+          gameLostId: null
+        }
+      });
+      await ctx.prisma.storyAward.deleteMany({
+        where: {
+          gameGainedId: input.gameId
+        }
+      });
       return ctx.prisma.game.delete({
         where: {
           id: input.gameId

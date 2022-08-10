@@ -2,7 +2,7 @@ import type { NextPageWithLayout } from "$src/pages/_app";
 import { z } from "zod";
 import { trpc } from "$src/utils/trpc";
 import { useQueryString } from "$src/utils/hooks";
-import { mdiDotsHorizontal, mdiHome } from "@mdi/js";
+import { mdiDotsHorizontal, mdiHome, mdiTrashCan } from "@mdi/js";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "$src/layouts/main";
@@ -24,6 +24,13 @@ const Characters: NextPageWithLayout = () => {
   const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
     ssr: true,
     refetchOnWindowFocus: false
+  });
+
+  const utils = trpc.useContext();
+  const deleteGameMutation = trpc.useMutation(["_games.delete"], {
+    onSettled() {
+      utils.invalidateQueries(["characters.getOne", { id: params.characterId }]);
+    }
   });
 
   if (!character)
@@ -154,6 +161,7 @@ const Characters: NextPageWithLayout = () => {
                 <th className="hidden sm:table-cell">Advancement</th>
                 <th className="hidden sm:table-cell">Treasure</th>
                 <th className="hidden sm:table-cell">Story Awards</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -164,12 +172,43 @@ const Characters: NextPageWithLayout = () => {
                 return (
                   <Fragment key={game.id}>
                     <tr>
-                      <th className="align-top">
-                        <p className="text-primary-content font-semibold">{game.name}</p>
-                        <p className="text-sm text-neutral-content font-normal">
-                          <span className="font-semibold">DM:</span> {game.dm.name}
-                        </p>
-                        <div className="table-cell sm:hidden font-normal">
+                      <Link href={`/characters/${params.characterId}/games/${game.id}`}>
+                        <th className="align-top">
+                          <p className="text-primary-content font-semibold">{game.name}</p>
+                          <p className="text-sm text-neutral-content font-normal">
+                            <span className="font-semibold">DM:</span> {game.dm.name}
+                          </p>
+                          <div className="table-cell sm:hidden font-normal">
+                            {game.experience > 0 && (
+                              <p>
+                                <span className="font-semibold">Experience:</span> {game.experience}
+                              </p>
+                            )}
+                            {game.acp > 0 && (
+                              <p>
+                                <span className="font-semibold">ACP:</span> {game.acp}
+                              </p>
+                            )}
+                            <p>
+                              <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
+                            </p>
+                            {game.tcp > 0 && (
+                              <p>
+                                <span className="font-semibold">TCP:</span> {game.tcp}
+                              </p>
+                            )}
+                            <p>
+                              <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
+                            </p>
+                            <p>
+                              <p className="font-semibold">Magic Items:</p>
+                              <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            </p>
+                          </div>
+                        </th>
+                      </Link>
+                      <Link href={`/characters/${params.characterId}/games/${game.id}`}>
+                        <td className="align-top hidden sm:table-cell">
                           {game.experience > 0 && (
                             <p>
                               <span className="font-semibold">Experience:</span> {game.experience}
@@ -183,6 +222,10 @@ const Characters: NextPageWithLayout = () => {
                           <p>
                             <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                           </p>
+                        </td>
+                      </Link>
+                      <Link href={`/characters/${params.characterId}/games/${game.id}`}>
+                        <td className="align-top hidden sm:table-cell">
                           {game.tcp > 0 && (
                             <p>
                               <span className="font-semibold">TCP:</span> {game.tcp}
@@ -195,43 +238,26 @@ const Characters: NextPageWithLayout = () => {
                             <p className="font-semibold">Magic Items:</p>
                             <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
                           </p>
-                        </div>
-                      </th>
-                      <td className="align-top hidden sm:table-cell">
-                        {game.experience > 0 && (
+                        </td>
+                      </Link>
+                      <Link href={`/characters/${params.characterId}/games/${game.id}`}>
+                        <td className="align-top hidden sm:table-cell">
                           <p>
-                            <span className="font-semibold">Experience:</span> {game.experience}
+                            {game.story_awards_gained.map(mi => (
+                              <p key={mi.id}>{mi.name}</p>
+                            ))}
                           </p>
-                        )}
-                        {game.acp > 0 && (
-                          <p>
-                            <span className="font-semibold">ACP:</span> {game.acp}
-                          </p>
-                        )}
-                        <p>
-                          <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
-                        </p>
-                      </td>
-                      <td className="align-top hidden sm:table-cell">
-                        {game.tcp > 0 && (
-                          <p>
-                            <span className="font-semibold">TCP:</span> {game.tcp}
-                          </p>
-                        )}
-                        <p>
-                          <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
-                        </p>
-                        <p>
-                          <p className="font-semibold">Magic Items:</p>
-                          <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
-                        </p>
-                      </td>
-                      <td className="hidden sm:table-cell">
-                        <p>
-                          {game.story_awards_gained.map(mi => (
-                            <p key={mi.id}>{mi.name}</p>
-                          ))}
-                        </p>
+                        </td>
+                      </Link>
+                      <td className="w-8">
+                        <button
+                          className="btn btn-sm"
+                          onClick={async () => {
+                            if (!confirm(`Are you sure you want to delete ${game.name}? This action cannot be reversed.`)) return false;
+                            deleteGameMutation.mutate({ gameId: game.id });
+                          }}>
+                          <Icon path={mdiTrashCan} size={0.8} />
+                        </button>
                       </td>
                     </tr>
                   </Fragment>
