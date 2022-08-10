@@ -113,6 +113,11 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
       else values.date = new Date(values.date.replace("T", " ")).toISOString();
 
       values.dm.DCI = values.dm.DCI ? parseInt(values.dm.DCI.toString()) : null;
+      if (values.acp) values.acp = parseInt(values.acp.toString());
+      if (values.tcp) values.tcp = parseInt(values.tcp.toString());
+      if (values.level) values.level = parseInt(values.level.toString());
+      if (values.gold) values.gold = parseInt(values.gold.toString());
+      if (values.experience) values.experience = parseInt(values.experience.toString());
 
       values.magic_items_gained = magicItemsGained;
       values.magic_items_lost = magicItemsLost;
@@ -122,6 +127,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
       console.error(err);
     }
 
+    console.log(values);
     const result = gameSchema.safeParse(values);
     if (result.success) {
       setSubmitting(true);

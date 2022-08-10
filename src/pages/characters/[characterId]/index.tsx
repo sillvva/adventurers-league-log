@@ -95,7 +95,7 @@ const Characters: NextPageWithLayout = () => {
               )}
             </p>
           </div>
-          <div className="flex gap-6">
+          <div className="flex-1 flex flex-wrap sm:flex-nowrap gap-6">
             <div className="flex-1 basis-full sm:basis-1/2 lg:basis-1/3 flex flex-col gap-4">
               <div className="flex">
                 <h4 className="font-semibold text-secondary-content">Level</h4>
@@ -127,32 +127,33 @@ const Characters: NextPageWithLayout = () => {
               </div>
             </div>
           </div>
+          <div className="flex gap-4 print:hidden">
+            {session.data?.user && (
+              <Link href={`/characters/${params.characterId}/game/new`}>
+                <a className="btn btn-primary btn-sm">New Game</a>
+              </Link>
+            )}
+          </div>
         </div>
         {character.image_url && (
-          <div className="relative w-56 h-96 hidden md:block">
+          <div className="relative w-56 max-h-80 hidden md:flex flex-col justify-center items-end">
             <a href={character.image_url} target="_blank" rel="noreferrer noopener">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={character.image_url} className="object-contain object-top" alt={character.name} />
+              <img src={character.image_url} className="object-contain object-top max-h-80" alt={character.name} />
             </a>
           </div>
         )}
       </section>
-      <div className="flex gap-4 print:hidden">
-        {session.data?.user && (
-          <Link href={`/characters/${params.characterId}/game/new`}>
-            <a className="btn btn-primary btn-sm">New Game</a>
-          </Link>
-        )}
-      </div>
       <section className="mt-6">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-lg">
           <table className="table w-full">
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Advancement</th>
-                <th>Treasure</th>
-                <th>Story Awards</th>
+                <th className="table-cell sm:hidden">Game</th>
+                <th className="hidden sm:table-cell">Title</th>
+                <th className="hidden sm:table-cell">Advancement</th>
+                <th className="hidden sm:table-cell">Treasure</th>
+                <th className="hidden sm:table-cell">Story Awards</th>
               </tr>
             </thead>
             <tbody>
@@ -163,12 +164,40 @@ const Characters: NextPageWithLayout = () => {
                 return (
                   <Fragment key={game.id}>
                     <tr>
-                      <td className="align-top">
+                      <th className="align-top">
                         <p className="text-primary-content font-semibold">{game.name}</p>
-                        <p className="text-sm text-neutral-content">DM: {game.dm.name}</p>
-                        <p className="text-xs text-neutral-content">{game.description}</p>
-                      </td>
-                      <td className="align-top">
+                        <p className="text-sm text-neutral-content font-normal">
+                          <span className="font-semibold">DM:</span> {game.dm.name}
+                        </p>
+                        <div className="table-cell sm:hidden font-normal">
+                          {game.experience > 0 && (
+                            <p>
+                              <span className="font-semibold">Experience:</span> {game.experience}
+                            </p>
+                          )}
+                          {game.acp > 0 && (
+                            <p>
+                              <span className="font-semibold">ACP:</span> {game.acp}
+                            </p>
+                          )}
+                          <p>
+                            <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
+                          </p>
+                          {game.tcp > 0 && (
+                            <p>
+                              <span className="font-semibold">TCP:</span> {game.tcp}
+                            </p>
+                          )}
+                          <p>
+                            <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
+                          </p>
+                          <p>
+                            <p className="font-semibold">Magic Items:</p>
+                            <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                          </p>
+                        </div>
+                      </th>
+                      <td className="align-top hidden sm:table-cell">
                         {game.experience > 0 && (
                           <p>
                             <span className="font-semibold">Experience:</span> {game.experience}
@@ -183,7 +212,7 @@ const Characters: NextPageWithLayout = () => {
                           <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                         </p>
                       </td>
-                      <td className="align-top">
+                      <td className="align-top hidden sm:table-cell">
                         {game.tcp > 0 && (
                           <p>
                             <span className="font-semibold">TCP:</span> {game.tcp}
@@ -197,7 +226,7 @@ const Characters: NextPageWithLayout = () => {
                           <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
                         </p>
                       </td>
-                      <td>
+                      <td className="hidden sm:table-cell">
                         <p>
                           {game.story_awards_gained.map(mi => (
                             <p key={mi.id}>{mi.name}</p>
