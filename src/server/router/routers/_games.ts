@@ -9,47 +9,49 @@ export const protectedGamesRouter = createProtectedRouter()
   .mutation("save", {
     input: gameSchema,
     async resolve({ input, ctx }) {
-      let dm: DungeonMaster;
-      if (!input.dm.id) {
-        const search = await ctx.prisma.dungeonMaster.findFirst({
-          where: {
-            OR: [{ name: input.dm.name }, { DCI: input.dm.DCI }]
-          }
-        });
-        if (search) dm = search;
-        else
-          dm = await ctx.prisma.dungeonMaster.create({
-            data: {
-              name: input.dm.name,
-              DCI: input.dm.DCI
+      let dm: DungeonMaster | null = null;
+      if (input.dm.name.trim()) {
+        if (!input.dm.id) {
+          const search = await ctx.prisma.dungeonMaster.findFirst({
+            where: {
+              OR: [{ name: input.dm.name }, { DCI: input.dm.DCI }]
             }
           });
-      } else {
-        const search = await ctx.prisma.dungeonMaster.findFirst({
-          where: {
-            id: input.dm.id
-          }
-        });
-        if (search) {
-          dm = await ctx.prisma.dungeonMaster.update({
+          if (search) dm = search;
+          else
+            dm = await ctx.prisma.dungeonMaster.create({
+              data: {
+                name: input.dm.name,
+                DCI: input.dm.DCI
+              }
+            });
+        } else {
+          const search = await ctx.prisma.dungeonMaster.findFirst({
             where: {
               id: input.dm.id
-            },
-            data: {
-              name: input.dm.name,
-              DCI: input.dm.DCI
             }
           });
-        } else throw new TRPCError({ message: "Dungeon Master not found", code: "INTERNAL_SERVER_ERROR" });
-      }
+          if (search) {
+            dm = await ctx.prisma.dungeonMaster.update({
+              where: {
+                id: input.dm.id
+              },
+              data: {
+                name: input.dm.name,
+                DCI: input.dm.DCI
+              }
+            });
+          } else throw new TRPCError({ message: "Dungeon Master not found", code: "INTERNAL_SERVER_ERROR" });
+        }
 
-      if (!dm.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });
+        if (!dm.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });
+      }
 
       const data: Omit<Game, "id" | "created_at"> = {
         name: input.name,
         date: new Date(input.date),
         description: input.description,
-        dungeonMasterId: dm.id,
+        dungeonMasterId: (dm || {}).id || null,
         characterId: input.characterId,
         acp: input.acp,
         tcp: input.tcp,

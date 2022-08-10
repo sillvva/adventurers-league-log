@@ -25,7 +25,7 @@ interface PageProps {
 export const gameSchema = z.object({
   characterId: z.string(),
   gameId: z.string().default(""),
-  name: z.string().min(1),
+  name: z.string().min(1, "Required"),
   date: z
     .string()
     .regex(
@@ -40,14 +40,14 @@ export const gameSchema = z.object({
   description: z.string().default(""),
   dm: z.object({
     id: z.string().default(""),
-    name: z.string().min(1),
+    name: z.string().default(""),
     DCI: z.number().nullable().default(null)
   }),
   magic_items_gained: z
     .array(
       z.object({
         id: z.string().default(""),
-        name: z.string().min(1),
+        name: z.string().min(1, "Required"),
         description: z.string().default("")
       })
     )
@@ -57,7 +57,7 @@ export const gameSchema = z.object({
     .array(
       z.object({
         id: z.string().default(""),
-        name: z.string().min(1),
+        name: z.string().min(1, "Required"),
         description: z.string().default("")
       })
     )
@@ -112,6 +112,8 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
       if (!values.date) errors.push(setError("date", { message: "Required" }));
       else values.date = new Date(values.date.replace("T", " ")).toISOString();
 
+      if (!values.dm.name) errors.push(setError("dm.name", { message: "Required" }));
+
       values.dm.DCI = values.dm.DCI ? parseInt(values.dm.DCI.toString()) : null;
       if (values.acp) values.acp = parseInt(values.acp.toString());
       if (values.tcp) values.tcp = parseInt(values.tcp.toString());
@@ -149,14 +151,17 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     }
   };
 
+  const magicItems = character ? getMagicItems(character, { excludeDropped: true }) : [];
+  const storyAwards = character ? getStoryAwards(character, { excludeDropped: true }) : [];
+
   const addMagicItem = () => setMagicItemsGained([...magicItemsGained, { id: "", name: "", description: "" }]);
   const removeMagicItem = (index: number) => setMagicItemsGained(magicItemsGained.filter((_, i) => i !== index));
-  const addLostMagicItem = () => setMagicItemsLost([...magicItemsLost, ""]);
+  const addLostMagicItem = () => setMagicItemsLost([...magicItemsLost, magicItems[0]?.id || ""]);
   const removeLostMagicItem = (index: number) => setMagicItemsLost(magicItemsLost.filter((_, i) => i !== index));
 
   const addStoryAward = () => setStoryAwardsGained([...storyAwardsGained, { id: "", name: "", description: "" }]);
   const removeStoryAward = (index: number) => setStoryAwardsGained(storyAwardsGained.filter((_, i) => i !== index));
-  const addLostStoryAward = () => setStoryAwardsLost([...storyAwardsLost, ""]);
+  const addLostStoryAward = () => setStoryAwardsLost([...storyAwardsLost, storyAwards[0]?.id || ""]);
   const removeLostStoryAward = (index: number) => setStoryAwardsLost(storyAwardsLost.filter((_, i) => i !== index));
 
   const [dms, setDMs] = useState<DungeonMaster[]>([]);
@@ -165,7 +170,8 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 
     const dms: DungeonMaster[] = [];
     character.games.forEach(game => {
-      if (dms.find(dm => dm.id === game.dm.id)) return;
+      if (!game.dm) return;
+      if (dms.find(dm => dm.id === game.dm?.id)) return;
       const match = game.dm[prop]?.toString().includes(value.toString());
       if (match) dms.push(game.dm);
     });
@@ -250,7 +256,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label>
                 <input
                   type="text"
-                  {...register("dm.name", { required: true, onChange: e => getDMs("name", e.target.value) })}
+                  {...register("dm.name", { onChange: e => getDMs("name", e.target.value) })}
                   className="input input-bordered focus:border-primary w-full"
                 />
               </label>
@@ -394,7 +400,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
             <button type="button" className="btn btn-primary btn-sm" onClick={addMagicItem}>
               Add Magic Item
             </button>
-            {getMagicItems(character).length > 0 && (
+            {magicItems.filter(item => !magicItemsLost.includes(item.id)).length > 0 && (
               <button type="button" className="btn btn-sm" onClick={addLostMagicItem}>
                 Drop Magic Item
               </button>
@@ -402,7 +408,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
             <button type="button" className="btn btn-primary btn-sm" onClick={addStoryAward}>
               Add Story Award
             </button>
-            {getStoryAwards(character).length > 0 && (
+            {storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
               <button type="button" className="btn btn-sm" onClick={addLostStoryAward}>
                 Drop Story Award
               </button>
@@ -463,7 +469,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                         setMagicItemsLost(magicItemsLost.map((item, i) => (i === index ? e.target.value : item)));
                       }}
                       className="select select-bordered w-full max-w-xs">
-                      {getMagicItems(character).map(item => (
+                      {magicItems.map(item => (
                         <option key={item.id} value={item.id}>
                           {item.name}
                         </option>
@@ -535,7 +541,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                         setStoryAwardsLost(storyAwardsLost.map((item, i) => (i === index ? e.target.value : item)));
                       }}
                       className="select select-bordered w-full max-w-xs">
-                      {getStoryAwards(character).map(item => (
+                      {storyAwards.map(item => (
                         <option key={item.id} value={item.id}>
                           {item.name}
                         </option>
@@ -588,7 +594,14 @@ export const getServerSideProps: GetServerSideProps = async context => {
   };
 };
 
-export const getMagicItems = (character: inferQueryOutput<"characters.getOne">, lastGameId: string = "") => {
+export const getMagicItems = (
+  character: inferQueryOutput<"characters.getOne">,
+  options?: {
+    lastGameId?: string;
+    excludeDropped?: boolean;
+  }
+) => {
+  const { lastGameId = "", excludeDropped = false } = options || {};
   const magicItems: MagicItem[] = [];
   let lastGame = false;
   character.games.forEach(game => {
@@ -604,10 +617,17 @@ export const getMagicItems = (character: inferQueryOutput<"characters.getOne">, 
       );
     });
   });
-  return magicItems;
+  return magicItems.filter(item => !excludeDropped || !item.gameLostId);
 };
 
-export const getStoryAwards = (character: inferQueryOutput<"characters.getOne">, lastGameId: string = "") => {
+export const getStoryAwards = (
+  character: inferQueryOutput<"characters.getOne">,
+  options?: {
+    lastGameId?: string;
+    excludeDropped?: boolean;
+  }
+) => {
+  const { lastGameId = "", excludeDropped = false } = options || {};
   const storyAwards: MagicItem[] = [];
   let lastGame = false;
   character.games.forEach(game => {
@@ -623,5 +643,5 @@ export const getStoryAwards = (character: inferQueryOutput<"characters.getOne">,
       );
     });
   });
-  return storyAwards;
+  return storyAwards.filter(item => !excludeDropped || !item.gameLostId);
 };

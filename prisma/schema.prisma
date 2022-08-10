@@ -69,24 +69,24 @@ model Character {
 }
 
 model Game {
-    id                  String        @id @unique @default(cuid())
+    id                  String         @id @unique @default(cuid())
     date                DateTime
     name                String
     description         String?
-    dm                  DungeonMaster @relation(fields: [dungeonMasterId], references: [id])
-    dungeonMasterId     String
+    dm                  DungeonMaster? @relation(fields: [dungeonMasterId], references: [id])
+    dungeonMasterId     String?
     experience          Int
     acp                 Int
     tcp                 Int
     level               Int
     gold                Float
-    magic_items_gained  MagicItem[]   @relation("magic_items_gained")
-    magic_items_lost    MagicItem[]   @relation("magic_items_lost")
-    story_awards_gained StoryAward[]  @relation("story_awards_gained")
-    story_awards_lost   StoryAward[]  @relation("story_awards_lost")
-    character           Character?    @relation(fields: [characterId], references: [id])
+    magic_items_gained  MagicItem[]    @relation("magic_items_gained")
+    magic_items_lost    MagicItem[]    @relation("magic_items_lost")
+    story_awards_gained StoryAward[]   @relation("story_awards_gained")
+    story_awards_lost   StoryAward[]   @relation("story_awards_lost")
+    character           Character?     @relation(fields: [characterId], references: [id])
     characterId         String?
-    created_at          DateTime      @default(now())
+    created_at          DateTime       @default(now())
 }
 
 model DungeonMaster {

@@ -90,14 +90,14 @@ export const charactersRouter = createRouter()
       const magic_items: MagicItem[] = character.games.reduce((acc, game) => {
         acc.push(...game.magic_items_gained);
         game.magic_items_lost.forEach(magicItem => {
-          acc.splice(magic_items.indexOf(magicItem), 1);
+          acc.splice(acc.indexOf(magicItem), 1);
         });
         return acc;
       }, [] as MagicItem[]);
       const story_awards: StoryAward[] = character.games.reduce((acc, game) => {
         acc.push(...game.story_awards_gained);
         game.story_awards_lost.forEach(magicItem => {
-          acc.splice(story_awards.indexOf(magicItem), 1);
+          acc.splice(acc.indexOf(magicItem), 1);
         });
         return acc;
       }, [] as StoryAward[]);

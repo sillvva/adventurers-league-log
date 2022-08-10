@@ -137,7 +137,7 @@ const Characters: NextPageWithLayout = () => {
           <div className="flex gap-4 print:hidden">
             {session.data?.user && (
               <Link href={`/characters/${params.characterId}/game/new`}>
-                <a className="btn btn-primary btn-sm">New Game</a>
+                <a className="btn btn-primary btn-sm">New Log</a>
               </Link>
             )}
           </div>
@@ -176,7 +176,7 @@ const Characters: NextPageWithLayout = () => {
                         <th className="align-top">
                           <p className="text-primary-content font-semibold">{game.name}</p>
                           <p className="text-sm text-neutral-content font-normal">
-                            <span className="font-semibold">DM:</span> {game.dm.name}
+                            <span className="font-semibold">DM:</span> {game.dm?.name}
                           </p>
                           <div className="table-cell sm:hidden font-normal">
                             {game.experience > 0 && (
@@ -200,10 +200,10 @@ const Characters: NextPageWithLayout = () => {
                             <p>
                               <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
                             </p>
-                            <p>
+                            <div>
                               <p className="font-semibold">Magic Items:</p>
                               <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
-                            </p>
+                            </div>
                           </div>
                         </th>
                       </Link>
@@ -234,10 +234,10 @@ const Characters: NextPageWithLayout = () => {
                           <p>
                             <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
                           </p>
-                          <p>
+                          <div>
                             <p className="font-semibold">Magic Items:</p>
                             <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
-                          </p>
+                          </div>
                         </td>
                       </Link>
                       <Link href={`/characters/${params.characterId}/games/${game.id}`}>
