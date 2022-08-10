@@ -7,7 +7,6 @@ import type { FormEventHandler } from "react";
 import { useState } from "react";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import Head from "next/head";
@@ -23,7 +22,7 @@ interface PageProps {
   session: Session;
 }
 
-export const gameSchema = {
+export const gameSchema = z.object({
   characterId: z.string(),
   gameId: z.string().default(""),
   name: z.string().min(1),
@@ -47,6 +46,7 @@ export const gameSchema = {
   magic_items_gained: z
     .array(
       z.object({
+        id: z.string().default(""),
         name: z.string().min(1),
         description: z.string().default("")
       })
@@ -56,14 +56,14 @@ export const gameSchema = {
   story_awards_gained: z
     .array(
       z.object({
+        id: z.string().default(""),
         name: z.string().min(1),
         description: z.string().default("")
       })
     )
     .default([]),
   story_awards_lost: z.array(z.string().min(1)).default([])
-};
-export const newGameSchema = z.object(gameSchema);
+});
 
 const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const router = useRouter();
@@ -81,22 +81,20 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     getValues,
     setValue,
     setError
-  } = useForm<z.infer<typeof newGameSchema>>({
-    resolver: zodResolver(newGameSchema)
-  });
+  } = useForm<z.infer<typeof gameSchema>>();
 
   const [season, setSeason] = useState<1 | 8 | 9>(9);
-  const [magicItemsGained, setMagicItemsGained] = useState<z.infer<typeof gameSchema.magic_items_gained>>([]);
-  const [magicItemsLost, setMagicItemsLost] = useState<z.infer<typeof gameSchema.magic_items_lost>>([]);
-  const [storyAwardsGained, setStoryAwardsGained] = useState<z.infer<typeof gameSchema.story_awards_gained>>([]);
-  const [storyAwardsLost, setStoryAwardsLost] = useState<z.infer<typeof gameSchema.story_awards_lost>>([]);
+  const [magicItemsGained, setMagicItemsGained] = useState<z.infer<typeof gameSchema.shape.magic_items_gained>>([]);
+  const [magicItemsLost, setMagicItemsLost] = useState<z.infer<typeof gameSchema.shape.magic_items_lost>>([]);
+  const [storyAwardsGained, setStoryAwardsGained] = useState<z.infer<typeof gameSchema.shape.story_awards_gained>>([]);
+  const [storyAwardsLost, setStoryAwardsLost] = useState<z.infer<typeof gameSchema.shape.story_awards_lost>>([]);
 
   const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
     ssr: true,
     refetchOnWindowFocus: false
   });
 
-  const mutation = trpc.useMutation(["_games.new"], {
+  const mutation = trpc.useMutation(["_games.save"], {
     onSuccess() {
       router.push(`/characters/${params.characterId}`);
     }
@@ -124,14 +122,11 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
       console.error(err);
     }
 
-    const result = newGameSchema.safeParse(values);
+    const result = gameSchema.safeParse(values);
     if (result.success) {
-      console.log(values);
-      // setSubmitting(true);
+      setSubmitting(true);
       mutation.mutate(values);
     } else {
-      console.log(values);
-      console.log(result.error.issues);
       result.error.issues.forEach(issue => {
         if (["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"].includes(issue.path.join("."))) {
           setError(issue.path.join(".") as "date" | "name" | "dm.name" | "description" | "characterId" | "experience" | "acp" | "tcp" | "level" | "gold", {
@@ -148,37 +143,15 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     }
   };
 
-  const addMagicItem = () => {
-    setMagicItemsGained([...magicItemsGained, { name: "", description: "" }]);
-  };
+  const addMagicItem = () => setMagicItemsGained([...magicItemsGained, { id: "", name: "", description: "" }]);
+  const removeMagicItem = (index: number) => setMagicItemsGained(magicItemsGained.filter((_, i) => i !== index));
+  const addLostMagicItem = () => setMagicItemsLost([...magicItemsLost, ""]);
+  const removeLostMagicItem = (index: number) => setMagicItemsLost(magicItemsLost.filter((_, i) => i !== index));
 
-  const removeMagicItem = (index: number) => {
-    setMagicItemsGained(magicItemsGained.filter((_, i) => i !== index));
-  };
-
-  const addLostMagicItem = () => {
-    setMagicItemsLost([...magicItemsLost, ""]);
-  };
-
-  const removeLostMagicItem = (index: number) => {
-    setMagicItemsLost(magicItemsLost.filter((_, i) => i !== index));
-  };
-
-  const addStoryAward = () => {
-    setStoryAwardsGained([...storyAwardsGained, { name: "", description: "" }]);
-  };
-
-  const removeStoryAward = (index: number) => {
-    setStoryAwardsGained(storyAwardsGained.filter((_, i) => i !== index));
-  };
-
-  const addLostStoryAward = () => {
-    setStoryAwardsLost([...storyAwardsLost, ""]);
-  };
-
-  const removeLostStoryAward = (index: number) => {
-    setStoryAwardsLost(storyAwardsLost.filter((_, i) => i !== index));
-  };
+  const addStoryAward = () => setStoryAwardsGained([...storyAwardsGained, { id: "", name: "", description: "" }]);
+  const removeStoryAward = (index: number) => setStoryAwardsGained(storyAwardsGained.filter((_, i) => i !== index));
+  const addLostStoryAward = () => setStoryAwardsLost([...storyAwardsLost, ""]);
+  const removeLostStoryAward = (index: number) => setStoryAwardsLost(storyAwardsLost.filter((_, i) => i !== index));
 
   const [dms, setDMs] = useState<DungeonMaster[]>([]);
   const getDMs = (prop: "name" | "DCI", value: string | number | null) => {

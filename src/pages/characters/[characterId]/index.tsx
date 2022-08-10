@@ -8,8 +8,10 @@ import Link from "next/link";
 import Layout from "$src/layouts/main";
 import Icon from "@mdi/react";
 import { Fragment, useRef } from "react";
+import { useSession } from "next-auth/react";
 
 const Characters: NextPageWithLayout = () => {
+  const session = useSession();
   const level = useRef(1);
   level.current = 1;
 
@@ -51,24 +53,26 @@ const Characters: NextPageWithLayout = () => {
             <li className="text-secondary">{character.name}</li>
           </ul>
         </div>
-        <div className="dropdown dropdown-end">
-          <label tabIndex={1} className="btn btn-sm">
-            <Icon path={mdiDotsHorizontal} size={1} />
-          </label>
-          <ul tabIndex={1} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-            <li>
-              <Link href={`/characters/${params.characterId}/edit`}>
-                <a>Edit</a>
-              </Link>
-            </li>
-            <li>
-              <a>Export</a>
-            </li>
-            <li>
-              <a className="bg-red-600 text-white">Delete</a>
-            </li>
-          </ul>
-        </div>
+        {session.data?.user && (
+          <div className="dropdown dropdown-end">
+            <label tabIndex={1} className="btn btn-sm">
+              <Icon path={mdiDotsHorizontal} size={1} />
+            </label>
+            <ul tabIndex={1} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+              <li>
+                <Link href={`/characters/${params.characterId}/edit`}>
+                  <a>Edit</a>
+                </Link>
+              </li>
+              <li>
+                <a>Export</a>
+              </li>
+              <li>
+                <a className="bg-red-600 text-white">Delete</a>
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
 
       <section className="flex">
@@ -134,9 +138,11 @@ const Characters: NextPageWithLayout = () => {
         )}
       </section>
       <div className="flex gap-4 print:hidden">
-        <Link href={`/characters/${params.characterId}/game/new`}>
-          <a className="btn btn-primary btn-sm">New Game</a>
-        </Link>
+        {session.data?.user && (
+          <Link href={`/characters/${params.characterId}/game/new`}>
+            <a className="btn btn-primary btn-sm">New Game</a>
+          </Link>
+        )}
       </div>
       <section className="mt-6">
         <div className="overflow-x-auto">
