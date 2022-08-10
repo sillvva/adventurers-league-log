@@ -171,45 +171,16 @@ const Characters: NextPageWithLayout = () => {
                 if (level_gained) level.current += level_gained.levels;
 
                 return (
-                  <Fragment key={game.id}>
-                    <tr>
-                      <Link href={`/characters/${params.characterId}/games/${game.id}`}>
-                        <th className="align-top">
-                          <p className="text-primary-content font-semibold">{game.name}</p>
+                  <tr key={game.id}>
+                    <Link href={`/characters/${params.characterId}/games/${game.id}`}>
+                      <th className="align-top">
+                        <p className="text-primary-content font-semibold">{game.name}</p>
+                        {game.dm && (
                           <p className="text-sm text-neutral-content font-normal">
-                            <span className="font-semibold">DM:</span> {game.dm?.name}
+                            <span className="font-semibold">DM:</span> {game.dm.name}
                           </p>
-                          <div className="table-cell sm:hidden font-normal">
-                            {game.experience > 0 && (
-                              <p>
-                                <span className="font-semibold">Experience:</span> {game.experience}
-                              </p>
-                            )}
-                            {game.acp > 0 && (
-                              <p>
-                                <span className="font-semibold">ACP:</span> {game.acp}
-                              </p>
-                            )}
-                            <p>
-                              <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
-                            </p>
-                            {game.tcp > 0 && (
-                              <p>
-                                <span className="font-semibold">TCP:</span> {game.tcp}
-                              </p>
-                            )}
-                            <p>
-                              <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
-                            </p>
-                            <div>
-                              <p className="font-semibold">Magic Items:</p>
-                              <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
-                            </div>
-                          </div>
-                        </th>
-                      </Link>
-                      <Link href={`/characters/${params.characterId}/games/${game.id}`}>
-                        <td className="align-top hidden sm:table-cell">
+                        )}
+                        <div className="table-cell sm:hidden font-normal">
                           {game.experience > 0 && (
                             <p>
                               <span className="font-semibold">Experience:</span> {game.experience}
@@ -223,10 +194,6 @@ const Characters: NextPageWithLayout = () => {
                           <p>
                             <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                           </p>
-                        </td>
-                      </Link>
-                      <Link href={`/characters/${params.characterId}/games/${game.id}`}>
-                        <td className="align-top hidden sm:table-cell">
                           {game.tcp > 0 && (
                             <p>
                               <span className="font-semibold">TCP:</span> {game.tcp}
@@ -235,37 +202,70 @@ const Characters: NextPageWithLayout = () => {
                           <p>
                             <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
                           </p>
-                          {(game.magic_items_gained.length > 0 || game.magic_items_lost.length > 0) && (
-                            <div>
-                              <p className="font-semibold">Magic Items:</p>
-                              <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
-                              <p className="text-sm line-through">{game.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
-                            </div>
-                          )}
-                        </td>
-                      </Link>
-                      <Link href={`/characters/${params.characterId}/games/${game.id}`}>
-                        <td className="align-top hidden sm:table-cell">
-                          {(game.story_awards_gained.length > 0 || game.story_awards_lost.length > 0) && (
-                            <div>
-                              <p className="text-sm">{game.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
-                              <p className="text-sm line-through">{game.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
-                            </div>
-                          )}
-                        </td>
-                      </Link>
-                      <td className="w-8">
-                        <button
-                          className="btn btn-sm"
-                          onClick={async () => {
-                            if (!confirm(`Are you sure you want to delete ${game.name}? This action cannot be reversed.`)) return false;
-                            deleteGameMutation.mutate({ gameId: game.id });
-                          }}>
-                          <Icon path={mdiTrashCan} size={0.8} />
-                        </button>
+                          <div>
+                            <p className="font-semibold">Magic Items:</p>
+                            <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                          </div>
+                        </div>
+                      </th>
+                    </Link>
+                    <Link href={`/characters/${params.characterId}/games/${game.id}`}>
+                      <td className="align-top hidden sm:table-cell">
+                        {game.experience > 0 && (
+                          <p>
+                            <span className="font-semibold">Experience:</span> {game.experience}
+                          </p>
+                        )}
+                        {game.acp > 0 && (
+                          <p>
+                            <span className="font-semibold">ACP:</span> {game.acp}
+                          </p>
+                        )}
+                        <p>
+                          <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
+                        </p>
                       </td>
-                    </tr>
-                  </Fragment>
+                    </Link>
+                    <Link href={`/characters/${params.characterId}/games/${game.id}`}>
+                      <td className="align-top hidden sm:table-cell">
+                        {game.tcp > 0 && (
+                          <p>
+                            <span className="font-semibold">TCP:</span> {game.tcp}
+                          </p>
+                        )}
+                        <p>
+                          <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
+                        </p>
+                        {(game.magic_items_gained.length > 0 || game.magic_items_lost.length > 0) && (
+                          <div>
+                            <p className="font-semibold">Magic Items:</p>
+                            <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through">{game.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+                          </div>
+                        )}
+                      </td>
+                    </Link>
+                    <Link href={`/characters/${params.characterId}/games/${game.id}`}>
+                      <td className="align-top hidden sm:table-cell">
+                        {(game.story_awards_gained.length > 0 || game.story_awards_lost.length > 0) && (
+                          <div>
+                            <p className="text-sm">{game.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through">{game.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                          </div>
+                        )}
+                      </td>
+                    </Link>
+                    <td className="w-8">
+                      <button
+                        className="btn btn-sm"
+                        onClick={async () => {
+                          if (!confirm(`Are you sure you want to delete ${game.name}? This action cannot be reversed.`)) return false;
+                          deleteGameMutation.mutate({ gameId: game.id });
+                        }}>
+                        <Icon path={mdiTrashCan} size={0.8} />
+                      </button>
+                    </td>
+                  </tr>
                 );
               })}
             </tbody>
