@@ -73,6 +73,36 @@ export const charactersRouter = createRouter()
         where: { id: input.id }
       });
 
+      // character.games.push({
+      //   id: "1234",
+      //   date: new Date(),
+      //   created_at: new Date(),
+      //   name: "Test Game",
+      //   description: "Test Game Description",
+      //   experience: 400,
+      //   acp: 0,
+      //   tcp: 0,
+      //   level: 0,
+      //   gold: 250,
+      //   magic_items_gained: [{
+      //     id: "123",
+      //     name: "Test Magic Item",
+      //     description: "Test Magic Item Description",
+      //     gameGainedId: "1234",
+      //     gameLostId: null
+      //   }],
+      //   magic_items_lost: [],
+      //   story_awards_gained: [],
+      //   story_awards_lost: [],
+      //   dm: {
+      //     id: "12",
+      //     name: "Test DM",
+      //     DCI: 1234
+      //   },
+      //   dungeonMasterId: "12",
+      //   characterId: character.id
+      // });
+
       const levels = getLevels(character.games);
 
       const total_level = levels.total;

@@ -7,7 +7,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Layout from "$src/layouts/main";
 import Icon from "@mdi/react";
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 const Characters: NextPageWithLayout = () => {
@@ -102,8 +102,8 @@ const Characters: NextPageWithLayout = () => {
               )}
             </p>
           </div>
-          <div className="flex-1 flex flex-wrap sm:flex-nowrap gap-6">
-            <div className="flex-1 basis-full sm:basis-1/2 lg:basis-1/3 flex flex-col gap-4">
+          <div className="flex-1 flex flex-wrap sm:flex-nowrap print:flex-nowrap gap-6">
+            <div className="flex-1 basis-full sm:basis-1/2 lg:basis-1/3 print:basis-1/3 flex flex-col gap-4">
               <div className="flex">
                 <h4 className="font-semibold text-secondary-content">Level</h4>
                 <div className="flex-1 text-right">{character.total_level}</div>
@@ -117,7 +117,7 @@ const Characters: NextPageWithLayout = () => {
                 <div className="flex-1 text-right">{character.total_gold.toLocaleString("en-US")}</div>
               </div>
             </div>
-            <div className="flex-1 basis-full sm:basis-1/2 lg:basis-2/3 flex flex-col">
+            <div className="flex-1 basis-full sm:basis-1/2 lg:basis-2/3 print:basis-2/3 flex flex-col">
               <div className="flex flex-col gap-4">
                 {character.story_awards.length > 0 && (
                   <div className="flex-1 flex flex-col">
@@ -143,7 +143,7 @@ const Characters: NextPageWithLayout = () => {
           </div>
         </div>
         {character.image_url && (
-          <div className="relative w-56 max-h-80 hidden md:flex flex-col justify-center items-end">
+          <div className="relative w-56 max-h-80 hidden md:flex print:flex flex-col justify-center items-end">
             <a href={character.image_url} target="_blank" rel="noreferrer noopener">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={character.image_url} className="object-contain object-top max-h-80" alt={character.name} />
@@ -156,12 +156,12 @@ const Characters: NextPageWithLayout = () => {
           <table className="table w-full">
             <thead>
               <tr>
-                <th className="table-cell sm:hidden">Game</th>
-                <th className="hidden sm:table-cell">Title</th>
-                <th className="hidden sm:table-cell">Advancement</th>
-                <th className="hidden sm:table-cell">Treasure</th>
-                <th className="hidden sm:table-cell">Story Awards</th>
-                <th></th>
+                <th className="table-cell sm:hidden print:hidden">Game</th>
+                <th className="hidden sm:table-cell print:table-cell">Title</th>
+                <th className="hidden sm:table-cell print:table-cell">Advancement</th>
+                <th className="hidden sm:table-cell print:table-cell">Treasure</th>
+                <th className="hidden sm:table-cell print:!hidden">Story Awards</th>
+                <th className="print:hidden"></th>
               </tr>
             </thead>
             <tbody>
@@ -170,15 +170,44 @@ const Characters: NextPageWithLayout = () => {
                 if (level_gained) level.current += level_gained.levels;
 
                 return (
-                  <tr key={game.id}>
-                    <th className="align-top">
-                      <p className="text-primary-content font-semibold">{game.name}</p>
-                      {game.dm && (
-                        <p className="text-sm text-neutral-content font-normal">
-                          <span className="font-semibold">DM:</span> {game.dm.name}
-                        </p>
-                      )}
-                      <div className="table-cell sm:hidden font-normal">
+                  <Fragment key={game.id}>
+                    <tr>
+                      <th className="align-top">
+                        <p className="text-primary-content font-semibold">{game.name}</p>
+                        {game.dm && (
+                          <p className="text-sm text-neutral-content font-normal">
+                            <span className="font-semibold">DM:</span> {game.dm.name}
+                          </p>
+                        )}
+                        <div className="table-cell sm:hidden print:hidden font-normal">
+                          {game.experience > 0 && (
+                            <p>
+                              <span className="font-semibold">Experience:</span> {game.experience}
+                            </p>
+                          )}
+                          {game.acp > 0 && (
+                            <p>
+                              <span className="font-semibold">ACP:</span> {game.acp}
+                            </p>
+                          )}
+                          <p>
+                            <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
+                          </p>
+                          {game.tcp > 0 && (
+                            <p>
+                              <span className="font-semibold">TCP:</span> {game.tcp}
+                            </p>
+                          )}
+                          <p>
+                            <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
+                          </p>
+                          <div>
+                            <p className="font-semibold">Magic Items:</p>
+                            <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                          </div>
+                        </div>
+                      </th>
+                      <td className="align-top hidden sm:table-cell print:table-cell">
                         {game.experience > 0 && (
                           <p>
                             <span className="font-semibold">Experience:</span> {game.experience}
@@ -192,6 +221,8 @@ const Characters: NextPageWithLayout = () => {
                         <p>
                           <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                         </p>
+                      </td>
+                      <td className="align-top hidden sm:table-cell print:table-cell">
                         {game.tcp > 0 && (
                           <p>
                             <span className="font-semibold">TCP:</span> {game.tcp}
@@ -200,70 +231,58 @@ const Characters: NextPageWithLayout = () => {
                         <p>
                           <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
                         </p>
-                        <div>
-                          <p className="font-semibold">Magic Items:</p>
-                          <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                        {(game.magic_items_gained.length > 0 || game.magic_items_lost.length > 0) && (
+                          <div>
+                            <p className="font-semibold">Magic Items:</p>
+                            <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through">{game.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+                          </div>
+                        )}
+                      </td>
+                      <td className="align-top hidden sm:table-cell print:!hidden">
+                        {(game.story_awards_gained.length > 0 || game.story_awards_lost.length > 0) && (
+                          <div>
+                            <p className="text-sm">{game.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through">{game.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                          </div>
+                        )}
+                      </td>
+                      <td className="w-8 print:hidden">
+                        <div className="flex flex-col justify-center gap-2">
+                          <Link href={`/characters/${params.characterId}/game/${game.id}`}>
+                            <a className="btn btn-sm btn-primary">
+                              <Icon path={mdiPencil} size={0.8} />
+                            </a>
+                          </Link>
+                          <button
+                            className="btn btn-sm"
+                            onClick={async () => {
+                              if (!confirm(`Are you sure you want to delete ${game.name}? This action cannot be reversed.`)) return false;
+                              deleteGameMutation.mutate({ gameId: game.id });
+                            }}>
+                            <Icon path={mdiTrashCan} size={0.8} />
+                          </button>
                         </div>
-                      </div>
-                    </th>
-                    <td className="align-top hidden sm:table-cell">
-                      {game.experience > 0 && (
-                        <p>
-                          <span className="font-semibold">Experience:</span> {game.experience}
+                      </td>
+                    </tr>
+                    <tr className="hidden print:table-row">
+                      <td colSpan={3}>
+                        <p className="text-sm">
+                          <span className="font-semibold">Notes:</span> {game.description}
                         </p>
-                      )}
-                      {game.acp > 0 && (
-                        <p>
-                          <span className="font-semibold">ACP:</span> {game.acp}
-                        </p>
-                      )}
-                      <p>
-                        <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
-                      </p>
-                    </td>
-                    <td className="align-top hidden sm:table-cell">
-                      {game.tcp > 0 && (
-                        <p>
-                          <span className="font-semibold">TCP:</span> {game.tcp}
-                        </p>
-                      )}
-                      <p>
-                        <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
-                      </p>
-                      {(game.magic_items_gained.length > 0 || game.magic_items_lost.length > 0) && (
-                        <div>
-                          <p className="font-semibold">Magic Items:</p>
-                          <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
-                          <p className="text-sm line-through">{game.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
-                        </div>
-                      )}
-                    </td>
-                    <td className="align-top hidden sm:table-cell">
-                      {(game.story_awards_gained.length > 0 || game.story_awards_lost.length > 0) && (
-                        <div>
-                          <p className="text-sm">{game.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
-                          <p className="text-sm line-through">{game.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
-                        </div>
-                      )}
-                    </td>
-                    <td className="w-8">
-                      <div className="flex flex-col justify-center gap-2">
-                        <Link href={`/characters/${params.characterId}/game/${game.id}`}>
-                          <a className="btn btn-sm btn-primary">
-                            <Icon path={mdiPencil} size={0.8} />
-                          </a>
-                        </Link>
-                        <button
-                          className="btn btn-sm"
-                          onClick={async () => {
-                            if (!confirm(`Are you sure you want to delete ${game.name}? This action cannot be reversed.`)) return false;
-                            deleteGameMutation.mutate({ gameId: game.id });
-                          }}>
-                          <Icon path={mdiTrashCan} size={0.8} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        {(game.story_awards_gained.length > 0 || game.story_awards_lost.length > 0) && (
+                          <div>
+                            {game.story_awards_gained.map(mi => (
+                              <p key={mi.id} className="text-sm">
+                                <span className="font-semibold">{mi.name}:</span> {mi.description}
+                              </p>
+                            ))}
+                            <p className="text-sm line-through">{game.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  </Fragment>
                 );
               })}
             </tbody>

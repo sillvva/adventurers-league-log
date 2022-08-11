@@ -3,7 +3,7 @@ import type { GetServerSideProps } from "next";
 import { unstable_getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import { useRouter } from "next/router";
-import { FormEventHandler, useEffect, useMemo } from "react";
+import { FormEventHandler, useMemo } from "react";
 import { useState } from "react";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
@@ -16,7 +16,7 @@ import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { z } from "zod";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { useQueryString } from "$src/utils/hooks";
-import type { DungeonMaster, Game, MagicItem, StoryAward } from "@prisma/client";
+import type { DungeonMaster, MagicItem } from "@prisma/client";
 import { gameSchema } from "../news";
 
 interface PageProps {
@@ -162,8 +162,8 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     }
   };
 
-  const magicItems = character ? getMagicItems(character, { excludeDropped: true, lastGameId: params.gameId }) : [];
-  const storyAwards = character ? getStoryAwards(character, { excludeDropped: true, lastGameId: params.gameId }) : [];
+  const magicItems = character ? getMagicItems(character, { excludeDropped: true, lastGameId: params.gameId === "new" ? "" : params.gameId }) : [];
+  const storyAwards = character ? getStoryAwards(character, { excludeDropped: true, lastGameId: params.gameId === "new" ? "" : params.gameId }) : [];
 
   const addMagicItem = () => setMagicItemsGained([...magicItemsGained, { id: "", name: "", description: "" }]);
   const removeMagicItem = (index: number) => setMagicItemsGained(magicItemsGained.filter((_, i) => i !== index));
@@ -231,7 +231,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 
       <form onSubmit={handleSubmit}>
         <input type="hidden" {...register("characterId", { value: params.characterId })} />
-        <input type="hidden" {...register("gameId", { value: params.gameId })} />
+        <input type="hidden" {...register("gameId", { value: params.gameId === "new" ? "" : params.gameId })} />
         <div className="grid grid-cols-12 gap-4">
           <div className="form-control col-span-12 sm:col-span-6">
             <label className="label">
