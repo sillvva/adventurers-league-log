@@ -3,11 +3,11 @@ import type { GetServerSideProps } from "next";
 import { unstable_getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import { useRouter } from "next/router";
-import type { FormEventHandler } from "react";
+import { FormEventHandler, useEffect } from "react";
 import { useState } from "react";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
-import { mdiHome, mdiTrashCan } from "@mdi/js";
+import { mdiAlert, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -17,59 +17,18 @@ import { z } from "zod";
 import { concatenate } from "$src/utils/misc";
 import { useQueryString } from "$src/utils/hooks";
 import type { DungeonMaster, MagicItem } from "@prisma/client";
+import { gameSchema } from "../new";
 
 interface PageProps {
   session: Session;
 }
 
-export const gameSchema = z.object({
-  characterId: z.string(),
-  gameId: z.string().default(""),
-  name: z.string().min(1, "Required"),
-  date: z
-    .string()
-    .regex(
-      /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/,
-      "Not a valid date"
-    ),
-  experience: z.number().default(0),
-  acp: z.number().default(0),
-  tcp: z.number().default(0),
-  level: z.number().default(0),
-  gold: z.number().default(0),
-  description: z.string().default(""),
-  dm: z.object({
-    id: z.string().default(""),
-    name: z.string().default(""),
-    DCI: z.number().nullable().default(null)
-  }),
-  magic_items_gained: z
-    .array(
-      z.object({
-        id: z.string().default(""),
-        name: z.string().min(1, "Required"),
-        description: z.string().default("")
-      })
-    )
-    .default([]),
-  magic_items_lost: z.array(z.string().min(1)).default([]),
-  story_awards_gained: z
-    .array(
-      z.object({
-        id: z.string().default(""),
-        name: z.string().min(1, "Required"),
-        description: z.string().default("")
-      })
-    )
-    .default([]),
-  story_awards_lost: z.array(z.string().min(1)).default([])
-});
-
-const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
+const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const router = useRouter();
   const { data: params } = useQueryString(
     z.object({
-      characterId: z.string()
+      characterId: z.string(),
+      gameId: z.string()
     })
   );
 
@@ -83,22 +42,76 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     setError
   } = useForm<z.infer<typeof gameSchema>>();
 
-  const [season, setSeason] = useState<1 | 8 | 9>(9);
-  const [magicItemsGained, setMagicItemsGained] = useState<z.infer<typeof gameSchema.shape.magic_items_gained>>([]);
-  const [magicItemsLost, setMagicItemsLost] = useState<z.infer<typeof gameSchema.shape.magic_items_lost>>([]);
-  const [storyAwardsGained, setStoryAwardsGained] = useState<z.infer<typeof gameSchema.shape.story_awards_gained>>([]);
-  const [storyAwardsLost, setStoryAwardsLost] = useState<z.infer<typeof gameSchema.shape.story_awards_lost>>([]);
-
   const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
     ssr: true,
     refetchOnWindowFocus: false
   });
+
+  const selectedGame = character?.games?.find(g => g.id === params.gameId);
+
+  const [season, setSeason] = useState<1 | 8 | 9>(selectedGame?.experience ? 1 : selectedGame?.acp ? 8 : 9);
+  const [dms, setDMs] = useState<DungeonMaster[]>([]);
+  const [magicItemsGained, setMagicItemsGained] = useState([] as { id: string; name: string; description: string }[]);
+  const [magicItemsLost, setMagicItemsLost] = useState<string[]>([]);
+  const [storyAwardsGained, setStoryAwardsGained] = useState([] as { id: string; name: string; description: string }[]);
+  const [storyAwardsLost, setStoryAwardsLost] = useState<string[]>([]);
 
   const mutation = trpc.useMutation(["_games.save"], {
     onSuccess() {
       router.push(`/characters/${params.characterId}`);
     }
   });
+
+  useEffect(() => {
+    if (selectedGame) {
+      setMagicItemsGained(selectedGame.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" })));
+      setMagicItemsLost(selectedGame.magic_items_lost.map(mi => mi.id));
+      setStoryAwardsGained((selectedGame?.story_awards_gained || []).map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" })));
+      setStoryAwardsLost(selectedGame.story_awards_lost.map(mi => mi.id));
+    }
+  }, [selectedGame]);
+
+  if (!character)
+    return (
+      <Head>
+        <title>Edit Log</title>
+      </Head>
+    );
+
+  if (!selectedGame)
+    return (
+      <>
+        <Head>
+          <title>Edit Log</title>
+        </Head>
+
+        <div className="text-sm breadcrumbs mb-4">
+          <ul>
+            <li>
+              <Icon path={mdiHome} className="w-4" />
+            </li>
+            <li>
+              <Link href="/characters">
+                <a className="text-neutral-content">Characters</a>
+              </Link>
+            </li>
+            <li>
+              <Link href={`/characters/${params.characterId}`}>
+                <a className="text-neutral-content">{character.name}</a>
+              </Link>
+            </li>
+            <li className="text-secondary">Error 404</li>
+          </ul>
+        </div>
+
+        <div className="alert alert-error shadow-lg">
+          <div>
+            <Icon path={mdiAlert} size={1} />
+            <span>Error! Task failed successfully.</span>
+          </div>
+        </div>
+      </>
+    );
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault();
@@ -150,8 +163,8 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     }
   };
 
-  const magicItems = character ? getMagicItems(character, { excludeDropped: true }) : [];
-  const storyAwards = character ? getStoryAwards(character, { excludeDropped: true }) : [];
+  const magicItems = character ? getMagicItems(character, { excludeDropped: true, lastGameId: params.gameId }) : [];
+  const storyAwards = character ? getStoryAwards(character, { excludeDropped: true, lastGameId: params.gameId }) : [];
 
   const addMagicItem = () => setMagicItemsGained([...magicItemsGained, { id: "", name: "", description: "" }]);
   const removeMagicItem = (index: number) => setMagicItemsGained(magicItemsGained.filter((_, i) => i !== index));
@@ -163,7 +176,6 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const addLostStoryAward = () => setStoryAwardsLost([...storyAwardsLost, storyAwards[0]?.id || ""]);
   const removeLostStoryAward = (index: number) => setStoryAwardsLost(storyAwardsLost.filter((_, i) => i !== index));
 
-  const [dms, setDMs] = useState<DungeonMaster[]>([]);
   const getDMs = (prop: "name" | "DCI", value: string | number | null) => {
     if (!character || !value) return setDMs([]);
 
@@ -184,17 +196,13 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     setValue("dm.DCI", dm.DCI);
   };
 
-  if (!character)
-    return (
-      <Head>
-        <title>New Log</title>
-      </Head>
-    );
+  const dateString = selectedGame.date.toISOString().split("T")[0];
+  const timeString = selectedGame.date.toLocaleTimeString("en-GB");
 
   return (
     <>
       <Head>
-        <title>New Log - {character.name}</title>
+        <title>Edit Log - {selectedGame.name}</title>
       </Head>
 
       <div className="text-sm breadcrumbs mb-4">
@@ -212,12 +220,13 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <a className="text-neutral-content">{character.name}</a>
             </Link>
           </li>
-          <li className="text-secondary">New Log</li>
+          <li className="text-secondary">{selectedGame.name}</li>
         </ul>
       </div>
 
       <form onSubmit={handleSubmit}>
         <input type="hidden" {...register("characterId", { value: params.characterId })} />
+        <input type="hidden" {...register("gameId", { value: params.gameId })} />
         <div className="grid grid-cols-12 gap-4">
           <div className="form-control col-span-12 sm:col-span-6">
             <label className="label">
@@ -226,7 +235,11 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                 <span className="text-error">*</span>
               </span>
             </label>
-            <input type="text" {...register("name", { required: true })} className="input input-bordered focus:border-primary w-full" />
+            <input
+              type="text"
+              {...register("name", { required: true, value: selectedGame.name })}
+              className="input input-bordered focus:border-primary w-full"
+            />
             <label className="label">
               <span className="label-text-alt text-error">{errors.name?.message}</span>
             </label>
@@ -238,12 +251,16 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                 <span className="text-error">*</span>
               </span>
             </label>
-            <input type="datetime-local" {...register("date", { required: true })} className="input input-bordered focus:border-primary w-full" />
+            <input
+              type="datetime-local"
+              {...register("date", { required: true, value: `${dateString}T${timeString}` })}
+              className="input input-bordered focus:border-primary w-full"
+            />
             <label className="label">
               <span className="label-text-alt text-error">{errors.date?.message}</span>
             </label>
           </div>
-          <input type="hidden" {...register("dm.id", { value: "" })} />
+          <input type="hidden" {...register("dm.id", { value: selectedGame.dm?.id || "" })} />
           <div className="form-control col-span-12 sm:col-span-6">
             <label className="label">
               <span className="label-text">
@@ -255,7 +272,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label>
                 <input
                   type="text"
-                  {...register("dm.name", { onChange: e => getDMs("name", e.target.value) })}
+                  {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => getDMs("name", e.target.value) })}
                   className="input input-bordered focus:border-primary w-full"
                 />
               </label>
@@ -284,7 +301,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label>
                 <input
                   type="number"
-                  {...register("dm.DCI", { onChange: e => getDMs("DCI", e.target.value) })}
+                  {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => getDMs("DCI", e.target.value) })}
                   className="input input-bordered focus:border-primary w-full"
                 />
               </label>
@@ -321,7 +338,11 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                 <label className="label">
                   <span className="label-text">Experience</span>
                 </label>
-                <input type="number" {...register("experience", { value: 0 })} className="input input-bordered focus:border-primary w-full" />
+                <input
+                  type="number"
+                  {...register("experience", { value: selectedGame.experience })}
+                  className="input input-bordered focus:border-primary w-full"
+                />
                 <label className="label">
                   <span className="label-text-alt text-error">{errors.experience?.message}</span>
                 </label>
@@ -338,7 +359,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                   type="number"
                   min="0"
                   max={20 - character.total_level}
-                  {...register("level", { value: 0, min: 0, max: 20 - character.total_level })}
+                  {...register("level", { value: selectedGame.level, min: 0, max: 20 - character.total_level })}
                   className="input input-bordered focus:border-primary w-full"
                 />
                 <label className="label">
@@ -354,7 +375,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                   <label className="label">
                     <span className="label-text">ACP</span>
                   </label>
-                  <input type="number" {...register("acp", { value: 0 })} className="input input-bordered focus:border-primary w-full" />
+                  <input type="number" {...register("acp", { value: selectedGame.acp })} className="input input-bordered focus:border-primary w-full" />
                   <label className="label">
                     <span className="label-text-alt text-error">{errors.acp?.message}</span>
                   </label>
@@ -365,7 +386,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                   <label className="label">
                     <span className="label-text">TCP</span>
                   </label>
-                  <input type="number" {...register("tcp", { value: 0 })} className="input input-bordered focus:border-primary w-full" />
+                  <input type="number" {...register("tcp", { value: selectedGame.tcp })} className="input input-bordered focus:border-primary w-full" />
                   <label className="label">
                     <span className="label-text-alt text-error">{errors.tcp?.message}</span>
                   </label>
@@ -378,7 +399,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text">Gold</span>
               </label>
-              <input type="number" {...register("gold", { value: 0 })} className="input input-bordered focus:border-primary w-full" />
+              <input type="number" {...register("gold", { value: selectedGame.gold })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.gold?.message}</span>
               </label>
@@ -389,7 +410,10 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text">Notes</span>
               </label>
-              <textarea {...register("description")} className="textarea textarea-bordered focus:border-primary w-full" />
+              <textarea
+                {...register("description", { value: selectedGame.description || "" })}
+                className="textarea textarea-bordered focus:border-primary w-full"
+              />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.description?.message}</span>
               </label>
@@ -568,11 +592,11 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   );
 };
 
-NewCharacter.getLayout = page => {
+EditCharacter.getLayout = page => {
   return <Layout>{page}</Layout>;
 };
 
-export default NewCharacter;
+export default EditCharacter;
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const session = await unstable_getServerSession(context.req, context.res, authOptions);
@@ -605,7 +629,10 @@ export const getMagicItems = (
   let lastGame = false;
   character.games.forEach(game => {
     if (lastGame) return;
-    if (game.id === lastGameId) lastGame = true;
+    if (game.id === lastGameId) {
+      lastGame = true;
+      return;
+    }
     game.magic_items_gained.forEach(item => {
       magicItems.push(item);
     });
@@ -631,7 +658,10 @@ export const getStoryAwards = (
   let lastGame = false;
   character.games.forEach(game => {
     if (lastGame) return;
-    if (game.id === lastGameId) lastGame = true;
+    if (game.id === lastGameId) {
+      lastGame = true;
+      return;
+    }
     game.story_awards_gained.forEach(item => {
       storyAwards.push(item);
     });

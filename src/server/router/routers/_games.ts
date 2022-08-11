@@ -1,4 +1,5 @@
 import { gameSchema } from "$src/pages/characters/[characterId]/game/new";
+import { parseError } from "$src/utils/misc";
 import { DungeonMaster, Game } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -26,12 +27,7 @@ export const protectedGamesRouter = createProtectedRouter()
               }
             });
         } else {
-          const search = await ctx.prisma.dungeonMaster.findFirst({
-            where: {
-              id: input.dm.id
-            }
-          });
-          if (search) {
+          try {
             dm = await ctx.prisma.dungeonMaster.update({
               where: {
                 id: input.dm.id
@@ -41,7 +37,9 @@ export const protectedGamesRouter = createProtectedRouter()
                 DCI: input.dm.DCI
               }
             });
-          } else throw new TRPCError({ message: "Dungeon Master not found", code: "INTERNAL_SERVER_ERROR" });
+          } catch (err) {
+            throw new TRPCError({ message: parseError(err), code: "INTERNAL_SERVER_ERROR" });
+          }
         }
 
         if (!dm.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });

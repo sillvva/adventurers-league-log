@@ -1,16 +1,6 @@
 import { createRouter } from "../context";
 import { z } from "zod";
-import type { Character, DungeonMaster, Game, MagicItem, StoryAward } from "@prisma/client";
-
-// type CharacterEntry = Character & {
-//   games: (Game & {
-//     dm: DungeonMaster;
-//     magic_items_gained: MagicItem[];
-//     magic_items_lost: MagicItem[];
-//     story_awards_gained: StoryAward[];
-//     story_awards_lost: StoryAward[];
-//   })[];
-// }
+import type { Game, MagicItem, StoryAward } from "@prisma/client";
 
 export const charactersRouter = createRouter()
   .query("getAll", {

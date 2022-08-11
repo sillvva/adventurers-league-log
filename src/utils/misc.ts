@@ -37,3 +37,10 @@ export const qsParse = <T>(queryString: string | Record<string, any>, schema: Zo
 export const concatenate = (...str: (string | boolean | null | undefined)[]) => {
 	return str.filter(s => !!s && typeof s == "string").join(" ");
 };
+
+export const parseError = (e: unknown) => {
+	if (e instanceof Error) return e.message;
+	if (typeof e === "string") return e;
+	if (typeof e === "object") return JSON.stringify(e);
+	return "Unknown error";
+};
