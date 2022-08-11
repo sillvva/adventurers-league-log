@@ -73,8 +73,9 @@ model Log {
     date                DateTime
     name                String
     description         String?
-    type                String?        @default("game")
+    type                LogType        @default(game)
     dm                  DungeonMaster? @relation(fields: [dungeonMasterId], references: [id])
+    isDMLog             Boolean        @default(false)
     dungeonMasterId     String?
     experience          Int
     acp                 Int
@@ -90,10 +91,16 @@ model Log {
     created_at          DateTime       @default(now())
 }
 
+enum LogType {
+    game
+    nongame
+}
+
 model DungeonMaster {
     id    String @id @unique @default(cuid())
     name  String
     DCI   Int?
+    uid   String?
     logs  Log[]
 }
 

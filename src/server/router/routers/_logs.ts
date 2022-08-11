@@ -1,4 +1,4 @@
-import { logSchema } from "$src/pages/characters/[characterId]/game/[logId]";
+import { logSchema } from "$src/pages/characters/[characterId]/log/[logId]";
 import { parseError } from "$src/utils/misc";
 import { DungeonMaster, Log } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -15,7 +15,7 @@ export const protectedLogsRouter = createProtectedRouter()
         if (!input.dm.id) {
           const search = await ctx.prisma.dungeonMaster.findFirst({
             where: {
-              OR: [{ name: input.dm.name }, { DCI: input.dm.DCI }]
+              OR: input.isDMLog ? [{ uid: ctx.session.user.id }] : [{ name: input.dm.name }, { DCI: input.dm.DCI }]
             }
           });
           if (search) dm = search;
@@ -23,7 +23,8 @@ export const protectedLogsRouter = createProtectedRouter()
             dm = await ctx.prisma.dungeonMaster.create({
               data: {
                 name: input.dm.name,
-                DCI: input.dm.DCI
+                DCI: input.dm.DCI,
+                uid: input.isDMLog ? ctx.session.user.id : null
               }
             });
         } else {
@@ -34,7 +35,8 @@ export const protectedLogsRouter = createProtectedRouter()
               },
               data: {
                 name: input.dm.name,
-                DCI: input.dm.DCI
+                DCI: input.dm.DCI,
+                uid: input.isDMLog ? ctx.session.user.id : null
               }
             });
           } catch (err) {
@@ -51,6 +53,7 @@ export const protectedLogsRouter = createProtectedRouter()
         description: input.description,
         type: input.type,
         dungeonMasterId: (dm || {}).id || null,
+        isDMLog: input.isDMLog,
         characterId: input.characterId,
         acp: input.acp,
         tcp: input.tcp,

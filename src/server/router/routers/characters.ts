@@ -46,6 +46,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
   //   created_at: new Date(),
   //   name: "Test Game",
   //   description: "Test Game Description",
+  //   type: "game",
   //   experience: 400,
   //   acp: 0,
   //   tcp: 0,
@@ -64,8 +65,10 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
   //   dm: {
   //     id: "12",
   //     name: "Test DM",
-  //     DCI: 1234
+  //     DCI: 1234,
+  //     uid: null
   //   },
+  //   isDMLog: false,
   //   dungeonMasterId: "12",
   //   characterId: character.id
   // });

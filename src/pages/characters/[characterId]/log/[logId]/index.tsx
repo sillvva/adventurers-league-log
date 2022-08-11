@@ -16,7 +16,7 @@ import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { z } from "zod";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { useQueryString } from "$src/utils/hooks";
-import type { DungeonMaster, MagicItem } from "@prisma/client";
+import type { DungeonMaster, LogType, MagicItem } from "@prisma/client";
 
 interface PageProps {
   session: Session;
@@ -32,7 +32,7 @@ export const logSchema = z.object({
       /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/,
       "Not a valid date"
     ),
-  type: z.string().default(""),
+  type: z.union([z.literal("game"), z.literal("nongame")]).default("game"),
   experience: z.number().default(0),
   acp: z.number().default(0),
   tcp: z.number().default(0),
@@ -44,6 +44,7 @@ export const logSchema = z.object({
     name: z.string().default(""),
     DCI: z.number().nullable().default(null)
   }),
+  isDMLog: z.boolean().default(false),
   magic_items_gained: z
     .array(
       z.object({
@@ -98,7 +99,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
         name: "",
         description: "",
         date: new Date(),
-        type: "game",
+        type: "game" as LogType,
         created_at: new Date(),
         experience: 0,
         acp: 0,
@@ -111,6 +112,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
           name: "",
           DCI: null
         },
+        isDMLog: false,
         magic_items_gained: [],
         magic_items_lost: [],
         story_awards_gained: [],
@@ -120,6 +122,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   );
 
   const [season, setSeason] = useState<1 | 8 | 9>(selectedGame?.experience ? 1 : selectedGame?.acp ? 8 : 9);
+  const [type, setType] = useState<LogType>(selectedGame.type || "game");
   const [dms, setDMs] = useState<DungeonMaster[]>([]);
   const [magicItemsGained, setMagicItemsGained] = useState(
     selectedGame.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
@@ -140,15 +143,6 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     }
   });
 
-  // useEffect(() => {
-  //   if (selectedGame) {
-  //     setMagicItemsGained(selectedGame.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" })));
-  //     setMagicItemsLost(selectedGame.magic_items_lost.map(mi => mi.id));
-  //     setStoryAwardsGained((selectedGame?.story_awards_gained || []).map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" })));
-  //     setStoryAwardsLost(selectedGame.story_awards_lost.map(mi => mi.id));
-  //   }
-  // }, [selectedGame]);
-
   if (!character)
     return (
       <Head>
@@ -165,10 +159,12 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     const values = getValues();
 
     try {
+      values.type = type;
+
       if (!values.date) errors.push(setError("date", { message: "Required" }));
       else values.date = new Date(values.date.replace("T", " ")).toISOString();
 
-      if (!values.dm.name) errors.push(setError("dm.name", { message: "Required" }));
+      if (values.type === "game" && !values.dm.name) errors.push(setError("dm.name", { message: "Required" }));
 
       values.dm.DCI = values.dm.DCI ? parseInt(values.dm.DCI.toString()) : null;
       if (values.acp) values.acp = parseInt(values.acp.toString());
@@ -190,9 +186,10 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
       setSubmitting(true);
       mutation.mutate(values);
     } else {
+      type IssueFields = "date" | "name" | "dm.name" | "description" | "characterId" | "experience" | "acp" | "tcp" | "level" | "gold";
       result.error.issues.forEach(issue => {
         if (["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"].includes(issue.path.join("."))) {
-          setError(issue.path.join(".") as "date" | "name" | "dm.name" | "description" | "characterId" | "experience" | "acp" | "tcp" | "level" | "gold", {
+          setError(issue.path.join(".") as IssueFields, {
             message: issue.message
           });
         }
@@ -260,7 +257,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <a className="text-neutral-content">{character.name}</a>
             </Link>
           </li>
-          {selectedGame.name ? <li className="text-secondary">{selectedGame.name}</li> : <li className="text-secondary">New Game</li>}
+          {selectedGame.name ? <li className="text-secondary">{selectedGame.name}</li> : <li className="text-secondary">New Log</li>}
         </ul>
       </div>
 
@@ -277,7 +274,16 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
         <input type="hidden" {...register("characterId", { value: params.characterId })} />
         <input type="hidden" {...register("gameId", { value: params.logId === "new" ? "" : params.logId })} />
         <div className="grid grid-cols-12 gap-4">
-          <div className="form-control col-span-12 sm:col-span-6">
+          <div className="form-control col-span-12 sm:col-span-4">
+            <label className="label">
+              <span className="label-text">Log Type</span>
+            </label>
+            <select value={type} onChange={e => setType(e.target.value as LogType)} className="select select-bordered w-full">
+              <option value={"game"}>Game</option>
+              <option value={"nongame"}>Non-Game (Purchase, Trade, etc)</option>
+            </select>
+          </div>
+          <div className="form-control col-span-12 sm:col-span-4">
             <label className="label">
               <span className="label-text">
                 Title
@@ -293,7 +299,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <span className="label-text-alt text-error">{errors.name?.message}</span>
             </label>
           </div>
-          <div className="form-control col-span-12 sm:col-span-6">
+          <div className="form-control col-span-12 sm:col-span-4">
             <label className="label">
               <span className="label-text">
                 Date
@@ -309,118 +315,118 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <span className="label-text-alt text-error">{errors.date?.message}</span>
             </label>
           </div>
-          <input type="hidden" {...register("dm.id", { value: selectedGame.dm?.id || "" })} />
-          <div className="form-control col-span-12 sm:col-span-6">
-            <label className="label">
-              <span className="label-text">
-                DM Name
-                <span className="text-error">*</span>
-              </span>
-            </label>
-            <div className="dropdown">
-              <label>
-                <input
-                  type="text"
-                  {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => getDMs("name", e.target.value) })}
-                  className="input input-bordered focus:border-primary w-full"
-                />
-              </label>
-              {dms.length > 0 && (
-                <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                  {dms.map(dm => (
-                    <li key={dm.id}>
-                      <a onMouseDown={() => setDM(dm)}>
-                        {dm.name}
-                        {dm.DCI && ` (${dm.DCI})`}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <label className="label">
-              <span className="label-text-alt text-error">{errors.dm?.name?.message}</span>
-            </label>
-          </div>
-          <div className="form-control col-span-12 sm:col-span-6">
-            <label className="label">
-              <span className="label-text">DM DCI</span>
-            </label>
-            <div className="dropdown">
-              <label>
-                <input
-                  type="number"
-                  {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => getDMs("DCI", e.target.value) })}
-                  className="input input-bordered focus:border-primary w-full"
-                />
-              </label>
-              {dms.length > 0 && (
-                <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                  {dms.map(dm => (
-                    <li key={dm.id}>
-                      <a onMouseDown={() => setDM(dm)}>
-                        {dm.name}
-                        {dm.DCI && ` (${dm.DCI})`}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <label className="label">
-              <span className="label-text-alt text-error">{errors.dm?.DCI?.message}</span>
-            </label>
-          </div>
-          <div className="form-control col-span-12 sm:col-span-4">
-            <label className="label">
-              <span className="label-text">Season</span>
-            </label>
-            <select value={season} onChange={e => setSeason(parseInt(e.target.value) as 1 | 8 | 9)} className="select select-bordered w-full max-w-xs">
-              <option value={9}>Season 9+</option>
-              <option value={8}>Season 8</option>
-              <option value={1}>Season 1-7</option>
-            </select>
-          </div>
-          {season === 1 && (
-            <div className="col-span-6 sm:col-span-4">
-              <div className="form-control w-full">
-                <label className="label">
-                  <span className="label-text">Experience</span>
-                </label>
-                <input
-                  type="number"
-                  {...register("experience", { value: selectedGame.experience })}
-                  className="input input-bordered focus:border-primary w-full"
-                />
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.experience?.message}</span>
-                </label>
-              </div>
-            </div>
-          )}
-          {season === 9 && (
-            <div className="col-span-6 sm:col-span-4">
-              <div className="form-control w-full">
-                <label className="label">
-                  <span className="label-text">Level</span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max={20 - character.total_level}
-                  {...register("level", { value: selectedGame.level, min: 0, max: 20 - character.total_level })}
-                  className="input input-bordered focus:border-primary w-full"
-                />
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.level?.message}</span>
-                </label>
-              </div>
-            </div>
-          )}
-          {season === 8 && (
+          {type === "game" && (
             <>
-              <div className="col-span-6 sm:col-span-2">
-                <div className="form-control w-full">
+              <input type="hidden" {...register("dm.id", { value: selectedGame.dm?.id || "" })} />
+              <div className="form-control col-span-12 sm:col-span-6">
+                <label className="label">
+                  <span className="label-text">
+                    DM Name
+                    <span className="text-error">*</span>
+                  </span>
+                </label>
+                <div className="dropdown">
+                  <label>
+                    <input
+                      type="text"
+                      {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => getDMs("name", e.target.value) })}
+                      className="input input-bordered focus:border-primary w-full"
+                    />
+                  </label>
+                  {dms.length > 0 && (
+                    <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
+                      {dms.map(dm => (
+                        <li key={dm.id}>
+                          <a onMouseDown={() => setDM(dm)}>
+                            {dm.name}
+                            {dm.DCI && ` (${dm.DCI})`}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <label className="label">
+                  <span className="label-text-alt text-error">{errors.dm?.name?.message}</span>
+                </label>
+              </div>
+              <div className="form-control col-span-12 sm:col-span-6">
+                <label className="label">
+                  <span className="label-text">DM DCI</span>
+                </label>
+                <div className="dropdown">
+                  <label>
+                    <input
+                      type="number"
+                      {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => getDMs("DCI", e.target.value) })}
+                      className="input input-bordered focus:border-primary w-full"
+                    />
+                  </label>
+                  {dms.length > 0 && (
+                    <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
+                      {dms.map(dm => (
+                        <li key={dm.id}>
+                          <a onMouseDown={() => setDM(dm)}>
+                            {dm.name}
+                            {dm.DCI && ` (${dm.DCI})`}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <label className="label">
+                  <span className="label-text-alt text-error">{errors.dm?.DCI?.message}</span>
+                </label>
+              </div>
+              <div className="form-control col-span-12 sm:col-span-4">
+                <label className="label">
+                  <span className="label-text">Season</span>
+                </label>
+                <select value={season} onChange={e => setSeason(parseInt(e.target.value) as 1 | 8 | 9)} className="select select-bordered w-full">
+                  <option value={9}>Season 9+</option>
+                  <option value={8}>Season 8</option>
+                  <option value={1}>Season 1-7</option>
+                </select>
+              </div>
+              {season === 1 && (
+                <div className="form-control w-full col-span-6 sm:col-span-4">
+                  <label className="label">
+                    <span className="label-text">Experience</span>
+                  </label>
+                  <input
+                    type="number"
+                    {...register("experience", { value: selectedGame.experience })}
+                    className="input input-bordered focus:border-primary w-full"
+                  />
+                  <label className="label">
+                    <span className="label-text-alt text-error">{errors.experience?.message}</span>
+                  </label>
+                </div>
+              )}
+              {season === 9 && (
+                <div className="form-control w-full col-span-12 sm:col-span-4">
+                  <label className="label">
+                    <span className="label-text">Level</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={20 - character.total_level}
+                    {...register("level", { value: selectedGame.level, min: 0, max: 20 - character.total_level })}
+                    className="input input-bordered focus:border-primary w-full"
+                  />
+                  <label className="label">
+                    <span className="label-text-alt text-error">{errors.level?.message}</span>
+                  </label>
+                </div>
+              )}
+            </>
+          )}
+          {(season === 8 || type === "nongame") && (
+            <>
+              {type === "game" && (
+                <div className="form-control w-full col-span-6 sm:col-span-2">
                   <label className="label">
                     <span className="label-text">ACP</span>
                   </label>
@@ -429,44 +435,38 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                     <span className="label-text-alt text-error">{errors.acp?.message}</span>
                   </label>
                 </div>
-              </div>
-              <div className="col-span-6 sm:col-span-2">
-                <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">TCP</span>
-                  </label>
-                  <input type="number" {...register("tcp", { value: selectedGame.tcp })} className="input input-bordered focus:border-primary w-full" />
-                  <label className="label">
-                    <span className="label-text-alt text-error">{errors.tcp?.message}</span>
-                  </label>
-                </div>
+              )}
+              <div className={concatenate("form-control w-full", type === "nongame" ? "col-span-6" : "col-span-6 sm:col-span-2")}>
+                <label className="label">
+                  <span className="label-text">TCP</span>
+                </label>
+                <input type="number" {...register("tcp", { value: selectedGame.tcp })} className="input input-bordered focus:border-primary w-full" />
+                <label className="label">
+                  <span className="label-text-alt text-error">{errors.tcp?.message}</span>
+                </label>
               </div>
             </>
           )}
-          <div className="col-span-6 sm:col-span-4">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Gold</span>
-              </label>
-              <input type="number" {...register("gold", { value: selectedGame.gold })} className="input input-bordered focus:border-primary w-full" />
-              <label className="label">
-                <span className="label-text-alt text-error">{errors.gold?.message}</span>
-              </label>
-            </div>
+          <div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-4" : "col-span-6")}>
+            <label className="label">
+              <span className="label-text">Gold</span>
+            </label>
+            <input type="number" {...register("gold", { value: selectedGame.gold })} className="input input-bordered focus:border-primary w-full" />
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.gold?.message}</span>
+            </label>
           </div>
-          <div className="col-span-12">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Notes</span>
-              </label>
-              <textarea
-                {...register("description", { value: selectedGame.description || "" })}
-                className="textarea textarea-bordered focus:border-primary w-full"
-              />
-              <label className="label">
-                <span className="label-text-alt text-error">{errors.description?.message}</span>
-              </label>
-            </div>
+          <div className="form-control w-full col-span-12">
+            <label className="label">
+              <span className="label-text">Notes</span>
+            </label>
+            <textarea
+              {...register("description", { value: selectedGame.description || "" })}
+              className="textarea textarea-bordered focus:border-primary w-full"
+            />
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.description?.message}</span>
+            </label>
           </div>
           <div className="col-span-12 flex gap-4">
             <button type="button" className="btn btn-primary btn-sm" onClick={addMagicItem}>
@@ -477,13 +477,17 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                 Drop Magic Item
               </button>
             )}
-            <button type="button" className="btn btn-primary btn-sm" onClick={addStoryAward}>
-              Add Story Award
-            </button>
-            {storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
-              <button type="button" className="btn btn-sm" onClick={addLostStoryAward}>
-                Drop Story Award
-              </button>
+            {type === "game" && (
+              <>
+                <button type="button" className="btn btn-primary btn-sm" onClick={addStoryAward}>
+                  Add Story Award
+                </button>
+                {storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
+                  <button type="button" className="btn btn-sm" onClick={addLostStoryAward}>
+                    Drop Story Award
+                  </button>
+                )}
+              </>
             )}
           </div>
           {magicItemsGained.map((item, index) => (
@@ -540,7 +544,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                       onChange={e => {
                         setMagicItemsLost(magicItemsLost.map((item, i) => (i === index ? e.target.value : item)));
                       }}
-                      className="select select-bordered w-full max-w-xs">
+                      className="select select-bordered w-full">
                       {magicItems.map(item => (
                         <option key={item.id} value={item.id}>
                           {item.name}
@@ -612,7 +616,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                       onChange={e => {
                         setStoryAwardsLost(storyAwardsLost.map((item, i) => (i === index ? e.target.value : item)));
                       }}
-                      className="select select-bordered w-full max-w-xs">
+                      className="select select-bordered w-full">
                       {storyAwards.map(item => (
                         <option key={item.id} value={item.id}>
                           {item.name}

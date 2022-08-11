@@ -81,7 +81,11 @@ const Characters: NextPageWithLayout = () => {
                 </Link>
               </li>
               <li>
-                <a download={`${slugify(character.name)}.json`} href={`/api/exports/characters/${params.characterId}`} target="_blank" rel="noreferrer noopener">
+                <a
+                  download={`${slugify(character.name)}.json`}
+                  href={`/api/exports/characters/${params.characterId}`}
+                  target="_blank"
+                  rel="noreferrer noopener">
                   Export
                 </a>
               </li>
@@ -112,8 +116,7 @@ const Characters: NextPageWithLayout = () => {
               {character.campaign}
               {character.character_sheet_url && (
                 <>
-                  {" "}
-                  -{" "}
+                  {" - "}
                   <a href={character.character_sheet_url} target="_blank" rel="noreferrer noopner" className="text-secondary font-semibold">
                     Character Sheet
                   </a>
@@ -155,7 +158,7 @@ const Characters: NextPageWithLayout = () => {
           </div>
           <div className="flex gap-4 print:hidden">
             {session.data?.user && (
-              <Link href={`/characters/${params.characterId}/game/new`}>
+              <Link href={`/characters/${params.characterId}/log/new`}>
                 <a className="btn btn-primary btn-sm">New Log</a>
               </Link>
             )}
@@ -193,25 +196,29 @@ const Characters: NextPageWithLayout = () => {
                     <tr>
                       <th className="align-top">
                         <p className="text-primary-content font-semibold">{log.name}</p>
-                        {log.dm && (
+                        {log.dm && log.type === "game" && (
                           <p className="text-sm text-neutral-content font-normal">
                             <span className="font-semibold">DM:</span> {log.dm.name}
                           </p>
                         )}
                         <div className="table-cell sm:hidden print:hidden font-normal">
-                          {log.experience > 0 && (
-                            <p>
-                              <span className="font-semibold">Experience:</span> {log.experience}
-                            </p>
+                          {log.type === "game" && (
+                            <>
+                              {log.experience > 0 && (
+                                <p>
+                                  <span className="font-semibold">Experience:</span> {log.experience}
+                                </p>
+                              )}
+                              {log.acp > 0 && (
+                                <p>
+                                  <span className="font-semibold">ACP:</span> {log.acp}
+                                </p>
+                              )}
+                              <p>
+                                <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
+                              </p>
+                            </>
                           )}
-                          {log.acp > 0 && (
-                            <p>
-                              <span className="font-semibold">ACP:</span> {log.acp}
-                            </p>
-                          )}
-                          <p>
-                            <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
-                          </p>
                           {log.tcp > 0 && (
                             <p>
                               <span className="font-semibold">TCP:</span> {log.tcp}
@@ -223,23 +230,28 @@ const Characters: NextPageWithLayout = () => {
                           <div>
                             <p className="font-semibold">Magic Items:</p>
                             <p className="text-sm">{log.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         </div>
                       </th>
                       <td className="align-top hidden sm:table-cell print:table-cell">
-                        {log.experience > 0 && (
-                          <p>
-                            <span className="font-semibold">Experience:</span> {log.experience}
-                          </p>
+                        {log.type === "game" && (
+                          <>
+                            {log.experience > 0 && (
+                              <p>
+                                <span className="font-semibold">Experience:</span> {log.experience}
+                              </p>
+                            )}
+                            {log.acp > 0 && (
+                              <p>
+                                <span className="font-semibold">ACP:</span> {log.acp}
+                              </p>
+                            )}
+                            <p>
+                              <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
+                            </p>
+                          </>
                         )}
-                        {log.acp > 0 && (
-                          <p>
-                            <span className="font-semibold">ACP:</span> {log.acp}
-                          </p>
-                        )}
-                        <p>
-                          <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
-                        </p>
                       </td>
                       <td className="align-top hidden sm:table-cell print:table-cell">
                         {log.tcp > 0 && (
@@ -268,7 +280,7 @@ const Characters: NextPageWithLayout = () => {
                       </td>
                       <td className="w-8 print:hidden">
                         <div className="flex flex-col justify-center gap-2">
-                          <Link href={`/characters/${params.characterId}/game/${log.id}`}>
+                          <Link href={`/characters/${params.characterId}/log/${log.id}`}>
                             <a className="btn btn-sm btn-primary">
                               <Icon path={mdiPencil} size={0.8} />
                             </a>
