@@ -10,6 +10,7 @@ import Icon from "@mdi/react";
 import { Fragment, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { slugify } from "$src/utils/misc";
 
 const Characters: NextPageWithLayout = () => {
   const session = useSession();
@@ -23,7 +24,7 @@ const Characters: NextPageWithLayout = () => {
     })
   );
 
-  const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
+  const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
     ssr: true,
     refetchOnWindowFocus: false
   });
@@ -31,7 +32,7 @@ const Characters: NextPageWithLayout = () => {
   const utils = trpc.useContext();
   const deleteGameMutation = trpc.useMutation(["_games.delete"], {
     onSuccess() {
-      utils.invalidateQueries(["characters.getOne", { id: params.characterId }]);
+      utils.invalidateQueries(["characters.getOne", { characterId: params.characterId }]);
     }
   });
 
@@ -80,14 +81,20 @@ const Characters: NextPageWithLayout = () => {
                 </Link>
               </li>
               <li>
-                <a>Export</a>
+                <a download={`${slugify(character.name)}.json`} href={`/api/exports/characters/${params.characterId}`} target="_blank" rel="noreferrer noopener">
+                  Export
+                </a>
               </li>
               <li>
-                <a className="bg-red-600 text-white" onClick={() => {
-                  if (confirm("Are you sure you want to delete this character? This action cannot be undone.")) {
-                    deleteCharacterMutation.mutate({ id: params.characterId });
-                  }
-                }}>Delete</a>
+                <a
+                  className="bg-red-600 text-white"
+                  onClick={() => {
+                    if (confirm("Are you sure you want to delete this character? This action cannot be undone.")) {
+                      deleteCharacterMutation.mutate({ id: params.characterId });
+                    }
+                  }}>
+                  Delete
+                </a>
               </li>
             </ul>
           </div>

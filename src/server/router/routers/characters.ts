@@ -1,138 +1,156 @@
 import { createRouter } from "../context";
 import { z } from "zod";
-import type { Game, MagicItem, StoryAward } from "@prisma/client";
+import type { Game, MagicItem, PrismaClient, StoryAward } from "@prisma/client";
 
 export const charactersRouter = createRouter()
   .query("getAll", {
     input: z.object({
-      userId: z.string().optional()
+      userId: z.string()
     }),
     async resolve({ input, ctx }) {
-      const characters = await ctx.prisma.character.findMany({
-        include: {
-          user: true,
-          games: {
-            include: {
-              dm: true,
-              magic_items_gained: true,
-              magic_items_lost: true,
-              story_awards_gained: true,
-              story_awards_lost: true
-            },
-            orderBy: {
-              date: "asc"
-            }
-          }
-        },
-        where: { userId: input.userId }
-      });
-
-      return characters.map(character => {
-        const levels = getLevels(character.games);
-        const total_level = levels.total;
-        const total_gold = character.games.reduce((acc, game) => acc + game.gold, 0);
-        const magic_items = character.games.reduce((acc, game) => {
-          acc.push(...game.magic_items_gained);
-          game.magic_items_lost.forEach(magicItem => {
-            acc.splice(magic_items.indexOf(magicItem), 1);
-          });
-          return acc;
-        }, [] as MagicItem[]);
-
-        return {
-          ...character,
-          total_level,
-          total_gold,
-          magic_items,
-          tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1
-        };
-      });
+      return await getAll(ctx.prisma, input.userId);
     }
   })
   .query("getOne", {
     input: z.object({
-      id: z.string().optional()
+      characterId: z.string()
     }),
     async resolve({ input, ctx }) {
-      const character = await ctx.prisma.character.findFirstOrThrow({
-        include: {
-          user: true,
-          games: {
-            include: {
-              dm: true,
-              magic_items_gained: true,
-              magic_items_lost: true,
-              story_awards_gained: true,
-              story_awards_lost: true
-            },
-            orderBy: {
-              date: "asc"
-            }
-          }
-        },
-        where: { id: input.id }
-      });
-
-      // character.games.push({
-      //   id: "1234",
-      //   date: new Date(),
-      //   created_at: new Date(),
-      //   name: "Test Game",
-      //   description: "Test Game Description",
-      //   experience: 400,
-      //   acp: 0,
-      //   tcp: 0,
-      //   level: 0,
-      //   gold: 250,
-      //   magic_items_gained: [{
-      //     id: "123",
-      //     name: "Test Magic Item",
-      //     description: "Test Magic Item Description",
-      //     gameGainedId: "1234",
-      //     gameLostId: null
-      //   }],
-      //   magic_items_lost: [],
-      //   story_awards_gained: [],
-      //   story_awards_lost: [],
-      //   dm: {
-      //     id: "12",
-      //     name: "Test DM",
-      //     DCI: 1234
-      //   },
-      //   dungeonMasterId: "12",
-      //   characterId: character.id
-      // });
-
-      const levels = getLevels(character.games);
-
-      const total_level = levels.total;
-      const total_gold = character.games.reduce((acc, game) => acc + game.gold, 0);
-      const magic_items: MagicItem[] = character.games.reduce((acc, game) => {
-        acc.push(...game.magic_items_gained);
-        game.magic_items_lost.forEach(magicItem => {
-          acc.splice(acc.indexOf(magicItem), 1);
-        });
-        return acc;
-      }, [] as MagicItem[]);
-      const story_awards: StoryAward[] = character.games.reduce((acc, game) => {
-        acc.push(...game.story_awards_gained);
-        game.story_awards_lost.forEach(magicItem => {
-          acc.splice(acc.indexOf(magicItem), 1);
-        });
-        return acc;
-      }, [] as StoryAward[]);
-
-      return {
-        ...character,
-        total_level,
-        total_gold,
-        magic_items,
-        story_awards,
-        game_levels: levels.game_levels,
-        tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1
-      };
+      return await getOne(ctx.prisma, input.characterId);
     }
   });
+
+export async function getOne(prisma: PrismaClient, characterId: string) {
+  const character = await prisma.character.findFirstOrThrow({
+    include: {
+      user: true,
+      games: {
+        include: {
+          dm: true,
+          magic_items_gained: true,
+          magic_items_lost: true,
+          story_awards_gained: true,
+          story_awards_lost: true
+        },
+        orderBy: {
+          date: "asc"
+        }
+      }
+    },
+    where: { id: characterId }
+  });
+
+  // character.games.push({
+  //   id: "1234",
+  //   date: new Date(),
+  //   created_at: new Date(),
+  //   name: "Test Game",
+  //   description: "Test Game Description",
+  //   experience: 400,
+  //   acp: 0,
+  //   tcp: 0,
+  //   level: 0,
+  //   gold: 250,
+  //   magic_items_gained: [{
+  //     id: "123",
+  //     name: "Test Magic Item",
+  //     description: "Test Magic Item Description",
+  //     gameGainedId: "1234",
+  //     gameLostId: null
+  //   }],
+  //   magic_items_lost: [],
+  //   story_awards_gained: [],
+  //   story_awards_lost: [],
+  //   dm: {
+  //     id: "12",
+  //     name: "Test DM",
+  //     DCI: 1234
+  //   },
+  //   dungeonMasterId: "12",
+  //   characterId: character.id
+  // });
+
+  const levels = getLevels(character.games);
+
+  const total_level = levels.total;
+  const total_gold = character.games.reduce((acc, game) => acc + game.gold, 0);
+  const magic_items: MagicItem[] = character.games.reduce((acc, game) => {
+    acc.push(...game.magic_items_gained);
+    game.magic_items_lost.forEach(magicItem => {
+      acc.splice(acc.indexOf(magicItem), 1);
+    });
+    return acc;
+  }, [] as MagicItem[]);
+  const story_awards: StoryAward[] = character.games.reduce((acc, game) => {
+    acc.push(...game.story_awards_gained);
+    game.story_awards_lost.forEach(magicItem => {
+      acc.splice(acc.indexOf(magicItem), 1);
+    });
+    return acc;
+  }, [] as StoryAward[]);
+
+  return {
+    ...character,
+    total_level,
+    total_gold,
+    magic_items,
+    story_awards,
+    game_levels: levels.game_levels,
+    tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1
+  };
+}
+
+export async function getAll(prisma: PrismaClient, userId: string) {
+  const characters = await prisma.character.findMany({
+    include: {
+      user: true,
+      games: {
+        include: {
+          dm: true,
+          magic_items_gained: true,
+          magic_items_lost: true,
+          story_awards_gained: true,
+          story_awards_lost: true
+        },
+        orderBy: {
+          date: "asc"
+        }
+      }
+    },
+    where: { userId: userId }
+  });
+
+  return characters.map(character => {
+    const levels = getLevels(character.games);
+    const total_level = levels.total;
+    const total_gold = character.games.reduce((acc, game) => acc + game.gold, 0);
+    const magic_items = character.games.reduce((acc, game) => {
+      acc.push(...game.magic_items_gained);
+      game.magic_items_lost.forEach(magicItem => {
+        acc.splice(magic_items.indexOf(magicItem), 1);
+      });
+      return acc;
+    }, [] as MagicItem[]);
+    const story_awards: StoryAward[] = character.games.reduce((acc, game) => {
+      acc.push(...game.story_awards_gained);
+      game.story_awards_lost.forEach(magicItem => {
+        acc.splice(acc.indexOf(magicItem), 1);
+      });
+      return acc;
+    }, [] as StoryAward[]);
+
+
+    return {
+      ...character,
+      total_level,
+      total_gold,
+      magic_items,
+      story_awards,
+      game_levels: levels.game_levels,
+      tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1
+    };
+  });
+}
 
 function getLevels(games: Game[]) {
   if (!games) games = [];

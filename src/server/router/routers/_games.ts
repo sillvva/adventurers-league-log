@@ -1,4 +1,4 @@
-import { gameSchema } from "$src/pages/characters/[characterId]/game/news";
+import { gameSchema } from "$src/pages/characters/[characterId]/game/[gameId]";
 import { parseError } from "$src/utils/misc";
 import { DungeonMaster, Game } from "@prisma/client";
 import { TRPCError } from "@trpc/server";

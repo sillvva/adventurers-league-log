@@ -17,11 +17,53 @@ import { z } from "zod";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { useQueryString } from "$src/utils/hooks";
 import type { DungeonMaster, MagicItem } from "@prisma/client";
-import { gameSchema } from "../news";
 
 interface PageProps {
   session: Session;
 }
+
+export const gameSchema = z.object({
+  characterId: z.string(),
+  gameId: z.string().default(""),
+  name: z.string().min(1, "Required"),
+  date: z
+    .string()
+    .regex(
+      /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/,
+      "Not a valid date"
+    ),
+  experience: z.number().default(0),
+  acp: z.number().default(0),
+  tcp: z.number().default(0),
+  level: z.number().default(0),
+  gold: z.number().default(0),
+  description: z.string().default(""),
+  dm: z.object({
+    id: z.string().default(""),
+    name: z.string().default(""),
+    DCI: z.number().nullable().default(null)
+  }),
+  magic_items_gained: z
+    .array(
+      z.object({
+        id: z.string().default(""),
+        name: z.string().min(1, "Required"),
+        description: z.string().default("")
+      })
+    )
+    .default([]),
+  magic_items_lost: z.array(z.string().min(1)).default([]),
+  story_awards_gained: z
+    .array(
+      z.object({
+        id: z.string().default(""),
+        name: z.string().min(1, "Required"),
+        description: z.string().default("")
+      })
+    )
+    .default([]),
+  story_awards_lost: z.array(z.string().min(1)).default([])
+});
 
 const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const router = useRouter();
@@ -42,7 +84,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     setError
   } = useForm<z.infer<typeof gameSchema>>();
 
-  const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
+  const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
     ssr: true,
     refetchOnWindowFocus: false
   });
