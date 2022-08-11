@@ -9,9 +9,11 @@ import Layout from "$src/layouts/main";
 import Icon from "@mdi/react";
 import { Fragment, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 const Characters: NextPageWithLayout = () => {
   const session = useSession();
+  const router = useRouter();
   const level = useRef(1);
   level.current = 1;
 
@@ -28,8 +30,14 @@ const Characters: NextPageWithLayout = () => {
 
   const utils = trpc.useContext();
   const deleteGameMutation = trpc.useMutation(["_games.delete"], {
-    onSettled() {
+    onSuccess() {
       utils.invalidateQueries(["characters.getOne", { id: params.characterId }]);
+    }
+  });
+
+  const deleteCharacterMutation = trpc.useMutation(["_characters.delete"], {
+    onSuccess() {
+      router.replace("/characters");
     }
   });
 
@@ -75,7 +83,11 @@ const Characters: NextPageWithLayout = () => {
                 <a>Export</a>
               </li>
               <li>
-                <a className="bg-red-600 text-white">Delete</a>
+                <a className="bg-red-600 text-white" onClick={() => {
+                  if (confirm("Are you sure you want to delete this character? This action cannot be undone.")) {
+                    deleteCharacterMutation.mutate({ id: params.characterId });
+                  }
+                }}>Delete</a>
               </li>
             </ul>
           </div>

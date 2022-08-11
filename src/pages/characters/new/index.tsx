@@ -40,7 +40,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     resolver: zodResolver(newCharacterSchema)
   });
 
-  const mutation = trpc.useMutation(["_characters.new"], {
+  const mutation = trpc.useMutation(["_characters.create"], {
     onSuccess(data) {
       router.push(`/characters/${data.id}`);
     }
