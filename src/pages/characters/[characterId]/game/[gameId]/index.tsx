@@ -3,21 +3,21 @@ import type { GetServerSideProps } from "next";
 import { unstable_getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import { useRouter } from "next/router";
-import { FormEventHandler, useEffect } from "react";
+import { FormEventHandler, useEffect, useMemo } from "react";
 import { useState } from "react";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
-import { mdiAlert, mdiHome, mdiTrashCan } from "@mdi/js";
+import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "$src/layouts/main";
 import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { z } from "zod";
-import { concatenate } from "$src/utils/misc";
+import { concatenate, formatDate } from "$src/utils/misc";
 import { useQueryString } from "$src/utils/hooks";
-import type { DungeonMaster, MagicItem } from "@prisma/client";
-import { gameSchema } from "../new";
+import type { DungeonMaster, Game, MagicItem, StoryAward } from "@prisma/client";
+import { gameSchema } from "../news";
 
 interface PageProps {
   session: Session;
@@ -47,70 +47,69 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     refetchOnWindowFocus: false
   });
 
-  const selectedGame = character?.games?.find(g => g.id === params.gameId);
+  const selectedGame = useMemo(
+    () =>
+      character?.games?.find(g => g.id === params.gameId) || {
+        characterId: params.characterId,
+        id: "",
+        name: "",
+        description: "",
+        date: new Date(),
+        created_at: new Date(),
+        experience: 0,
+        acp: 0,
+        tcp: 0,
+        level: 0,
+        gold: 0,
+        dungeonMasterId: "",
+        dm: {
+          id: "",
+          name: "",
+          DCI: null
+        },
+        magic_items_gained: [],
+        magic_items_lost: [],
+        story_awards_gained: [],
+        story_awards_lost: []
+      },
+    [params, character]
+  );
 
   const [season, setSeason] = useState<1 | 8 | 9>(selectedGame?.experience ? 1 : selectedGame?.acp ? 8 : 9);
   const [dms, setDMs] = useState<DungeonMaster[]>([]);
-  const [magicItemsGained, setMagicItemsGained] = useState([] as { id: string; name: string; description: string }[]);
-  const [magicItemsLost, setMagicItemsLost] = useState<string[]>([]);
-  const [storyAwardsGained, setStoryAwardsGained] = useState([] as { id: string; name: string; description: string }[]);
-  const [storyAwardsLost, setStoryAwardsLost] = useState<string[]>([]);
+  const [magicItemsGained, setMagicItemsGained] = useState(
+    selectedGame.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
+  );
+  const [magicItemsLost, setMagicItemsLost] = useState<string[]>(selectedGame.magic_items_lost.map(mi => mi.id));
+  const [storyAwardsGained, setStoryAwardsGained] = useState(
+    (selectedGame?.story_awards_gained || []).map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
+  );
+  const [storyAwardsLost, setStoryAwardsLost] = useState<string[]>(selectedGame.story_awards_lost.map(mi => mi.id));
+  const [mutError, setMutError] = useState<string | null>(null);
 
   const mutation = trpc.useMutation(["_games.save"], {
     onSuccess() {
       router.push(`/characters/${params.characterId}`);
+    },
+    onError(err) {
+      setMutError(err.message);
     }
   });
 
-  useEffect(() => {
-    if (selectedGame) {
-      setMagicItemsGained(selectedGame.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" })));
-      setMagicItemsLost(selectedGame.magic_items_lost.map(mi => mi.id));
-      setStoryAwardsGained((selectedGame?.story_awards_gained || []).map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" })));
-      setStoryAwardsLost(selectedGame.story_awards_lost.map(mi => mi.id));
-    }
-  }, [selectedGame]);
+  // useEffect(() => {
+  //   if (selectedGame) {
+  //     setMagicItemsGained(selectedGame.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" })));
+  //     setMagicItemsLost(selectedGame.magic_items_lost.map(mi => mi.id));
+  //     setStoryAwardsGained((selectedGame?.story_awards_gained || []).map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" })));
+  //     setStoryAwardsLost(selectedGame.story_awards_lost.map(mi => mi.id));
+  //   }
+  // }, [selectedGame]);
 
   if (!character)
     return (
       <Head>
-        <title>Edit Log</title>
+        <title>{selectedGame.name ? "Edit Log" : "New Log"}</title>
       </Head>
-    );
-
-  if (!selectedGame)
-    return (
-      <>
-        <Head>
-          <title>Edit Log</title>
-        </Head>
-
-        <div className="text-sm breadcrumbs mb-4">
-          <ul>
-            <li>
-              <Icon path={mdiHome} className="w-4" />
-            </li>
-            <li>
-              <Link href="/characters">
-                <a className="text-neutral-content">Characters</a>
-              </Link>
-            </li>
-            <li>
-              <Link href={`/characters/${params.characterId}`}>
-                <a className="text-neutral-content">{character.name}</a>
-              </Link>
-            </li>
-            <li className="text-secondary">Error 404</li>
-          </ul>
-        </div>
-
-        <div className="alert alert-error shadow-lg">
-          <div>
-            <Icon path={mdiAlert} size={1} />
-            <span>Error! Task failed successfully.</span>
-          </div>
-        </div>
-      </>
     );
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = e => {
@@ -196,13 +195,10 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     setValue("dm.DCI", dm.DCI);
   };
 
-  const dateString = selectedGame.date.toISOString().split("T")[0];
-  const timeString = selectedGame.date.toLocaleTimeString("en-GB");
-
   return (
     <>
       <Head>
-        <title>Edit Log - {selectedGame.name}</title>
+        <title>{selectedGame.name ? `Edit Log - ${selectedGame.name}` : "New Log"}</title>
       </Head>
 
       <div className="text-sm breadcrumbs mb-4">
@@ -220,9 +216,18 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <a className="text-neutral-content">{character.name}</a>
             </Link>
           </li>
-          <li className="text-secondary">{selectedGame.name}</li>
+          {selectedGame.name ? <li className="text-secondary">{selectedGame.name}</li> : <li className="text-secondary">New Game</li>}
         </ul>
       </div>
+
+      {mutError && (
+        <div className="alert alert-error shadow-lg">
+          <div>
+            <Icon path={mdiAlertCircle} size={1} />
+            <span>Error! Task failed successfully. I mean... {mutError}</span>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <input type="hidden" {...register("characterId", { value: params.characterId })} />
@@ -253,7 +258,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
             </label>
             <input
               type="datetime-local"
-              {...register("date", { required: true, value: `${dateString}T${timeString}` })}
+              {...register("date", { required: true, value: formatDate(selectedGame.date) })}
               className="input input-bordered focus:border-primary w-full"
             />
             <label className="label">

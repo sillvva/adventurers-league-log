@@ -44,3 +44,9 @@ export const parseError = (e: unknown) => {
 	if (typeof e === "object") return JSON.stringify(e);
 	return "Unknown error";
 };
+
+export const formatDate = (date: Date) => {
+	const dateString = date.toISOString().split("T")[0];
+  const timeString = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+	return `${dateString}T${timeString}`;
+}
