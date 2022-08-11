@@ -64,15 +64,16 @@ model Character {
     character_sheet_url String?
     user                User     @relation(fields: [userId], references: [id])
     userId              String
-    games               Game[]
+    logs                Log[]
     created_at          DateTime @default(now())
 }
 
-model Game {
+model Log {
     id                  String         @id @unique @default(cuid())
     date                DateTime
     name                String
     description         String?
+    type                String?        @default("game")
     dm                  DungeonMaster? @relation(fields: [dungeonMasterId], references: [id])
     dungeonMasterId     String?
     experience          Int
@@ -93,25 +94,25 @@ model DungeonMaster {
     id    String @id @unique @default(cuid())
     name  String
     DCI   Int?
-    games Game[]
+    logs  Log[]
 }
 
 model MagicItem {
     id           String  @id @unique @default(cuid())
     name         String
     description  String?
-    gameGained   Game?   @relation("magic_items_gained", fields: [gameGainedId], references: [id])
-    gameGainedId String?
-    gameLost     Game?   @relation("magic_items_lost", fields: [gameLostId], references: [id])
-    gameLostId   String?
+    logGained    Log?   @relation("magic_items_gained", fields: [logGainedId], references: [id])
+    logGainedId  String?
+    logLost      Log?   @relation("magic_items_lost", fields: [logLostId], references: [id])
+    logLostId    String?
 }
 
 model StoryAward {
     id           String   @id @unique @default(cuid())
     name         String
     description  String?
-    gameGained   Game?    @relation("story_awards_gained", fields: [gameGainedId], references: [id])
-    gameGainedId String?
-    gameLost     Game?    @relation("story_awards_lost", fields: [gameLostId], references: [id])
-    gameLostId   String?
+    logGained    Log?    @relation("story_awards_gained", fields: [logGainedId], references: [id])
+    logGainedId  String?
+    logLost      Log?    @relation("story_awards_lost", fields: [logLostId], references: [id])
+    logLostId    String?
 }

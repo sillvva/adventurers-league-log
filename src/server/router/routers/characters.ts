@@ -1,6 +1,6 @@
 import { createRouter } from "../context";
 import { z } from "zod";
-import type { Game, MagicItem, PrismaClient, StoryAward } from "@prisma/client";
+import type { Log, MagicItem, PrismaClient, StoryAward } from "@prisma/client";
 
 export const charactersRouter = createRouter()
   .query("getAll", {
@@ -24,7 +24,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
   const character = await prisma.character.findFirstOrThrow({
     include: {
       user: true,
-      games: {
+      logs: {
         include: {
           dm: true,
           magic_items_gained: true,
@@ -40,7 +40,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
     where: { id: characterId }
   });
 
-  // character.games.push({
+  // character.logs.push({
   //   id: "1234",
   //   date: new Date(),
   //   created_at: new Date(),
@@ -70,20 +70,20 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
   //   characterId: character.id
   // });
 
-  const levels = getLevels(character.games);
+  const levels = getLevels(character.logs);
 
   const total_level = levels.total;
-  const total_gold = character.games.reduce((acc, game) => acc + game.gold, 0);
-  const magic_items: MagicItem[] = character.games.reduce((acc, game) => {
-    acc.push(...game.magic_items_gained);
-    game.magic_items_lost.forEach(magicItem => {
+  const total_gold = character.logs.reduce((acc, log) => acc + log.gold, 0);
+  const magic_items: MagicItem[] = character.logs.reduce((acc, log) => {
+    acc.push(...log.magic_items_gained);
+    log.magic_items_lost.forEach(magicItem => {
       acc.splice(acc.indexOf(magicItem), 1);
     });
     return acc;
   }, [] as MagicItem[]);
-  const story_awards: StoryAward[] = character.games.reduce((acc, game) => {
-    acc.push(...game.story_awards_gained);
-    game.story_awards_lost.forEach(magicItem => {
+  const story_awards: StoryAward[] = character.logs.reduce((acc, log) => {
+    acc.push(...log.story_awards_gained);
+    log.story_awards_lost.forEach(magicItem => {
       acc.splice(acc.indexOf(magicItem), 1);
     });
     return acc;
@@ -95,7 +95,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
     total_gold,
     magic_items,
     story_awards,
-    game_levels: levels.game_levels,
+    log_levels: levels.log_levels,
     tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1
   };
 }
@@ -104,7 +104,7 @@ export async function getAll(prisma: PrismaClient, userId: string) {
   const characters = await prisma.character.findMany({
     include: {
       user: true,
-      games: {
+      logs: {
         include: {
           dm: true,
           magic_items_gained: true,
@@ -121,19 +121,19 @@ export async function getAll(prisma: PrismaClient, userId: string) {
   });
 
   return characters.map(character => {
-    const levels = getLevels(character.games);
+    const levels = getLevels(character.logs);
     const total_level = levels.total;
-    const total_gold = character.games.reduce((acc, game) => acc + game.gold, 0);
-    const magic_items = character.games.reduce((acc, game) => {
-      acc.push(...game.magic_items_gained);
-      game.magic_items_lost.forEach(magicItem => {
+    const total_gold = character.logs.reduce((acc, log) => acc + log.gold, 0);
+    const magic_items = character.logs.reduce((acc, log) => {
+      acc.push(...log.magic_items_gained);
+      log.magic_items_lost.forEach(magicItem => {
         acc.splice(magic_items.indexOf(magicItem), 1);
       });
       return acc;
     }, [] as MagicItem[]);
-    const story_awards: StoryAward[] = character.games.reduce((acc, game) => {
-      acc.push(...game.story_awards_gained);
-      game.story_awards_lost.forEach(magicItem => {
+    const story_awards: StoryAward[] = character.logs.reduce((acc, log) => {
+      acc.push(...log.story_awards_gained);
+      log.story_awards_lost.forEach(magicItem => {
         acc.splice(acc.indexOf(magicItem), 1);
       });
       return acc;
@@ -146,23 +146,23 @@ export async function getAll(prisma: PrismaClient, userId: string) {
       total_gold,
       magic_items,
       story_awards,
-      game_levels: levels.game_levels,
+      log_levels: levels.log_levels,
       tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1
     };
   });
 }
 
-function getLevels(games: Game[]) {
-  if (!games) games = [];
+function getLevels(logs: Log[]) {
+  if (!logs) logs = [];
   let totalLevel = 1;
-  const game_levels: { id: string; levels: number }[] = [];
+  const log_levels: { id: string; levels: number }[] = [];
 
   const xpLevels = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];
   let totalXp = 0;
   let next = 1;
   let xpDiff = 0;
-  games.forEach(game => {
-    totalXp += game.experience;
+  logs.forEach(log => {
+    totalXp += log.experience;
     let current = xpLevels[next];
     let gained = 0;
     while (current && totalXp >= current) {
@@ -173,7 +173,7 @@ function getLevels(games: Game[]) {
       }
       current = xpLevels[next];
     }
-    if (gained > 0) game_levels.push({ id: game.id, levels: gained });
+    if (gained > 0) log_levels.push({ id: log.id, levels: gained });
     totalLevel += gained;
   });
 
@@ -183,8 +183,8 @@ function getLevels(games: Game[]) {
     let totalAcp = Math.round((acpLevels[totalLevel - 1] as number) + xpDiff * (totalLevel <= 3 ? 4 : 8));
     let acpDiff = 0;
     next = totalLevel;
-    games.forEach(game => {
-      totalAcp += game.acp;
+    logs.forEach(log => {
+      totalAcp += log.acp;
       let current = acpLevels[next];
       let gained = 0;
       while (current && totalAcp >= current) {
@@ -196,9 +196,9 @@ function getLevels(games: Game[]) {
         current = acpLevels[next];
       }
       if (gained > 0) {
-        const leveled = game_levels.findIndex(level => level.id === game.id);
-        if (leveled > -1) (game_levels[leveled] as typeof game_levels[number]).levels += gained;
-        else game_levels.push({ id: game.id, levels: gained });
+        const leveled = log_levels.findIndex(level => level.id === log.id);
+        if (leveled > -1) (log_levels[leveled] as typeof log_levels[number]).levels += gained;
+        else log_levels.push({ id: log.id, levels: gained });
         totalLevel += gained;
       }
     });
@@ -206,18 +206,18 @@ function getLevels(games: Game[]) {
     if (totalLevel < 20 && acpDiff > 0) totalLevel++;
   }
 
-  games.forEach(game => {
-    if (game.level > 0) {
-      const leveled = game_levels.findIndex(level => level.id === game.id);
-      if (leveled > -1) (game_levels[leveled] as typeof game_levels[number]).levels += game.level;
-      else game_levels.push({ id: game.id, levels: game.level });
+  logs.forEach(log => {
+    if (log.level > 0) {
+      const leveled = log_levels.findIndex(level => level.id === log.id);
+      if (leveled > -1) (log_levels[leveled] as typeof log_levels[number]).levels += log.level;
+      else log_levels.push({ id: log.id, levels: log.level });
     }
   });
 
-  totalLevel += games.reduce((acc, game) => acc + game.level, 0);
+  totalLevel += logs.reduce((acc, log) => acc + log.level, 0);
 
   return {
     total: Math.min(20, totalLevel),
-    game_levels
+    log_levels
   };
 }

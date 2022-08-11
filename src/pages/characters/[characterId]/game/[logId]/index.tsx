@@ -22,7 +22,7 @@ interface PageProps {
   session: Session;
 }
 
-export const gameSchema = z.object({
+export const logSchema = z.object({
   characterId: z.string(),
   gameId: z.string().default(""),
   name: z.string().min(1, "Required"),
@@ -32,6 +32,7 @@ export const gameSchema = z.object({
       /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/,
       "Not a valid date"
     ),
+  type: z.string().default(""),
   experience: z.number().default(0),
   acp: z.number().default(0),
   tcp: z.number().default(0),
@@ -70,7 +71,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const { data: params } = useQueryString(
     z.object({
       characterId: z.string(),
-      gameId: z.string()
+      logId: z.string()
     })
   );
 
@@ -82,7 +83,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     getValues,
     setValue,
     setError
-  } = useForm<z.infer<typeof gameSchema>>();
+  } = useForm<z.infer<typeof logSchema>>();
 
   const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
     ssr: true,
@@ -91,12 +92,13 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 
   const selectedGame = useMemo(
     () =>
-      character?.games?.find(g => g.id === params.gameId) || {
+      character?.logs?.find(g => g.id === params.logId) || {
         characterId: params.characterId,
         id: "",
         name: "",
         description: "",
         date: new Date(),
+        type: "game",
         created_at: new Date(),
         experience: 0,
         acp: 0,
@@ -129,7 +131,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const [storyAwardsLost, setStoryAwardsLost] = useState<string[]>(selectedGame.story_awards_lost.map(mi => mi.id));
   const [mutError, setMutError] = useState<string | null>(null);
 
-  const mutation = trpc.useMutation(["_games.save"], {
+  const mutation = trpc.useMutation(["_logs.save"], {
     onSuccess() {
       router.push(`/characters/${params.characterId}`);
     },
@@ -183,7 +185,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
       console.error(err);
     }
 
-    const result = gameSchema.safeParse(values);
+    const result = logSchema.safeParse(values);
     if (result.success) {
       setSubmitting(true);
       mutation.mutate(values);
@@ -204,8 +206,8 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     }
   };
 
-  const magicItems = character ? getMagicItems(character, { excludeDropped: true, lastGameId: params.gameId === "new" ? "" : params.gameId }) : [];
-  const storyAwards = character ? getStoryAwards(character, { excludeDropped: true, lastGameId: params.gameId === "new" ? "" : params.gameId }) : [];
+  const magicItems = character ? getMagicItems(character, { excludeDropped: true, lastLogId: params.logId === "new" ? "" : params.logId }) : [];
+  const storyAwards = character ? getStoryAwards(character, { excludeDropped: true, lastLogId: params.logId === "new" ? "" : params.logId }) : [];
 
   const addMagicItem = () => setMagicItemsGained([...magicItemsGained, { id: "", name: "", description: "" }]);
   const removeMagicItem = (index: number) => setMagicItemsGained(magicItemsGained.filter((_, i) => i !== index));
@@ -221,11 +223,11 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     if (!character || !value) return setDMs([]);
 
     const dms: DungeonMaster[] = [];
-    character.games.forEach(game => {
-      if (!game.dm) return;
-      if (dms.find(dm => dm.id === game.dm?.id)) return;
-      const match = game.dm[prop]?.toString().includes(value.toString());
-      if (match) dms.push(game.dm);
+    character.logs.forEach(log => {
+      if (!log.dm) return;
+      if (dms.find(dm => dm.id === log.dm?.id)) return;
+      const match = log.dm[prop]?.toString().includes(value.toString());
+      if (match) dms.push(log.dm);
     });
 
     setDMs(dms);
@@ -273,7 +275,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 
       <form onSubmit={handleSubmit}>
         <input type="hidden" {...register("characterId", { value: params.characterId })} />
-        <input type="hidden" {...register("gameId", { value: params.gameId === "new" ? "" : params.gameId })} />
+        <input type="hidden" {...register("gameId", { value: params.logId === "new" ? "" : params.logId })} />
         <div className="grid grid-cols-12 gap-4">
           <div className="form-control col-span-12 sm:col-span-6">
             <label className="label">
@@ -667,57 +669,57 @@ export const getServerSideProps: GetServerSideProps = async context => {
 export const getMagicItems = (
   character: inferQueryOutput<"characters.getOne">,
   options?: {
-    lastGameId?: string;
+    lastLogId?: string;
     excludeDropped?: boolean;
   }
 ) => {
-  const { lastGameId = "", excludeDropped = false } = options || {};
+  const { lastLogId = "", excludeDropped = false } = options || {};
   const magicItems: MagicItem[] = [];
-  let lastGame = false;
-  character.games.forEach(game => {
-    if (lastGame) return;
-    if (game.id === lastGameId) {
-      lastGame = true;
+  let lastLog = false;
+  character.logs.forEach(log => {
+    if (lastLog) return;
+    if (log.id === lastLogId) {
+      lastLog = true;
       return;
     }
-    game.magic_items_gained.forEach(item => {
+    log.magic_items_gained.forEach(item => {
       magicItems.push(item);
     });
-    game.magic_items_lost.forEach(item => {
+    log.magic_items_lost.forEach(item => {
       magicItems.splice(
         magicItems.findIndex(i => i.id === item.id),
         1
       );
     });
   });
-  return magicItems.filter(item => !excludeDropped || !item.gameLostId);
+  return magicItems.filter(item => !excludeDropped || !item.logLostId);
 };
 
 export const getStoryAwards = (
   character: inferQueryOutput<"characters.getOne">,
   options?: {
-    lastGameId?: string;
+    lastLogId?: string;
     excludeDropped?: boolean;
   }
 ) => {
-  const { lastGameId = "", excludeDropped = false } = options || {};
+  const { lastLogId = "", excludeDropped = false } = options || {};
   const storyAwards: MagicItem[] = [];
-  let lastGame = false;
-  character.games.forEach(game => {
-    if (lastGame) return;
-    if (game.id === lastGameId) {
-      lastGame = true;
+  let lastLog = false;
+  character.logs.forEach(log => {
+    if (lastLog) return;
+    if (log.id === lastLogId) {
+      lastLog = true;
       return;
     }
-    game.story_awards_gained.forEach(item => {
+    log.story_awards_gained.forEach(item => {
       storyAwards.push(item);
     });
-    game.story_awards_lost.forEach(item => {
+    log.story_awards_lost.forEach(item => {
       storyAwards.splice(
         storyAwards.findIndex(i => i.id === item.id),
         1
       );
     });
   });
-  return storyAwards.filter(item => !excludeDropped || !item.gameLostId);
+  return storyAwards.filter(item => !excludeDropped || !item.logLostId);
 };

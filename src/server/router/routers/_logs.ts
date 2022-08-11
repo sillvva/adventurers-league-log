@@ -1,14 +1,14 @@
-import { gameSchema } from "$src/pages/characters/[characterId]/game/[gameId]";
+import { logSchema } from "$src/pages/characters/[characterId]/game/[logId]";
 import { parseError } from "$src/utils/misc";
-import { DungeonMaster, Game } from "@prisma/client";
+import { DungeonMaster, Log } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createProtectedRouter } from "../protected-router";
 
 // Example router with queries that can only be hit if the user requesting is signed in
-export const protectedGamesRouter = createProtectedRouter()
+export const protectedLogsRouter = createProtectedRouter()
   .mutation("save", {
-    input: gameSchema,
+    input: logSchema,
     async resolve({ input, ctx }) {
       let dm: DungeonMaster | null = null;
       if (input.dm.name.trim()) {
@@ -45,10 +45,11 @@ export const protectedGamesRouter = createProtectedRouter()
         if (!dm.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });
       }
 
-      const data: Omit<Game, "id" | "created_at"> = {
+      const data: Omit<Log, "id" | "created_at"> = {
         name: input.name,
         date: new Date(input.date),
         description: input.description,
+        type: input.type,
         dungeonMasterId: (dm || {}).id || null,
         characterId: input.characterId,
         acp: input.acp,
@@ -57,7 +58,7 @@ export const protectedGamesRouter = createProtectedRouter()
         level: input.level,
         gold: input.gold
       };
-      const game: Game = await ctx.prisma.game.upsert({
+      const log: Log = await ctx.prisma.log.upsert({
         where: {
           id: input.gameId
         },
@@ -65,13 +66,13 @@ export const protectedGamesRouter = createProtectedRouter()
         create: data
       });
 
-      if (!game.id) throw new TRPCError({ message: "Could not save game", code: "INTERNAL_SERVER_ERROR" });
+      if (!log.id) throw new TRPCError({ message: "Could not save game", code: "INTERNAL_SERVER_ERROR" });
 
       const itemsToUpdate = input.magic_items_gained.filter(item => item.id);
 
       await ctx.prisma.magicItem.deleteMany({
         where: {
-          gameGainedId: game.id,
+          logGainedId: log.id,
           id: {
             notIn: itemsToUpdate.map(item => item.id)
           }
@@ -84,7 +85,7 @@ export const protectedGamesRouter = createProtectedRouter()
           .map(item => ({
             name: item.name,
             description: item.description,
-            gameGainedId: game.id
+            logGainedId: log.id
           }))
       });
 
@@ -107,7 +108,7 @@ export const protectedGamesRouter = createProtectedRouter()
           }
         },
         data: {
-          gameLostId: game.id
+          logLostId: log.id
         }
       });
 
@@ -115,7 +116,7 @@ export const protectedGamesRouter = createProtectedRouter()
 
       await ctx.prisma.storyAward.deleteMany({
         where: {
-          gameGainedId: game.id,
+          logGainedId: log.id,
           id: {
             notIn: storyAwardsToUpdate.map(item => item.id)
           }
@@ -128,7 +129,7 @@ export const protectedGamesRouter = createProtectedRouter()
           .map(item => ({
             name: item.name,
             description: item.description,
-            gameGainedId: game.id
+            gameGainedId: log.id
           }))
       });
 
@@ -151,51 +152,51 @@ export const protectedGamesRouter = createProtectedRouter()
           }
         },
         data: {
-          gameLostId: game.id
+          logLostId: log.id
         }
       });
 
-      return ctx.prisma.game.findFirst({
+      return ctx.prisma.log.findFirst({
         where: {
-          id: game.id
+          id: log.id
         }
       });
     }
   })
   .mutation("delete", {
     input: z.object({
-      gameId: z.string()
+      logId: z.string()
     }),
     async resolve({ input, ctx }) {
       await ctx.prisma.magicItem.updateMany({
         where: {
-          gameLostId: input.gameId
+          logLostId: input.logId
         },
         data: {
-          gameLostId: null
+          logLostId: null
         }
       });
       await ctx.prisma.magicItem.deleteMany({
         where: {
-          gameGainedId: input.gameId
+          logGainedId: input.logId
         }
       });
       await ctx.prisma.storyAward.updateMany({
         where: {
-          gameLostId: input.gameId
+          logLostId: input.logId
         },
         data: {
-          gameLostId: null
+          logLostId: null
         }
       });
       await ctx.prisma.storyAward.deleteMany({
         where: {
-          gameGainedId: input.gameId
+          logGainedId: input.logId
         }
       });
-      return ctx.prisma.game.delete({
+      return ctx.prisma.log.delete({
         where: {
-          id: input.gameId
+          id: input.logId
         }
       });
     }

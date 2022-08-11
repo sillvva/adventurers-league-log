@@ -4,13 +4,13 @@ import superjson from "superjson";
 
 import { charactersRouter as charactersRouter } from "./routers/characters";
 import { protectedCharactersRouter } from "./routers/_characters";
-import { protectedGamesRouter } from "./routers/_games";
+import { protectedLogsRouter } from "./routers/_logs";
 
 export const appRouter = createRouter()
   .transformer(superjson)
   .merge("characters.", charactersRouter)
   .merge("_characters.", protectedCharactersRouter)
-  .merge("_games.", protectedGamesRouter);
+  .merge("_logs.", protectedLogsRouter);
 
 // export type definition of API
 export type AppRouter = typeof appRouter;

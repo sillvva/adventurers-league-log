@@ -30,7 +30,7 @@ const Characters: NextPageWithLayout = () => {
   });
 
   const utils = trpc.useContext();
-  const deleteGameMutation = trpc.useMutation(["_games.delete"], {
+  const deleteGameMutation = trpc.useMutation(["_logs.delete"], {
     onSuccess() {
       utils.invalidateQueries(["characters.getOne", { characterId: params.characterId }]);
     }
@@ -184,57 +184,57 @@ const Characters: NextPageWithLayout = () => {
               </tr>
             </thead>
             <tbody>
-              {character.games.map(game => {
-                const level_gained = character.game_levels.find(gl => gl.id === game.id);
+              {character.logs.map(log => {
+                const level_gained = character.log_levels.find(gl => gl.id === log.id);
                 if (level_gained) level.current += level_gained.levels;
 
                 return (
-                  <Fragment key={game.id}>
+                  <Fragment key={log.id}>
                     <tr>
                       <th className="align-top">
-                        <p className="text-primary-content font-semibold">{game.name}</p>
-                        {game.dm && (
+                        <p className="text-primary-content font-semibold">{log.name}</p>
+                        {log.dm && (
                           <p className="text-sm text-neutral-content font-normal">
-                            <span className="font-semibold">DM:</span> {game.dm.name}
+                            <span className="font-semibold">DM:</span> {log.dm.name}
                           </p>
                         )}
                         <div className="table-cell sm:hidden print:hidden font-normal">
-                          {game.experience > 0 && (
+                          {log.experience > 0 && (
                             <p>
-                              <span className="font-semibold">Experience:</span> {game.experience}
+                              <span className="font-semibold">Experience:</span> {log.experience}
                             </p>
                           )}
-                          {game.acp > 0 && (
+                          {log.acp > 0 && (
                             <p>
-                              <span className="font-semibold">ACP:</span> {game.acp}
+                              <span className="font-semibold">ACP:</span> {log.acp}
                             </p>
                           )}
                           <p>
                             <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                           </p>
-                          {game.tcp > 0 && (
+                          {log.tcp > 0 && (
                             <p>
-                              <span className="font-semibold">TCP:</span> {game.tcp}
+                              <span className="font-semibold">TCP:</span> {log.tcp}
                             </p>
                           )}
                           <p>
-                            <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
+                            <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
                           </p>
                           <div>
                             <p className="font-semibold">Magic Items:</p>
-                            <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm">{log.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         </div>
                       </th>
                       <td className="align-top hidden sm:table-cell print:table-cell">
-                        {game.experience > 0 && (
+                        {log.experience > 0 && (
                           <p>
-                            <span className="font-semibold">Experience:</span> {game.experience}
+                            <span className="font-semibold">Experience:</span> {log.experience}
                           </p>
                         )}
-                        {game.acp > 0 && (
+                        {log.acp > 0 && (
                           <p>
-                            <span className="font-semibold">ACP:</span> {game.acp}
+                            <span className="font-semibold">ACP:</span> {log.acp}
                           </p>
                         )}
                         <p>
@@ -242,33 +242,33 @@ const Characters: NextPageWithLayout = () => {
                         </p>
                       </td>
                       <td className="align-top hidden sm:table-cell print:table-cell">
-                        {game.tcp > 0 && (
+                        {log.tcp > 0 && (
                           <p>
-                            <span className="font-semibold">TCP:</span> {game.tcp}
+                            <span className="font-semibold">TCP:</span> {log.tcp}
                           </p>
                         )}
                         <p>
-                          <span className="font-semibold">Gold:</span> {game.gold.toLocaleString("en-US")}
+                          <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
                         </p>
-                        {(game.magic_items_gained.length > 0 || game.magic_items_lost.length > 0) && (
+                        {(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
                           <div>
                             <p className="font-semibold">Magic Items:</p>
-                            <p className="text-sm">{game.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
-                            <p className="text-sm line-through">{game.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm">{log.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
                       </td>
                       <td className="align-top hidden sm:table-cell print:!hidden">
-                        {(game.story_awards_gained.length > 0 || game.story_awards_lost.length > 0) && (
+                        {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
-                            <p className="text-sm">{game.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
-                            <p className="text-sm line-through">{game.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm">{log.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
                       </td>
                       <td className="w-8 print:hidden">
                         <div className="flex flex-col justify-center gap-2">
-                          <Link href={`/characters/${params.characterId}/game/${game.id}`}>
+                          <Link href={`/characters/${params.characterId}/game/${log.id}`}>
                             <a className="btn btn-sm btn-primary">
                               <Icon path={mdiPencil} size={0.8} />
                             </a>
@@ -276,8 +276,8 @@ const Characters: NextPageWithLayout = () => {
                           <button
                             className="btn btn-sm"
                             onClick={async () => {
-                              if (!confirm(`Are you sure you want to delete ${game.name}? This action cannot be reversed.`)) return false;
-                              deleteGameMutation.mutate({ gameId: game.id });
+                              if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
+                              deleteGameMutation.mutate({ logId: log.id });
                             }}>
                             <Icon path={mdiTrashCan} size={0.8} />
                           </button>
@@ -287,16 +287,16 @@ const Characters: NextPageWithLayout = () => {
                     <tr className="hidden print:table-row">
                       <td colSpan={3}>
                         <p className="text-sm">
-                          <span className="font-semibold">Notes:</span> {game.description}
+                          <span className="font-semibold">Notes:</span> {log.description}
                         </p>
-                        {(game.story_awards_gained.length > 0 || game.story_awards_lost.length > 0) && (
+                        {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
-                            {game.story_awards_gained.map(mi => (
+                            {log.story_awards_gained.map(mi => (
                               <p key={mi.id} className="text-sm">
                                 <span className="font-semibold">{mi.name}:</span> {mi.description}
                               </p>
                             ))}
-                            <p className="text-sm line-through">{game.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
                       </td>

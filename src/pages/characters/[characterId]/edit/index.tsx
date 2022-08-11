@@ -49,7 +49,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     })
   );
 
-  const { data: character } = trpc.useQuery(["characters.getOne", { id: params.characterId }], {
+  const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
     ssr: true,
     refetchOnWindowFocus: false
   });
@@ -57,7 +57,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const utils = trpc.useContext();
   const mutation = trpc.useMutation(["_characters.edit"], {
     onSuccess() {
-      utils.invalidateQueries(["characters.getOne", { id: params.characterId }]);
+      utils.invalidateQueries(["characters.getOne", { characterId: params.characterId }]);
       router.push(`/characters/${params.characterId}`);
     }
   });

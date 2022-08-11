@@ -7,7 +7,6 @@ import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { mdiHome } from "@mdi/js";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import Layout from "$src/layouts/main";
 import Icon from "@mdi/react";
 
@@ -16,7 +15,7 @@ interface PageProps {
 }
 
 const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
-  const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id }], {
+  const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id || "" }], {
     enabled: !!session.user,
     refetchOnWindowFocus: false
   });
