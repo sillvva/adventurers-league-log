@@ -81,7 +81,7 @@ export const logSchema = z.object({
   story_awards_lost: z.array(z.string().min(1)).default([])
 });
 
-const EditCharacter: NextPageWithLayout<PageProps> = ({ ssrCharacter }) => {
+const EditCharacter: NextPageWithLayout<PageProps> = ({ character }) => {
   const router = useRouter();
   const { data: params } = useQueryString(
     z.object({
@@ -99,8 +99,6 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ ssrCharacter }) => {
     setValue,
     setError
   } = useForm<z.infer<typeof logSchema>>();
-
-  const character = ssrCharacter;
 
   const selectedGame = useMemo(
     () =>
@@ -707,7 +705,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
     }),
     props: {
       session,
-      ssrCharacter: {
+      character: {
         ...character,
         logs: character.logs.map(log => ({
           ...log,
@@ -722,7 +720,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 };
 
 export const getMagicItems = (
-  character: PageProps["ssrCharacter"],
+  character: PageProps["character"],
   options?: {
     lastLogId?: string;
     excludeDropped?: boolean;
@@ -751,7 +749,7 @@ export const getMagicItems = (
 };
 
 export const getStoryAwards = (
-  character: PageProps["ssrCharacter"],
+  character: PageProps["character"],
   options?: {
     lastLogId?: string;
     excludeDropped?: boolean;

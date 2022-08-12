@@ -219,7 +219,11 @@ const Characters: NextPageWithLayout = () => {
                 return (
                   <Fragment key={log.id}>
                     <tr>
-                      <th className="align-top !static">
+                      <th
+                        className={concatenate(
+                          "align-top !static",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        )}>
                         <p className={concatenate("text-primary-content font-semibold", tooltipClasses(log.description, "left"))} data-tip={log.description}>
                           {log.name}
                         </p>
@@ -282,7 +286,11 @@ const Characters: NextPageWithLayout = () => {
                           </div>
                         </div>
                       </th>
-                      <td className="align-top hidden sm:table-cell print:table-cell">
+                      <td
+                        className={concatenate(
+                          "align-top hidden sm:table-cell print:table-cell",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        )}>
                         {log.type === "game" && (
                           <>
                             {log.experience > 0 && (
@@ -306,7 +314,11 @@ const Characters: NextPageWithLayout = () => {
                           </>
                         )}
                       </td>
-                      <td className="align-top hidden sm:table-cell print:table-cell">
+                      <td
+                        className={concatenate(
+                          "align-top hidden sm:table-cell print:table-cell",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        )}>
                         {log.tcp !== 0 && (
                           <p>
                             <span className="font-semibold">TCP:</span> {log.tcp}
@@ -336,7 +348,11 @@ const Characters: NextPageWithLayout = () => {
                           </div>
                         )}
                       </td>
-                      <td className="align-top hidden md:table-cell print:!hidden">
+                      <td
+                        className={concatenate(
+                          "align-top hidden md:table-cell print:!hidden",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        )}>
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
                             <p className="flex flex-wrap divide-x text-sm">
@@ -373,27 +389,29 @@ const Characters: NextPageWithLayout = () => {
                         </div>
                       </td>
                     </tr>
-                    <tr className="hidden print:table-row">
-                      <td colSpan={3}>
-                        <p className="text-sm">
-                          <span className="font-semibold">Notes:</span> {log.description}
-                        </p>
-                        {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
-                          <div>
-                            {log.story_awards_gained.map(mi => (
-                              <p key={mi.id} className="text-sm">
-                                <span className="font-semibold">
-                                  {mi.name}
-                                  {mi.description ? ":" : ""}
-                                </span>{" "}
-                                {mi.description}
-                              </p>
-                            ))}
-                            <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
+                    {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
+                      <tr className="hidden print:table-row">
+                        <td colSpan={3} className="pt-0">
+                          <p className="text-sm">
+                            <span className="font-semibold">Notes:</span> {log.description}
+                          </p>
+                          {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
+                            <div>
+                              {log.story_awards_gained.map(mi => (
+                                <p key={mi.id} className="text-sm">
+                                  <span className="font-semibold">
+                                    {mi.name}
+                                    {mi.description ? ":" : ""}
+                                  </span>{" "}
+                                  {mi.description}
+                                </p>
+                              ))}
+                              <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )}
                   </Fragment>
                 );
               })}
