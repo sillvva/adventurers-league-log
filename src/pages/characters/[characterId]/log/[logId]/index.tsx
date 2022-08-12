@@ -1,9 +1,9 @@
 import type { NextPageWithLayout } from "$src/pages/_app";
-import type { GetServerSideProps } from "next";
+import type { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import { useRouter } from "next/router";
-import { FormEventHandler, useMemo } from "react";
+import { FormEventHandler } from "react";
 import { useState } from "react";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
@@ -16,12 +16,13 @@ import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { z } from "zod";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { useQueryString } from "$src/utils/hooks";
-import type { DungeonMaster, LogType, MagicItem } from "@prisma/client";
+import type { DungeonMaster, Log, LogType, MagicItem, StoryAward } from "@prisma/client";
+import { prisma } from "$src/server/db/client";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { getOne } from "$src/server/router/routers/characters";
+import type { AsyncReturnType } from "$src/types/util";
 
-interface PageProps {
-  session: Session;
-}
+type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
 
 export const logSchema = z.object({
   characterId: z.string().default(""),
@@ -80,7 +81,7 @@ export const logSchema = z.object({
   story_awards_lost: z.array(z.string().min(1)).default([])
 });
 
-const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
+const EditCharacter: NextPageWithLayout<PageProps> = ({ ssrCharacter }) => {
   const router = useRouter();
   const { data: params } = useQueryString(
     z.object({
@@ -99,41 +100,43 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     setError
   } = useForm<z.infer<typeof logSchema>>();
 
-  const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
-    ssr: true,
-    refetchOnWindowFocus: false
-  });
+  const character = ssrCharacter;
 
-  const selectedGame = useMemo(
-    () =>
-      character?.logs?.find(g => g.id === params.logId) || {
-        characterId: params.characterId,
-        id: "",
-        name: "",
-        description: "",
-        date: new Date(),
-        type: "game" as LogType,
-        created_at: new Date(),
-        experience: 0,
-        acp: 0,
-        tcp: 0,
-        level: 0,
-        gold: 0,
-        dtd: 0,
-        dungeonMasterId: "",
-        dm: {
-          id: "",
-          name: "",
-          DCI: null
-        },
-        is_dm_log: false,
-        magic_items_gained: [],
-        magic_items_lost: [],
-        story_awards_gained: [],
-        story_awards_lost: []
-      },
-    [params, character]
-  );
+  const selectedGame = character.logs
+    .map(log => ({
+      ...log,
+      date: new Date(log.date),
+      applied_date: log.applied_date !== null ? new Date(log.applied_date) : null,
+      created_at: new Date(log.created_at)
+    }))
+    .find(g => g.id === params.logId) || {
+    characterId: params.characterId,
+    id: "",
+    name: "",
+    description: "",
+    date: new Date(),
+    type: "game" as LogType,
+    created_at: new Date(),
+    experience: 0,
+    acp: 0,
+    tcp: 0,
+    level: 0,
+    gold: 0,
+    dtd: 0,
+    dungeonMasterId: "",
+    dm: {
+      id: "",
+      name: "",
+      DCI: null,
+      uid: ""
+    },
+    applied_date: new Date(),
+    is_dm_log: false,
+    magic_items_gained: [],
+    magic_items_lost: [],
+    story_awards_gained: [],
+    story_awards_lost: []
+  };
 
   const [parent1] = useAutoAnimate<HTMLDivElement>();
   const [parent2] = useAutoAnimate<HTMLDivElement>();
@@ -288,16 +291,18 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
         <input type="hidden" {...register("characterId", { value: params.characterId })} />
         <input type="hidden" {...register("gameId", { value: params.logId === "new" ? "" : params.logId })} />
         <div className="grid grid-cols-12 gap-4">
-          <div className="form-control col-span-12 sm:col-span-4">
-            <label className="label">
-              <span className="label-text">Log Type</span>
-            </label>
-            <select value={type} onChange={e => setType(e.target.value as LogType)} className="select select-bordered w-full">
-              <option value={"game"}>Game</option>
-              <option value={"nongame"}>Non-Game (Purchase, Trade, etc)</option>
-            </select>
-          </div>
-          <div className="form-control col-span-12 sm:col-span-4">
+          {!selectedGame.is_dm_log && (
+            <div className="form-control col-span-12 sm:col-span-4">
+              <label className="label">
+                <span className="label-text">Log Type</span>
+              </label>
+              <select value={type} onChange={e => setType(e.target.value as LogType)} className="select select-bordered w-full">
+                <option value={"game"}>Game</option>
+                <option value={"nongame"}>Non-Game (Purchase, Trade, etc)</option>
+              </select>
+            </div>
+          )}
+          <div className={concatenate("form-control col-span-12", selectedGame.is_dm_log ? "sm:col-span-6" : "sm:col-span-4")}>
             <label className="label">
               <span className="label-text">
                 Title
@@ -313,7 +318,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <span className="label-text-alt text-error">{errors.name?.message}</span>
             </label>
           </div>
-          <div className="form-control col-span-12 sm:col-span-4">
+          <div className={concatenate("form-control col-span-12", selectedGame.is_dm_log ? "sm:col-span-6" : "sm:col-span-4")}>
             <label className="label">
               <span className="label-text">
                 Date
@@ -333,67 +338,71 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
             {type === "game" && (
               <>
                 <input type="hidden" {...register("dm.id", { value: selectedGame.dm?.id || "" })} />
-                <div className="form-control col-span-12 sm:col-span-6">
-                  <label className="label">
-                    <span className="label-text">
-                      DM Name
-                      <span className="text-error">*</span>
-                    </span>
-                  </label>
-                  <div className="dropdown">
-                    <label>
-                      <input
-                        type="text"
-                        {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => getDMs("name", e.target.value) })}
-                        className="input input-bordered focus:border-primary w-full"
-                      />
-                    </label>
-                    {dms.length > 0 && (
-                      <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                        {dms.map(dm => (
-                          <li key={dm.id}>
-                            <a onMouseDown={() => setDM(dm)}>
-                              {dm.name}
-                              {dm.DCI && ` (${dm.DCI})`}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  <label className="label">
-                    <span className="label-text-alt text-error">{errors.dm?.name?.message}</span>
-                  </label>
-                </div>
-                <div className="form-control col-span-12 sm:col-span-6">
-                  <label className="label">
-                    <span className="label-text">DM DCI</span>
-                  </label>
-                  <div className="dropdown">
-                    <label>
-                      <input
-                        type="number"
-                        {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => getDMs("DCI", e.target.value) })}
-                        className="input input-bordered focus:border-primary w-full"
-                      />
-                    </label>
-                    {dms.length > 0 && (
-                      <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                        {dms.map(dm => (
-                          <li key={dm.id}>
-                            <a onMouseDown={() => setDM(dm)}>
-                              {dm.name}
-                              {dm.DCI && ` (${dm.DCI})`}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  <label className="label">
-                    <span className="label-text-alt text-error">{errors.dm?.DCI?.message}</span>
-                  </label>
-                </div>
+                {!selectedGame.is_dm_log && (
+                  <>
+                    <div className="form-control col-span-12 sm:col-span-6">
+                      <label className="label">
+                        <span className="label-text">
+                          DM Name
+                          <span className="text-error">*</span>
+                        </span>
+                      </label>
+                      <div className="dropdown">
+                        <label>
+                          <input
+                            type="text"
+                            {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => getDMs("name", e.target.value) })}
+                            className="input input-bordered focus:border-primary w-full"
+                          />
+                        </label>
+                        {dms.length > 0 && (
+                          <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
+                            {dms.map(dm => (
+                              <li key={dm.id}>
+                                <a onMouseDown={() => setDM(dm)}>
+                                  {dm.name}
+                                  {dm.DCI && ` (${dm.DCI})`}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      <label className="label">
+                        <span className="label-text-alt text-error">{errors.dm?.name?.message}</span>
+                      </label>
+                    </div>
+                    <div className="form-control col-span-12 sm:col-span-6">
+                      <label className="label">
+                        <span className="label-text">DM DCI</span>
+                      </label>
+                      <div className="dropdown">
+                        <label>
+                          <input
+                            type="number"
+                            {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => getDMs("DCI", e.target.value) })}
+                            className="input input-bordered focus:border-primary w-full"
+                          />
+                        </label>
+                        {dms.length > 0 && (
+                          <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
+                            {dms.map(dm => (
+                              <li key={dm.id}>
+                                <a onMouseDown={() => setDM(dm)}>
+                                  {dm.name}
+                                  {dm.DCI && ` (${dm.DCI})`}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      <label className="label">
+                        <span className="label-text-alt text-error">{errors.dm?.DCI?.message}</span>
+                      </label>
+                    </div>
+                  </>
+                )}
                 <div className="form-control col-span-12 sm:col-span-4">
                   <label className="label">
                     <span className="label-text">Season</span>
@@ -475,7 +484,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text whitespace-nowrap overflow-hidden text-ellipsis">Downtime Days</span>
               </label>
-              <input type="number" {...register("dtd", { value: selectedGame.dtd })} className="input input-bordered focus:border-primary w-full" />
+              <input type="number" value={selectedGame.dtd} {...register("dtd")} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.dtd?.message}</span>
               </label>
@@ -497,7 +506,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
             <button type="button" className="btn btn-primary btn-sm flex-1 sm:flex-none min-w-fit" onClick={addMagicItem}>
               Add Magic Item
             </button>
-            {magicItems.filter(item => !magicItemsLost.includes(item.id)).length > 0 && (
+            {!selectedGame.is_dm_log && magicItems.filter(item => !magicItemsLost.includes(item.id)).length > 0 && (
               <button type="button" className="btn btn-sm flex-1 sm:flex-none min-w-fit" onClick={addLostMagicItem}>
                 Drop Magic Item
               </button>
@@ -507,7 +516,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                 <button type="button" className="btn btn-primary btn-sm flex-1 sm:flex-none min-w-fit" onClick={addStoryAward}>
                   Add Story Award
                 </button>
-                {storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
+                {!selectedGame.is_dm_log && storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
                   <button type="button" className="btn btn-sm flex-1 sm:flex-none min-w-fit" onClick={addLostStoryAward}>
                     Drop Story Award
                   </button>
@@ -680,27 +689,36 @@ EditCharacter.getLayout = page => {
 
 export default EditCharacter;
 
-export const getServerSideProps: GetServerSideProps = async context => {
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const session = await unstable_getServerSession(context.req, context.res, authOptions);
+  const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
+  const character = await getOne(prisma, characterId);
 
-  if (!session) {
-    return {
+  return {
+    ...(!session && {
       redirect: {
         destination: "/",
         permanent: false
       }
-    };
-  }
-
-  return {
+    }),
     props: {
-      session
+      session,
+      ssrCharacter: {
+        ...character,
+        logs: character.logs.map(log => ({
+          ...log,
+          date: log.date.toISOString(),
+          created_at: log.created_at.toISOString(),
+          applied_date: log.applied_date === null ? null : log.applied_date.toISOString()
+        })),
+        created_at: character.created_at.toISOString()
+      }
     }
   };
 };
 
 export const getMagicItems = (
-  character: inferQueryOutput<"characters.getOne">,
+  character: PageProps["ssrCharacter"],
   options?: {
     lastLogId?: string;
     excludeDropped?: boolean;
@@ -729,7 +747,7 @@ export const getMagicItems = (
 };
 
 export const getStoryAwards = (
-  character: inferQueryOutput<"characters.getOne">,
+  character: PageProps["ssrCharacter"],
   options?: {
     lastLogId?: string;
     excludeDropped?: boolean;
