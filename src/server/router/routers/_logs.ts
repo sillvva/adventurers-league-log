@@ -51,11 +51,12 @@ export const protectedLogsRouter = createProtectedRouter()
         if (!dm.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });
       }
 
-      const existing = await ctx.prisma.log.findFirst({
-        where: {
-          id: input.gameId
-        }
-      });
+      let applied_date: Date | null = input.is_dm_log
+        ? input.characterId && input.applied_date !== null
+          ? new Date(input.applied_date)
+          : null
+        : new Date(input.date);
+      if (input.characterId && applied_date === null) throw new TRPCError({ message: "Applied date is required", code: "INTERNAL_SERVER_ERROR" });
 
       const data: Omit<Log, "id" | "created_at"> = {
         name: input.name,
@@ -64,13 +65,14 @@ export const protectedLogsRouter = createProtectedRouter()
         type: input.type,
         dungeonMasterId: (dm || {}).id || null,
         is_dm_log: input.is_dm_log,
-        applied_date: input.characterId ? (existing?.characterId === input.characterId ? existing.applied_date : new Date()) : null,
+        applied_date: applied_date,
         characterId: input.characterId,
         acp: input.acp,
         tcp: input.tcp,
         experience: input.experience,
         level: input.level,
-        gold: input.gold
+        gold: input.gold,
+        dtd: input.dtd,
       };
       const log: Log = await ctx.prisma.log.upsert({
         where: {

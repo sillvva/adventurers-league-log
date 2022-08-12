@@ -83,6 +83,7 @@ model Log {
     tcp                 Int
     level               Int
     gold                Float
+    dtd                 Int            @default(0)
     magic_items_gained  MagicItem[]    @relation("magic_items_gained")
     magic_items_lost    MagicItem[]    @relation("magic_items_lost")
     story_awards_gained StoryAward[]   @relation("story_awards_gained")

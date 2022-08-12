@@ -39,6 +39,7 @@ export const logSchema = z.object({
   tcp: z.number().default(0),
   level: z.number().default(0),
   gold: z.number().default(0),
+  dtd: z.number().default(0),
   description: z.string().default(""),
   dm: z.object({
     id: z.string().default(""),
@@ -46,6 +47,17 @@ export const logSchema = z.object({
     DCI: z.number().nullable().default(null)
   }),
   is_dm_log: z.boolean().default(false),
+  applied_date: z
+    .union([
+      z.null(),
+      z
+        .string()
+        .regex(
+          /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/,
+          "Not a valid date"
+        )
+    ])
+    .default(null),
   magic_items_gained: z
     .array(
       z.object({
@@ -107,6 +119,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
         tcp: 0,
         level: 0,
         gold: 0,
+        dtd: 0,
         dungeonMasterId: "",
         dm: {
           id: "",
@@ -163,11 +176,12 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
       if (values.type === "game" && !values.dm.name) errors.push(setError("dm.name", { message: "Required" }));
 
       values.dm.DCI = values.dm.DCI ? parseInt(values.dm.DCI.toString()) : null;
+      if (values.experience) values.experience = parseInt(values.experience.toString());
       if (values.acp) values.acp = parseInt(values.acp.toString());
       if (values.tcp) values.tcp = parseInt(values.tcp.toString());
       if (values.level) values.level = parseInt(values.level.toString());
       if (values.gold) values.gold = parseInt(values.gold.toString());
-      if (values.experience) values.experience = parseInt(values.experience.toString());
+      if (values.dtd) values.dtd = parseInt(values.dtd.toString());
 
       values.magic_items_gained = magicItemsGained;
       values.magic_items_lost = magicItemsLost;
@@ -437,7 +451,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                     </label>
                   </div>
                 )}
-                <div className={concatenate("form-control w-full", type === "nongame" ? "col-span-6" : "col-span-6 sm:col-span-2")}>
+                <div className={concatenate("form-control w-full", type === "nongame" ? "col-span-4" : "col-span-6 sm:col-span-2")}>
                   <label className="label">
                     <span className="label-text">TCP</span>
                   </label>
@@ -448,13 +462,22 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                 </div>
               </>
             )}
-            <div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-4" : "col-span-6")}>
+            <div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-2" : "col-span-4")}>
               <label className="label">
                 <span className="label-text">Gold</span>
               </label>
               <input type="number" {...register("gold", { value: selectedGame.gold })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.gold?.message}</span>
+              </label>
+            </div>
+            <div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-2" : "col-span-4")}>
+              <label className="label">
+                <span className="label-text whitespace-nowrap overflow-hidden text-ellipsis">Downtime Days</span>
+              </label>
+              <input type="number" {...register("dtd", { value: selectedGame.dtd })} className="input input-bordered focus:border-primary w-full" />
+              <label className="label">
+                <span className="label-text-alt text-error">{errors.dtd?.message}</span>
               </label>
             </div>
           </div>
@@ -470,22 +493,22 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <span className="label-text-alt text-error">{errors.description?.message}</span>
             </label>
           </div>
-          <div className="col-span-12 flex gap-4">
-            <button type="button" className="btn btn-primary btn-sm" onClick={addMagicItem}>
+          <div className="col-span-12 flex gap-4 flex-wrap">
+            <button type="button" className="btn btn-primary btn-sm flex-1 sm:flex-none min-w-fit" onClick={addMagicItem}>
               Add Magic Item
             </button>
             {magicItems.filter(item => !magicItemsLost.includes(item.id)).length > 0 && (
-              <button type="button" className="btn btn-sm" onClick={addLostMagicItem}>
+              <button type="button" className="btn btn-sm flex-1 sm:flex-none min-w-fit" onClick={addLostMagicItem}>
                 Drop Magic Item
               </button>
             )}
             {type === "game" && (
               <>
-                <button type="button" className="btn btn-primary btn-sm" onClick={addStoryAward}>
+                <button type="button" className="btn btn-primary btn-sm flex-1 sm:flex-none min-w-fit" onClick={addStoryAward}>
                   Add Story Award
                 </button>
                 {storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
-                  <button type="button" className="btn btn-sm" onClick={addLostStoryAward}>
+                  <button type="button" className="btn btn-sm flex-1 sm:flex-none min-w-fit" onClick={addLostStoryAward}>
                     Drop Story Award
                   </button>
                 )}

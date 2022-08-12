@@ -77,6 +77,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
 
   const total_level = levels.total;
   const total_gold = character.logs.reduce((acc, log) => acc + log.gold, 0);
+  const total_dtd = character.logs.reduce((acc, log) => acc + log.dtd, 0);
   const magic_items: MagicItem[] = character.logs.reduce((acc, log) => {
     acc.push(...log.magic_items_gained);
     log.magic_items_lost.forEach(magicItem => {
@@ -96,6 +97,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
     ...character,
     total_level,
     total_gold,
+    total_dtd,
     magic_items,
     story_awards,
     log_levels: levels.log_levels,
@@ -127,6 +129,7 @@ export async function getAll(prisma: PrismaClient, userId: string) {
     const levels = getLevels(character.logs);
     const total_level = levels.total;
     const total_gold = character.logs.reduce((acc, log) => acc + log.gold, 0);
+    const total_dtd = character.logs.reduce((acc, log) => acc + log.dtd, 0);
     const magic_items = character.logs.reduce((acc, log) => {
       acc.push(...log.magic_items_gained);
       log.magic_items_lost.forEach(magicItem => {
@@ -147,6 +150,7 @@ export async function getAll(prisma: PrismaClient, userId: string) {
       ...character,
       total_level,
       total_gold,
+      total_dtd,
       magic_items,
       story_awards,
       log_levels: levels.log_levels,

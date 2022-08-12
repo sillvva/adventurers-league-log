@@ -141,6 +141,10 @@ const Characters: NextPageWithLayout = () => {
                 <h4 className="font-semibold text-secondary-content">Gold</h4>
                 <div className="flex-1 text-right">{character.total_gold.toLocaleString("en-US")}</div>
               </div>
+              <div className="flex">
+                <h4 className="font-semibold text-secondary-content">Downtime Days</h4>
+                <div className="flex-1 text-right">{character.total_dtd}</div>
+              </div>
             </div>
             <div className="divider sm:divider-horizontal before:bg-neutral-content/50 after:bg-neutral-content/50"></div>
             <div className="flex-1 basis-full sm:basis-2/3 lg:basis-2/3 print:basis-2/3 flex flex-col">
@@ -241,14 +245,21 @@ const Characters: NextPageWithLayout = () => {
                               </p>
                             </>
                           )}
+                          {log.dtd > 0 && (
+                            <p>
+                              <span className="font-semibold">Downtime Days:</span> {log.dtd}
+                            </p>
+                          )}
                           {log.tcp > 0 && (
                             <p>
                               <span className="font-semibold">TCP:</span> {log.tcp}
                             </p>
                           )}
-                          <p>
-                            <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
-                          </p>
+                          {log.gold > 0 && (
+                            <p>
+                              <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
+                            </p>
+                          )}
                           <div>
                             <p className="font-semibold">Magic Items:</p>
                             <p className="flex flex-wrap divide-x text-sm">
@@ -283,6 +294,11 @@ const Characters: NextPageWithLayout = () => {
                             <p>
                               <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                             </p>
+                            {log.dtd > 0 && (
+                              <p>
+                                <span className="font-semibold text-sm">Downtime Days:</span> {log.dtd}
+                              </p>
+                            )}
                           </>
                         )}
                       </td>
@@ -292,9 +308,11 @@ const Characters: NextPageWithLayout = () => {
                             <span className="font-semibold">TCP:</span> {log.tcp}
                           </p>
                         )}
-                        <p>
-                          <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
-                        </p>
+                        {log.gold > 0 && (
+                          <p>
+                            <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
+                          </p>
+                        )}
                         {(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
                           <div>
                             <p className="font-semibold">Magic Items:</p>
