@@ -253,7 +253,11 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <a className="text-neutral-content">{character?.name}</a>
             </Link>
           </li>
-          {selectedGame.name ? <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{selectedGame.name}</li> : <li className="text-secondary drop-shadow-md">New Log</li>}
+          {selectedGame.name ? (
+            <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{selectedGame.name}</li>
+          ) : (
+            <li className="text-secondary drop-shadow-md">New Log</li>
+          )}
         </ul>
       </div>
 
@@ -558,6 +562,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                       <Icon path={mdiTrashCan} size={1} />
                     </button>
                   </div>
+                  <div className="text-sm">{magicItems.find(item => magicItemsLost[index] === item.id)?.description}</div>
                 </div>
               </div>
             ))}
@@ -630,6 +635,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                       <Icon path={mdiTrashCan} size={1} />
                     </button>
                   </div>
+                  <div className="text-sm">{storyAwards.find(item => storyAwardsLost[index] === item.id)?.description}</div>
                 </div>
               </div>
             ))}

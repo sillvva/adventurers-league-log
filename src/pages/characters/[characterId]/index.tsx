@@ -142,17 +142,33 @@ const Characters: NextPageWithLayout = () => {
                 <div className="flex-1 text-right">{character.total_gold.toLocaleString("en-US")}</div>
               </div>
             </div>
-            <div className="divider sm:divider-horizontal before:bg-neutral-content/50 after:bg-neutral-content/50"></div> 
+            <div className="divider sm:divider-horizontal before:bg-neutral-content/50 after:bg-neutral-content/50"></div>
             <div className="flex-1 basis-full sm:basis-2/3 lg:basis-2/3 print:basis-2/3 flex flex-col">
               <div className="flex flex-col gap-4" ref={parent1}>
-                  <div className="flex-1 flex flex-col">
-                    <h4 className="font-semibold text-secondary-content">Story Awards</h4>
-                    <p>{character.story_awards.length ? character.story_awards.map(mi => mi.name).join(" | ") : "None"}</p>
-                  </div>
-                  <div className="flex-1 flex flex-col">
-                    <h4 className="font-semibold text-secondary-content">Magic Items</h4>
-                    <p>{character.magic_items.length ? character.magic_items.map(mi => mi.name).join(" | ") : "None"}</p>
-                  </div>
+                <div className="flex-1 flex flex-col">
+                  <h4 className="font-semibold text-secondary-content mb-2">Story Awards</h4>
+                  <p className="flex flex-wrap divide-x text-sm">
+                    {character.story_awards.length
+                      ? character.story_awards.map(mi => (
+                          <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                            {mi.name}
+                          </span>
+                        ))
+                      : "None"}
+                  </p>
+                </div>
+                <div className="flex-1 flex flex-col">
+                  <h4 className="font-semibold text-secondary-content mb-2">Magic Items</h4>
+                  <p className="flex flex-wrap divide-x text-sm">
+                    {character.magic_items.length
+                      ? character.magic_items.map(mi => (
+                          <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                            {mi.name}
+                          </span>
+                        ))
+                      : "None"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -229,7 +245,15 @@ const Characters: NextPageWithLayout = () => {
                           </p>
                           <div>
                             <p className="font-semibold">Magic Items:</p>
-                            <p className="text-sm">{log.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="flex flex-wrap divide-x text-sm">
+                              {log.magic_items_gained.length
+                                ? log.magic_items_gained.map(mi => (
+                                    <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                                      {mi.name}
+                                    </span>
+                                  ))
+                                : "None"}
+                            </p>
                             <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         </div>
@@ -265,7 +289,15 @@ const Characters: NextPageWithLayout = () => {
                         {(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
                           <div>
                             <p className="font-semibold">Magic Items:</p>
-                            <p className="text-sm">{log.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="flex flex-wrap divide-x text-sm">
+                              {log.magic_items_gained.length
+                                ? log.magic_items_gained.map(mi => (
+                                    <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                                      {mi.name}
+                                    </span>
+                                  ))
+                                : "None"}
+                            </p>
                             <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
@@ -273,7 +305,15 @@ const Characters: NextPageWithLayout = () => {
                       <td className="align-top hidden sm:table-cell print:!hidden">
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
-                            <p className="text-sm">{log.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="flex flex-wrap divide-x text-sm">
+                              {log.story_awards_gained.length
+                                ? log.story_awards_gained.map(mi => (
+                                    <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                                      {mi.name}
+                                    </span>
+                                  ))
+                                : "None"}
+                            </p>
                             <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
@@ -305,7 +345,11 @@ const Characters: NextPageWithLayout = () => {
                           <div>
                             {log.story_awards_gained.map(mi => (
                               <p key={mi.id} className="text-sm">
-                                <span className="font-semibold">{mi.name}:</span> {mi.description}
+                                <span className="font-semibold">
+                                  {mi.name}
+                                  {mi.description ? ":" : ""}
+                                </span>{" "}
+                                {mi.description}
                               </p>
                             ))}
                             <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
