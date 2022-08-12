@@ -9,12 +9,14 @@ import Head from "next/head";
 import Link from "next/link";
 import Layout from "$src/layouts/main";
 import Icon from "@mdi/react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 interface PageProps {
   session: Session;
 }
 
 const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
+  const [parent] = useAutoAnimate<HTMLTableSectionElement>();
   const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id || "" }], {
     enabled: !!session.user,
     refetchOnWindowFocus: false
@@ -64,7 +66,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
               <th className="text-center">Level</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody ref={parent}>
             {isFetching ? (
               <tr>
                 <td colSpan={5} className="text-center py-20">

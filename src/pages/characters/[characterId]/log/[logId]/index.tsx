@@ -17,6 +17,7 @@ import { z } from "zod";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { useQueryString } from "$src/utils/hooks";
 import type { DungeonMaster, LogType, MagicItem } from "@prisma/client";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 interface PageProps {
   session: Session;
@@ -121,6 +122,8 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     [params, character]
   );
 
+  const [parent1] = useAutoAnimate<HTMLDivElement>();
+  const [parent2] = useAutoAnimate<HTMLDivElement>();
   const [season, setSeason] = useState<1 | 8 | 9>(selectedGame?.experience ? 1 : selectedGame?.acp ? 8 : 9);
   const [type, setType] = useState<LogType>(selectedGame.type || "game");
   const [dms, setDMs] = useState<DungeonMaster[]>([]);
@@ -142,13 +145,6 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
       setMutError(err.message);
     }
   });
-
-  if (!character)
-    return (
-      <Head>
-        <title>{selectedGame.name ? "Edit Log" : "New Log"}</title>
-      </Head>
-    );
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault();
@@ -254,7 +250,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
           </li>
           <li>
             <Link href={`/characters/${params.characterId}`}>
-              <a className="text-neutral-content">{character.name}</a>
+              <a className="text-neutral-content">{character?.name}</a>
             </Link>
           </li>
           {selectedGame.name ? <li className="text-secondary">{selectedGame.name}</li> : <li className="text-secondary">New Log</li>}
@@ -315,146 +311,148 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <span className="label-text-alt text-error">{errors.date?.message}</span>
             </label>
           </div>
-          {type === "game" && (
-            <>
-              <input type="hidden" {...register("dm.id", { value: selectedGame.dm?.id || "" })} />
-              <div className="form-control col-span-12 sm:col-span-6">
-                <label className="label">
-                  <span className="label-text">
-                    DM Name
-                    <span className="text-error">*</span>
-                  </span>
-                </label>
-                <div className="dropdown">
-                  <label>
-                    <input
-                      type="text"
-                      {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => getDMs("name", e.target.value) })}
-                      className="input input-bordered focus:border-primary w-full"
-                    />
+          <div className="col-span-12 grid grid-cols-12 gap-4" ref={parent1}>
+            {type === "game" && (
+              <>
+                <input type="hidden" {...register("dm.id", { value: selectedGame.dm?.id || "" })} />
+                <div className="form-control col-span-12 sm:col-span-6">
+                  <label className="label">
+                    <span className="label-text">
+                      DM Name
+                      <span className="text-error">*</span>
+                    </span>
                   </label>
-                  {dms.length > 0 && (
-                    <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                      {dms.map(dm => (
-                        <li key={dm.id}>
-                          <a onMouseDown={() => setDM(dm)}>
-                            {dm.name}
-                            {dm.DCI && ` (${dm.DCI})`}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <div className="dropdown">
+                    <label>
+                      <input
+                        type="text"
+                        {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => getDMs("name", e.target.value) })}
+                        className="input input-bordered focus:border-primary w-full"
+                      />
+                    </label>
+                    {dms.length > 0 && (
+                      <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
+                        {dms.map(dm => (
+                          <li key={dm.id}>
+                            <a onMouseDown={() => setDM(dm)}>
+                              {dm.name}
+                              {dm.DCI && ` (${dm.DCI})`}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <label className="label">
+                    <span className="label-text-alt text-error">{errors.dm?.name?.message}</span>
+                  </label>
                 </div>
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.dm?.name?.message}</span>
-                </label>
-              </div>
-              <div className="form-control col-span-12 sm:col-span-6">
-                <label className="label">
-                  <span className="label-text">DM DCI</span>
-                </label>
-                <div className="dropdown">
-                  <label>
+                <div className="form-control col-span-12 sm:col-span-6">
+                  <label className="label">
+                    <span className="label-text">DM DCI</span>
+                  </label>
+                  <div className="dropdown">
+                    <label>
+                      <input
+                        type="number"
+                        {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => getDMs("DCI", e.target.value) })}
+                        className="input input-bordered focus:border-primary w-full"
+                      />
+                    </label>
+                    {dms.length > 0 && (
+                      <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
+                        {dms.map(dm => (
+                          <li key={dm.id}>
+                            <a onMouseDown={() => setDM(dm)}>
+                              {dm.name}
+                              {dm.DCI && ` (${dm.DCI})`}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <label className="label">
+                    <span className="label-text-alt text-error">{errors.dm?.DCI?.message}</span>
+                  </label>
+                </div>
+                <div className="form-control col-span-12 sm:col-span-4">
+                  <label className="label">
+                    <span className="label-text">Season</span>
+                  </label>
+                  <select value={season} onChange={e => setSeason(parseInt(e.target.value) as 1 | 8 | 9)} className="select select-bordered w-full">
+                    <option value={9}>Season 9+</option>
+                    <option value={8}>Season 8</option>
+                    <option value={1}>Season 1-7</option>
+                  </select>
+                </div>
+                {season === 1 && (
+                  <div className="form-control w-full col-span-6 sm:col-span-4">
+                    <label className="label">
+                      <span className="label-text">Experience</span>
+                    </label>
                     <input
                       type="number"
-                      {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => getDMs("DCI", e.target.value) })}
+                      {...register("experience", { value: selectedGame.experience })}
                       className="input input-bordered focus:border-primary w-full"
                     />
-                  </label>
-                  {dms.length > 0 && (
-                    <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                      {dms.map(dm => (
-                        <li key={dm.id}>
-                          <a onMouseDown={() => setDM(dm)}>
-                            {dm.name}
-                            {dm.DCI && ` (${dm.DCI})`}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.dm?.DCI?.message}</span>
-                </label>
-              </div>
-              <div className="form-control col-span-12 sm:col-span-4">
-                <label className="label">
-                  <span className="label-text">Season</span>
-                </label>
-                <select value={season} onChange={e => setSeason(parseInt(e.target.value) as 1 | 8 | 9)} className="select select-bordered w-full">
-                  <option value={9}>Season 9+</option>
-                  <option value={8}>Season 8</option>
-                  <option value={1}>Season 1-7</option>
-                </select>
-              </div>
-              {season === 1 && (
-                <div className="form-control w-full col-span-6 sm:col-span-4">
+                    <label className="label">
+                      <span className="label-text-alt text-error">{errors.experience?.message}</span>
+                    </label>
+                  </div>
+                )}
+                {season === 9 && (
+                  <div className="form-control w-full col-span-12 sm:col-span-4">
+                    <label className="label">
+                      <span className="label-text">Level</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={character ? 20 - character.total_level : 19}
+                      {...register("level", { value: selectedGame.level, min: 0, max: character ? 20 - character.total_level : 19 })}
+                      className="input input-bordered focus:border-primary w-full"
+                    />
+                    <label className="label">
+                      <span className="label-text-alt text-error">{errors.level?.message}</span>
+                    </label>
+                  </div>
+                )}
+              </>
+            )}
+            {(season === 8 || type === "nongame") && (
+              <>
+                {type === "game" && (
+                  <div className="form-control w-full col-span-6 sm:col-span-2">
+                    <label className="label">
+                      <span className="label-text">ACP</span>
+                    </label>
+                    <input type="number" {...register("acp", { value: selectedGame.acp })} className="input input-bordered focus:border-primary w-full" />
+                    <label className="label">
+                      <span className="label-text-alt text-error">{errors.acp?.message}</span>
+                    </label>
+                  </div>
+                )}
+                <div className={concatenate("form-control w-full", type === "nongame" ? "col-span-6" : "col-span-6 sm:col-span-2")}>
                   <label className="label">
-                    <span className="label-text">Experience</span>
+                    <span className="label-text">TCP</span>
                   </label>
-                  <input
-                    type="number"
-                    {...register("experience", { value: selectedGame.experience })}
-                    className="input input-bordered focus:border-primary w-full"
-                  />
+                  <input type="number" {...register("tcp", { value: selectedGame.tcp })} className="input input-bordered focus:border-primary w-full" />
                   <label className="label">
-                    <span className="label-text-alt text-error">{errors.experience?.message}</span>
-                  </label>
-                </div>
-              )}
-              {season === 9 && (
-                <div className="form-control w-full col-span-12 sm:col-span-4">
-                  <label className="label">
-                    <span className="label-text">Level</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max={20 - character.total_level}
-                    {...register("level", { value: selectedGame.level, min: 0, max: 20 - character.total_level })}
-                    className="input input-bordered focus:border-primary w-full"
-                  />
-                  <label className="label">
-                    <span className="label-text-alt text-error">{errors.level?.message}</span>
+                    <span className="label-text-alt text-error">{errors.tcp?.message}</span>
                   </label>
                 </div>
-              )}
-            </>
-          )}
-          {(season === 8 || type === "nongame") && (
-            <>
-              {type === "game" && (
-                <div className="form-control w-full col-span-6 sm:col-span-2">
-                  <label className="label">
-                    <span className="label-text">ACP</span>
-                  </label>
-                  <input type="number" {...register("acp", { value: selectedGame.acp })} className="input input-bordered focus:border-primary w-full" />
-                  <label className="label">
-                    <span className="label-text-alt text-error">{errors.acp?.message}</span>
-                  </label>
-                </div>
-              )}
-              <div className={concatenate("form-control w-full", type === "nongame" ? "col-span-6" : "col-span-6 sm:col-span-2")}>
-                <label className="label">
-                  <span className="label-text">TCP</span>
-                </label>
-                <input type="number" {...register("tcp", { value: selectedGame.tcp })} className="input input-bordered focus:border-primary w-full" />
-                <label className="label">
-                  <span className="label-text-alt text-error">{errors.tcp?.message}</span>
-                </label>
-              </div>
-            </>
-          )}
-          <div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-4" : "col-span-6")}>
-            <label className="label">
-              <span className="label-text">Gold</span>
-            </label>
-            <input type="number" {...register("gold", { value: selectedGame.gold })} className="input input-bordered focus:border-primary w-full" />
-            <label className="label">
-              <span className="label-text-alt text-error">{errors.gold?.message}</span>
-            </label>
+              </>
+            )}
+            <div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-4" : "col-span-6")}>
+              <label className="label">
+                <span className="label-text">Gold</span>
+              </label>
+              <input type="number" {...register("gold", { value: selectedGame.gold })} className="input input-bordered focus:border-primary w-full" />
+              <label className="label">
+                <span className="label-text-alt text-error">{errors.gold?.message}</span>
+              </label>
+            </div>
           </div>
           <div className="form-control w-full col-span-12">
             <label className="label">
@@ -490,150 +488,152 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               </>
             )}
           </div>
-          {magicItemsGained.map((item, index) => (
-            <div key={`magicItemsGained${index}`} className="card bg-base-300/70 col-span-12 sm:col-span-6">
-              <div className="card-body flex flex-col gap-4">
-                <h4 className="text-2xl">Add Magic Item</h4>
-                <div className="flex gap-4">
-                  <div className="form-control flex-1">
+          <div className="col-span-12 grid grid-cols-12 gap-4" ref={parent2}>
+            {magicItemsGained.map((item, index) => (
+              <div key={`magicItemsGained${index}`} className="card bg-base-300/70 col-span-12 sm:col-span-6 h-[338px]">
+                <div className="card-body flex flex-col gap-4">
+                  <h4 className="text-2xl">Add Magic Item</h4>
+                  <div className="flex gap-4">
+                    <div className="form-control flex-1">
+                      <label className="label">
+                        <span className="label-text">Name</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={e => {
+                          setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
+                        }}
+                        className="input input-bordered focus:border-primary w-full"
+                      />
+                      <label className="label">
+                        <span className="label-text-alt text-error">{(errors.magic_items_gained || [])[index]?.name?.message}</span>
+                      </label>
+                    </div>
+                    <button type="button" className="btn btn-danger mt-9" onClick={() => removeMagicItem(index)}>
+                      <Icon path={mdiTrashCan} size={1} />
+                    </button>
+                  </div>
+                  <div className="form-control w-full">
                     <label className="label">
-                      <span className="label-text">Name</span>
+                      <span className="label-text">Description</span>
                     </label>
-                    <input
-                      type="text"
-                      value={item.name}
+                    <textarea
+                      value={item.description}
                       onChange={e => {
-                        setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
+                        setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
                       }}
-                      className="input input-bordered focus:border-primary w-full"
+                      className="textarea textarea-bordered focus:border-primary w-full"
                     />
-                    <label className="label">
-                      <span className="label-text-alt text-error">{(errors.magic_items_gained || [])[index]?.name?.message}</span>
-                    </label>
                   </div>
-                  <button type="button" className="btn btn-danger mt-9" onClick={() => removeMagicItem(index)}>
-                    <Icon path={mdiTrashCan} size={1} />
-                  </button>
-                </div>
-                <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">Description</span>
-                  </label>
-                  <textarea
-                    value={item.description}
-                    onChange={e => {
-                      setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
-                    }}
-                    className="textarea textarea-bordered focus:border-primary w-full"
-                  />
                 </div>
               </div>
-            </div>
-          ))}
-          {magicItemsLost.map((id, index) => (
-            <div key={`magicItemsLost${index}`} className="card bg-base-300/70 shadow-xl col-span-12 sm:col-span-6">
-              <div className="card-body flex flex-col gap-4">
-                <h4 className="text-2xl">Drop Magic Item</h4>
-                <div className="flex gap-4">
-                  <div className="form-control flex-1">
-                    <label className="label">
-                      <span className="label-text">Select an Item</span>
-                    </label>
-                    <select
-                      value={id}
-                      onChange={e => {
-                        setMagicItemsLost(magicItemsLost.map((item, i) => (i === index ? e.target.value : item)));
-                      }}
-                      className="select select-bordered w-full">
-                      {magicItems.map(item => (
-                        <option key={item.id} value={item.id}>
-                          {item.name}
-                        </option>
-                      ))}
-                    </select>
-                    <label className="label">
-                      <span className="label-text-alt text-error">{(errors.magic_items_lost || [])[index]?.message}</span>
-                    </label>
+            ))}
+            {magicItemsLost.map((id, index) => (
+              <div key={`magicItemsLost${index}`} className="card bg-base-300/70 shadow-xl col-span-12 sm:col-span-6">
+                <div className="card-body flex flex-col gap-4">
+                  <h4 className="text-2xl">Drop Magic Item</h4>
+                  <div className="flex gap-4">
+                    <div className="form-control flex-1">
+                      <label className="label">
+                        <span className="label-text">Select an Item</span>
+                      </label>
+                      <select
+                        value={id}
+                        onChange={e => {
+                          setMagicItemsLost(magicItemsLost.map((item, i) => (i === index ? e.target.value : item)));
+                        }}
+                        className="select select-bordered w-full">
+                        {magicItems.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.name}
+                          </option>
+                        ))}
+                      </select>
+                      <label className="label">
+                        <span className="label-text-alt text-error">{(errors.magic_items_lost || [])[index]?.message}</span>
+                      </label>
+                    </div>
+                    <button type="button" className="btn btn-danger mt-9" onClick={() => removeLostMagicItem(index)}>
+                      <Icon path={mdiTrashCan} size={1} />
+                    </button>
                   </div>
-                  <button type="button" className="btn btn-danger mt-9" onClick={() => removeLostMagicItem(index)}>
-                    <Icon path={mdiTrashCan} size={1} />
-                  </button>
                 </div>
               </div>
-            </div>
-          ))}
-          {storyAwardsGained.map((item, index) => (
-            <div key={`storyAwardsGained${index}`} className="card bg-base-300/70 col-span-12 sm:col-span-6">
-              <div className="card-body flex flex-col gap-4">
-                <h4 className="text-2xl">Add Story Award</h4>
-                <div className="flex gap-4">
-                  <div className="form-control flex-1">
+            ))}
+            {storyAwardsGained.map((item, index) => (
+              <div key={`storyAwardsGained${index}`} className="card bg-base-300/70 col-span-12 sm:col-span-6">
+                <div className="card-body flex flex-col gap-4">
+                  <h4 className="text-2xl">Add Story Award</h4>
+                  <div className="flex gap-4">
+                    <div className="form-control flex-1">
+                      <label className="label">
+                        <span className="label-text">Name</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={e => {
+                          setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
+                        }}
+                        className="input input-bordered focus:border-primary w-full"
+                      />
+                      <label className="label">
+                        <span className="label-text-alt text-error">{(errors.story_awards_gained || [])[index]?.name?.message}</span>
+                      </label>
+                    </div>
+                    <button type="button" className="btn btn-danger mt-9" onClick={() => removeStoryAward(index)}>
+                      <Icon path={mdiTrashCan} size={1} />
+                    </button>
+                  </div>
+                  <div className="form-control w-full">
                     <label className="label">
-                      <span className="label-text">Name</span>
+                      <span className="label-text">Description</span>
                     </label>
-                    <input
-                      type="text"
-                      value={item.name}
+                    <textarea
+                      value={item.description}
                       onChange={e => {
-                        setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
+                        setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
                       }}
-                      className="input input-bordered focus:border-primary w-full"
+                      className="textarea textarea-bordered focus:border-primary w-full"
                     />
-                    <label className="label">
-                      <span className="label-text-alt text-error">{(errors.story_awards_gained || [])[index]?.name?.message}</span>
-                    </label>
                   </div>
-                  <button type="button" className="btn btn-danger mt-9" onClick={() => removeStoryAward(index)}>
-                    <Icon path={mdiTrashCan} size={1} />
-                  </button>
-                </div>
-                <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">Description</span>
-                  </label>
-                  <textarea
-                    value={item.description}
-                    onChange={e => {
-                      setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
-                    }}
-                    className="textarea textarea-bordered focus:border-primary w-full"
-                  />
                 </div>
               </div>
-            </div>
-          ))}
-          {storyAwardsLost.map((id, index) => (
-            <div key={`storyAwardsLost${index}`} className="card bg-base-300/70 shadow-xl col-span-12 sm:col-span-6">
-              <div className="card-body flex flex-col gap-4">
-                <h4 className="text-2xl">Drop Story Award</h4>
-                <div className="flex gap-4">
-                  <div className="form-control flex-1">
-                    <label className="label">
-                      <span className="label-text">Select a Story Award</span>
-                    </label>
-                    <select
-                      value={id}
-                      onChange={e => {
-                        setStoryAwardsLost(storyAwardsLost.map((item, i) => (i === index ? e.target.value : item)));
-                      }}
-                      className="select select-bordered w-full">
-                      {storyAwards.map(item => (
-                        <option key={item.id} value={item.id}>
-                          {item.name}
-                        </option>
-                      ))}
-                    </select>
-                    <label className="label">
-                      <span className="label-text-alt text-error">{(errors.story_awards_lost || [])[index]?.message}</span>
-                    </label>
+            ))}
+            {storyAwardsLost.map((id, index) => (
+              <div key={`storyAwardsLost${index}`} className="card bg-base-300/70 shadow-xl col-span-12 sm:col-span-6">
+                <div className="card-body flex flex-col gap-4">
+                  <h4 className="text-2xl">Drop Story Award</h4>
+                  <div className="flex gap-4">
+                    <div className="form-control flex-1">
+                      <label className="label">
+                        <span className="label-text">Select a Story Award</span>
+                      </label>
+                      <select
+                        value={id}
+                        onChange={e => {
+                          setStoryAwardsLost(storyAwardsLost.map((item, i) => (i === index ? e.target.value : item)));
+                        }}
+                        className="select select-bordered w-full">
+                        {storyAwards.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.name}
+                          </option>
+                        ))}
+                      </select>
+                      <label className="label">
+                        <span className="label-text-alt text-error">{(errors.story_awards_lost || [])[index]?.message}</span>
+                      </label>
+                    </div>
+                    <button type="button" className="btn btn-danger mt-9" onClick={() => removeLostStoryAward(index)}>
+                      <Icon path={mdiTrashCan} size={1} />
+                    </button>
                   </div>
-                  <button type="button" className="btn btn-danger mt-9" onClick={() => removeLostStoryAward(index)}>
-                    <Icon path={mdiTrashCan} size={1} />
-                  </button>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
           <div className="col-span-12 text-center">
             <button type="submit" className={concatenate("btn btn-primary", submitting && "loading")} disabled={submitting}>
               Save Game

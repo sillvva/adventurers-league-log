@@ -11,11 +11,14 @@ import { Fragment, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { slugify } from "$src/utils/misc";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Characters: NextPageWithLayout = () => {
   const session = useSession();
   const router = useRouter();
   const level = useRef(1);
+  const [parent1] = useAutoAnimate<HTMLDivElement>();
+  const [parent2] = useAutoAnimate<HTMLTableSectionElement>();
   level.current = 1;
 
   const { data: params } = useQueryString(
@@ -140,7 +143,7 @@ const Characters: NextPageWithLayout = () => {
               </div>
             </div>
             <div className="flex-1 basis-full sm:basis-1/2 lg:basis-2/3 print:basis-2/3 flex flex-col">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4" ref={parent1}>
                 {character.story_awards.length > 0 && (
                   <div className="flex-1 flex flex-col">
                     <h4 className="font-semibold text-secondary-content">Story Awards</h4>
@@ -186,7 +189,7 @@ const Characters: NextPageWithLayout = () => {
                 <th className="print:hidden"></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref={parent2}>
               {character.logs.map(log => {
                 const level_gained = character.log_levels.find(gl => gl.id === log.id);
                 if (level_gained) level.current += level_gained.levels;
