@@ -11,20 +11,24 @@ export const protectedLogsRouter = createProtectedRouter()
     input: logSchema,
     async resolve({ input, ctx }) {
       let dm: DungeonMaster | null = null;
+      const user = ctx.session.user;
       if (input.dm.name.trim()) {
         if (!input.dm.id) {
           const search = await ctx.prisma.dungeonMaster.findFirst({
             where: {
-              OR: input.isDMLog ? [{ uid: ctx.session.user.id }] : [{ name: input.dm.name }, { DCI: input.dm.DCI }]
+              OR:
+                input.isDMLog || input.dm.name.trim() === user.name?.trim()
+                  ? [{ uid: ctx.session.user.id }]
+                  : [{ name: input.dm.name.trim() }, { DCI: input.dm.DCI }]
             }
           });
           if (search) dm = search;
           else
             dm = await ctx.prisma.dungeonMaster.create({
               data: {
-                name: input.dm.name,
+                name: input.dm.name.trim(),
                 DCI: input.dm.DCI,
-                uid: input.isDMLog ? ctx.session.user.id : null
+                uid: input.isDMLog || input.dm.name.trim() === user.name?.trim() ? ctx.session.user.id : null
               }
             });
         } else {
@@ -34,9 +38,9 @@ export const protectedLogsRouter = createProtectedRouter()
                 id: input.dm.id
               },
               data: {
-                name: input.dm.name,
+                name: input.dm.name.trim(),
                 DCI: input.dm.DCI,
-                uid: input.isDMLog ? ctx.session.user.id : null
+                uid: input.isDMLog || input.dm.name.trim() === user.name?.trim() ? ctx.session.user.id : null
               }
             });
           } catch (err) {

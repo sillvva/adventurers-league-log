@@ -10,7 +10,7 @@ import Icon from "@mdi/react";
 import { Fragment, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { slugify } from "$src/utils/misc";
+import { concatenate, slugify } from "$src/utils/misc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Characters: NextPageWithLayout = () => {
@@ -150,7 +150,10 @@ const Characters: NextPageWithLayout = () => {
                   <p className="flex flex-wrap divide-x text-sm">
                     {character.story_awards.length
                       ? character.story_awards.map(mi => (
-                          <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                          <span
+                            key={mi.id}
+                            className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
+                            data-tip={mi.description}>
                             {mi.name}
                           </span>
                         ))
@@ -162,7 +165,10 @@ const Characters: NextPageWithLayout = () => {
                   <p className="flex flex-wrap divide-x text-sm">
                     {character.magic_items.length
                       ? character.magic_items.map(mi => (
-                          <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                          <span
+                            key={mi.id}
+                            className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
+                            data-tip={mi.description}>
                             {mi.name}
                           </span>
                         ))
@@ -248,7 +254,10 @@ const Characters: NextPageWithLayout = () => {
                             <p className="flex flex-wrap divide-x text-sm">
                               {log.magic_items_gained.length
                                 ? log.magic_items_gained.map(mi => (
-                                    <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                                    <span
+                                      key={mi.id}
+                                      className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
+                                      data-tip={mi.description}>
                                       {mi.name}
                                     </span>
                                   ))
@@ -292,7 +301,10 @@ const Characters: NextPageWithLayout = () => {
                             <p className="flex flex-wrap divide-x text-sm">
                               {log.magic_items_gained.length
                                 ? log.magic_items_gained.map(mi => (
-                                    <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                                    <span
+                                      key={mi.id}
+                                      className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
+                                      data-tip={mi.description}>
                                       {mi.name}
                                     </span>
                                   ))
@@ -308,7 +320,10 @@ const Characters: NextPageWithLayout = () => {
                             <p className="flex flex-wrap divide-x text-sm">
                               {log.story_awards_gained.length
                                 ? log.story_awards_gained.map(mi => (
-                                    <span key={mi.id} className="tooltip tooltip-bottom px-2 first:pl-0" data-tip={mi.description}>
+                                    <span
+                                      key={mi.id}
+                                      className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
+                                      data-tip={mi.description}>
                                       {mi.name}
                                     </span>
                                   ))
