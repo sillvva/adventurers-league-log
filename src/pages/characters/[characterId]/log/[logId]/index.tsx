@@ -24,7 +24,7 @@ interface PageProps {
 }
 
 export const logSchema = z.object({
-  characterId: z.string(),
+  characterId: z.string().default(""),
   gameId: z.string().default(""),
   name: z.string().min(1, "Required"),
   date: z
@@ -45,7 +45,7 @@ export const logSchema = z.object({
     name: z.string().default(""),
     DCI: z.number().nullable().default(null)
   }),
-  isDMLog: z.boolean().default(false),
+  is_dm_log: z.boolean().default(false),
   magic_items_gained: z
     .array(
       z.object({
@@ -113,7 +113,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
           name: "",
           DCI: null
         },
-        isDMLog: false,
+        is_dm_log: false,
         magic_items_gained: [],
         magic_items_lost: [],
         story_awards_gained: [],

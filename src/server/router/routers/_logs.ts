@@ -17,7 +17,7 @@ export const protectedLogsRouter = createProtectedRouter()
           const search = await ctx.prisma.dungeonMaster.findFirst({
             where: {
               OR:
-                input.isDMLog || input.dm.name.trim() === user.name?.trim()
+                input.is_dm_log || input.dm.name.trim() === user.name?.trim()
                   ? [{ uid: ctx.session.user.id }]
                   : [{ name: input.dm.name.trim() }, { DCI: input.dm.DCI }]
             }
@@ -28,7 +28,7 @@ export const protectedLogsRouter = createProtectedRouter()
               data: {
                 name: input.dm.name.trim(),
                 DCI: input.dm.DCI,
-                uid: input.isDMLog || input.dm.name.trim() === user.name?.trim() ? ctx.session.user.id : null
+                uid: input.is_dm_log || input.dm.name.trim() === user.name?.trim() ? ctx.session.user.id : null
               }
             });
         } else {
@@ -40,7 +40,7 @@ export const protectedLogsRouter = createProtectedRouter()
               data: {
                 name: input.dm.name.trim(),
                 DCI: input.dm.DCI,
-                uid: input.isDMLog || input.dm.name.trim() === user.name?.trim() ? ctx.session.user.id : null
+                uid: input.is_dm_log || input.dm.name.trim() === user.name?.trim() ? ctx.session.user.id : null
               }
             });
           } catch (err) {
@@ -51,13 +51,20 @@ export const protectedLogsRouter = createProtectedRouter()
         if (!dm.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });
       }
 
+      const existing = await ctx.prisma.log.findFirst({
+        where: {
+          id: input.gameId
+        }
+      });
+
       const data: Omit<Log, "id" | "created_at"> = {
         name: input.name,
         date: new Date(input.date),
         description: input.description,
         type: input.type,
         dungeonMasterId: (dm || {}).id || null,
-        isDMLog: input.isDMLog,
+        is_dm_log: input.is_dm_log,
+        applied_date: input.characterId ? (existing?.characterId === input.characterId ? existing.applied_date : new Date()) : null,
         characterId: input.characterId,
         acp: input.acp,
         tcp: input.tcp,

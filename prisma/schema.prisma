@@ -75,7 +75,8 @@ model Log {
     description         String?
     type                LogType        @default(game)
     dm                  DungeonMaster? @relation(fields: [dungeonMasterId], references: [id])
-    isDMLog             Boolean        @default(false)
+    is_dm_log           Boolean        @default(false)
+    applied_date        DateTime?      
     dungeonMasterId     String?
     experience          Int
     acp                 Int

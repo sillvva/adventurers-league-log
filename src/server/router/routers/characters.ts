@@ -68,7 +68,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
   //     DCI: 1234,
   //     uid: null
   //   },
-  //   isDMLog: false,
+  //   is_dm_log: false,
   //   dungeonMasterId: "12",
   //   characterId: character.id
   // });
