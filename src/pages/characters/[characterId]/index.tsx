@@ -69,7 +69,7 @@ const Characters: NextPageWithLayout = () => {
                 <a className="text-neutral-content">Characters</a>
               </Link>
             </li>
-            <li className="text-secondary">{character.name}</li>
+            <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{character.name}</li>
           </ul>
         </div>
         {session.data?.user && (
@@ -120,15 +120,15 @@ const Characters: NextPageWithLayout = () => {
               {character.character_sheet_url && (
                 <>
                   {" - "}
-                  <a href={character.character_sheet_url} target="_blank" rel="noreferrer noopner" className="text-secondary font-semibold">
+                  <a href={character.character_sheet_url} target="_blank" rel="noreferrer noopner" className="text-secondary drop-shadow-sm font-semibold">
                     Character Sheet
                   </a>
                 </>
               )}
             </p>
           </div>
-          <div className="flex-1 flex flex-wrap sm:flex-nowrap print:flex-nowrap gap-6">
-            <div className="flex-1 basis-full sm:basis-1/2 lg:basis-1/3 print:basis-1/3 flex flex-col gap-4">
+          <div className="flex-1 flex flex-wrap sm:flex-nowrap print:flex-nowrap gap-4 sm:gap-4 md:gap-6">
+            <div className="basis-1/2 sm:basis-1/3 lg:basis-1/3 print:basis-1/3 flex flex-col gap-2 sm:gap-4">
               <div className="flex">
                 <h4 className="font-semibold text-secondary-content">Level</h4>
                 <div className="flex-1 text-right">{character.total_level}</div>
@@ -142,20 +142,17 @@ const Characters: NextPageWithLayout = () => {
                 <div className="flex-1 text-right">{character.total_gold.toLocaleString("en-US")}</div>
               </div>
             </div>
-            <div className="flex-1 basis-full sm:basis-1/2 lg:basis-2/3 print:basis-2/3 flex flex-col">
+            <div className="divider sm:divider-horizontal before:bg-neutral-content/50 after:bg-neutral-content/50"></div> 
+            <div className="flex-1 basis-full sm:basis-2/3 lg:basis-2/3 print:basis-2/3 flex flex-col">
               <div className="flex flex-col gap-4" ref={parent1}>
-                {character.story_awards.length > 0 && (
                   <div className="flex-1 flex flex-col">
                     <h4 className="font-semibold text-secondary-content">Story Awards</h4>
-                    <p>{character.story_awards.map(mi => mi.name).join(" | ")}</p>
+                    <p>{character.story_awards.length ? character.story_awards.map(mi => mi.name).join(" | ") : "None"}</p>
                   </div>
-                )}
-                {character.magic_items.length > 0 && (
                   <div className="flex-1 flex flex-col">
                     <h4 className="font-semibold text-secondary-content">Magic Items</h4>
-                    <p>{character.magic_items.map(mi => mi.name).join(" | ")}</p>
+                    <p>{character.magic_items.length ? character.magic_items.map(mi => mi.name).join(" | ") : "None"}</p>
                   </div>
-                )}
               </div>
             </div>
           </div>

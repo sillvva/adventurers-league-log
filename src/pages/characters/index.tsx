@@ -43,7 +43,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
             <li>
               <Icon path={mdiHome} className="w-4" />
             </li>
-            <li className="text-secondary">Characters</li>
+            <li className="text-secondary drop-shadow-md">Characters</li>
           </ul>
         </div>
         {characters && characters.length > 0 && (

@@ -37,12 +37,7 @@ const Characters: NextPageWithLayout = () => {
             <li>
               <Icon path={mdiHome} className="w-4" />
             </li>
-            <li>
-              <Link href="/characters">
-                <a className="text-neutral-content">Characters</a>
-              </Link>
-            </li>
-            <li className="text-secondary">DM Logs</li>
+            <li className="text-secondary drop-shadow-md">DM Logs</li>
           </ul>
         </div>
         {session.data?.user && (

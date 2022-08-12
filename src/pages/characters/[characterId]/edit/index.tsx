@@ -97,7 +97,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <a className="text-neutral-content">{character.name}</a>
             </Link>
           </li>
-          <li className="text-secondary">Edit</li>
+          <li className="text-secondary drop-shadow-md">Edit</li>
         </ul>
       </div>
 

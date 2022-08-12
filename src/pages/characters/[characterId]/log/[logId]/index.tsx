@@ -253,7 +253,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <a className="text-neutral-content">{character?.name}</a>
             </Link>
           </li>
-          {selectedGame.name ? <li className="text-secondary">{selectedGame.name}</li> : <li className="text-secondary">New Log</li>}
+          {selectedGame.name ? <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{selectedGame.name}</li> : <li className="text-secondary drop-shadow-md">New Log</li>}
         </ul>
       </div>
 
