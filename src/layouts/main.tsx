@@ -1,14 +1,19 @@
-import type { PropsWithChildren } from "react";
+import { PropsWithChildren, useState } from "react";
 import { useRouter } from "next/router";
 import { signIn, signOut, useSession } from "next-auth/react";
 import background from "../../public/images/barovia-gate.jpg";
 import google from "../../public/images/google.svg";
 import Image from "next/future/image";
 import Link from "next/link";
+import Icon from "@mdi/react";
+import { mdiMenu } from "@mdi/js";
+import { concatenate } from "$src/utils/misc";
 
 const Layout = (props: PropsWithChildren) => {
   const session = useSession();
   const router = useRouter();
+
+  const [drawer, setDrawer] = useState(false);
 
   return (
     <>
@@ -23,11 +28,20 @@ const Layout = (props: PropsWithChildren) => {
       <div className="flex flex-col min-h-screen">
         <header className="relative z-20 border-b-[1px] border-slate-500 w-full">
           <nav className="container mx-auto p-4 max-w-5xl flex gap-2">
+            <button className="py-3 pr-4 flex md:hidden" onClick={() => setDrawer(true)}>
+              <Icon path={mdiMenu} size={1} />
+            </button>
             <Link href={session.data?.user ? "/characters" : "/"}>
               <a className="flex flex-col font-draconis text-center mr-8">
                 <h1 className="text-base leading-4">Adventurers League</h1>
                 <h2 className="text-3xl leading-7">Log Sheet</h2>
               </a>
+            </Link>
+            <Link href="/characters">
+              <a className="p-2 hidden md:flex items-center">Characters</a>
+            </Link>
+            <Link href="/dm-logs">
+              <a className="p-2 hidden md:flex items-center">DM Logs</a>
             </Link>
             <div className="flex-1">&nbsp;</div>
             {session.status !== "loading" && (
@@ -109,6 +123,32 @@ const Layout = (props: PropsWithChildren) => {
             </p>
           </div>
         </footer>
+        <div className={concatenate("fixed z-50 top-0 bottom-0 -left-72 w-72 bg-neutral py-4 px-4 transition-all", drawer && "left-0")}>
+          <ul className="menu w-full" onClick={() => setDrawer(false)}>
+            <li>
+              <Link href="/characters">
+                <a>Characters</a>
+              </Link>
+            </li>
+            <li>
+              <Link href="/dm-logs">
+                <a>DM Logs</a>
+              </Link>
+            </li>
+          </ul>
+          <div className="divider"></div>
+          <ul className="menu w-full">
+            <li>
+              <a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener">
+                Contribute
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div
+          className={concatenate("fixed inset-0 bg-black/50 transition-all", drawer ? "z-40 opacity-100" : "-z-10 opacity-0")}
+          onClick={() => setDrawer(false)}
+        />
       </div>
     </>
   );
