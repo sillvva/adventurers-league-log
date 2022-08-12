@@ -4,7 +4,7 @@ import { trpc } from "$src/utils/trpc";
 import { unstable_getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import { mdiHome } from "@mdi/js";
+import { mdiDotsHorizontal, mdiHome } from "@mdi/js";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "$src/layouts/main";
@@ -37,7 +37,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
     <>
       <Head>{session.user ? <title>{session.user.name}&apos;s Characters</title> : <title>Characters</title>}</Head>
 
-      <div className="flex">
+      <div className="flex gap-4">
         <div className="text-sm breadcrumbs mb-4">
           <ul>
             <li>
@@ -53,6 +53,18 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
             </Link>
           </div>
         )}
+        <div className="dropdown dropdown-end">
+          <label tabIndex={1} className="btn btn-sm">
+            <Icon path={mdiDotsHorizontal} size={1} />
+          </label>
+          <ul tabIndex={1} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+            <li>
+              <a download={`dm.json`} href={`/api/exports/characters/all`} target="_blank" rel="noreferrer noopener">
+                Export
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <div className="overflow-x-auto w-full rounded-lg">

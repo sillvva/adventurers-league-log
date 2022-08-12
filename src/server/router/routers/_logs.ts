@@ -72,7 +72,7 @@ export const protectedLogsRouter = createProtectedRouter()
         experience: input.experience,
         level: input.level,
         gold: input.gold,
-        dtd: input.dtd,
+        dtd: input.dtd
       };
       const log: Log = await ctx.prisma.log.upsert({
         where: {
@@ -213,6 +213,37 @@ export const protectedLogsRouter = createProtectedRouter()
       return ctx.prisma.log.delete({
         where: {
           id: input.logId
+        }
+      });
+    }
+  })
+  .query("dm-logs", {
+    async resolve({ ctx }) {
+      return ctx.prisma.log.findMany({
+        where: {
+          is_dm_log: true,
+          dm: {
+            OR: [
+              {
+                uid: ctx.session.user.id
+              },
+              {
+                name: ctx.session.user.name || ""
+              }
+            ]
+          }
+        },
+        include: {
+          dm: true,
+          magic_items_gained: true,
+          magic_items_lost: true,
+          story_awards_gained: true,
+          story_awards_lost: true,
+          character: {
+            include: {
+              user: true
+            }
+          }
         }
       });
     }

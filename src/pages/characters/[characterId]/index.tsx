@@ -33,7 +33,7 @@ const Characters: NextPageWithLayout = () => {
   });
 
   const utils = trpc.useContext();
-  const deleteGameMutation = trpc.useMutation(["_logs.delete"], {
+  const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
     onSuccess() {
       utils.invalidateQueries(["characters.getOne", { characterId: params.characterId }]);
     }
@@ -382,7 +382,7 @@ const Characters: NextPageWithLayout = () => {
                             className="btn btn-sm"
                             onClick={async () => {
                               if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
-                              deleteGameMutation.mutate({ logId: log.id });
+                              deleteLogMutation.mutate({ logId: log.id });
                             }}>
                             <Icon path={mdiTrashCan} size={0.8} />
                           </button>

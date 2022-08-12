@@ -26,6 +26,7 @@ type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
 
 export const logSchema = z.object({
   characterId: z.string().default(""),
+  characterName: z.string().default(""),
   gameId: z.string().default(""),
   name: z.string().min(1, "Required"),
   date: z
@@ -45,7 +46,8 @@ export const logSchema = z.object({
   dm: z.object({
     id: z.string().default(""),
     name: z.string().default(""),
-    DCI: z.number().nullable().default(null)
+    DCI: z.number().nullable().default(null),
+    uid: z.string().default("")
   }),
   is_dm_log: z.boolean().default(false),
   applied_date: z
@@ -81,7 +83,7 @@ export const logSchema = z.object({
   story_awards_lost: z.array(z.string().min(1)).default([])
 });
 
-const EditCharacter: NextPageWithLayout<PageProps> = ({ character }) => {
+const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
   const router = useRouter();
   const { data: params } = useQueryString(
     z.object({
@@ -238,7 +240,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ character }) => {
     character.logs.forEach(log => {
       if (!log.dm) return;
       if (dms.find(dm => dm.id === log.dm?.id)) return;
-      const match = log.dm[prop]?.toString().includes(value.toString());
+      const match = log.dm[prop]?.toString().toLowerCase().includes(value.toString().toLowerCase());
       if (match) dms.push(log.dm);
     });
 
@@ -685,11 +687,11 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ character }) => {
   );
 };
 
-EditCharacter.getLayout = page => {
+EditLog.getLayout = page => {
   return <Layout>{page}</Layout>;
 };
 
-export default EditCharacter;
+export default EditLog;
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const session = await unstable_getServerSession(context.req, context.res, authOptions);

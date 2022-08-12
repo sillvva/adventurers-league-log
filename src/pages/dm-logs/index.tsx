@@ -1,29 +1,24 @@
 import type { NextPageWithLayout } from "$src/pages/_app";
-import { z } from "zod";
 import { trpc } from "$src/utils/trpc";
-import { useQueryString } from "$src/utils/hooks";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "$src/layouts/main";
 import Icon from "@mdi/react";
-import { Fragment, useRef } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { slugify } from "$src/utils/misc";
+import { Fragment } from "react";
+import { concatenate, tooltipClasses } from "$src/utils/misc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Characters: NextPageWithLayout = () => {
-  const session = useSession();
-  const level = useRef(1);
   const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
-  level.current = 1;
 
-  const { data: params } = useQueryString(
-    z.object({
-      characterId: z.string()
-    })
-  );
+  const utils = trpc.useContext();
+  const { data: logs } = trpc.useQuery(["_logs.dm-logs"]);
+  const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
+    onSuccess() {
+      utils.invalidateQueries(["_logs.dm-logs"]);
+    }
+  });
 
   return (
     <>
@@ -40,27 +35,28 @@ const Characters: NextPageWithLayout = () => {
             <li className="text-secondary drop-shadow-md">DM Logs</li>
           </ul>
         </div>
-        {session.data?.user && (
-          <div className="dropdown dropdown-end">
-            <label tabIndex={1} className="btn btn-sm">
-              <Icon path={mdiDotsHorizontal} size={1} />
-            </label>
-            <ul tabIndex={1} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-              <li>
-                <a
-                  download={`dm.json`}
-                  href={`/api/exports/dm`}
-                  target="_blank"
-                  rel="noreferrer noopener">
-                  Export
-                </a>
-              </li>
-            </ul>
+        {logs && logs.length > 0 && (
+          <div className="flex-1 flex justify-end">
+            <Link href="/dm-logs/new">
+              <a className="btn btn-primary btn-sm">New Log</a>
+            </Link>
           </div>
         )}
+        <div className="dropdown dropdown-end">
+          <label tabIndex={1} className="btn btn-sm">
+            <Icon path={mdiDotsHorizontal} size={1} />
+          </label>
+          <ul tabIndex={1} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+            <li>
+              <a download={`dm.json`} href={`/api/exports/dm`} target="_blank" rel="noreferrer noopener">
+                Export
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <section className="mt-6">
+      <section>
         <div className="overflow-x-auto rounded-lg">
           <table className="table w-full">
             <thead>
@@ -74,18 +70,26 @@ const Characters: NextPageWithLayout = () => {
               </tr>
             </thead>
             <tbody ref={parent1}>
-              {/* {character.logs.map(log => {
-                const level_gained = character.log_levels.find(gl => gl.id === log.id);
-                if (level_gained) level.current += level_gained.levels;
-
-                return (
+              {!logs ? (
+                <></>
+              ) : (
+                logs.map(log => (
                   <Fragment key={log.id}>
                     <tr>
-                      <th className="align-top">
-                        <p className="text-primary-content font-semibold">{log.name}</p>
-                        {log.dm && log.type === "game" && (
+                      <th
+                        className={concatenate(
+                          "align-top !static",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        )}>
+                        <p className={concatenate("text-primary-content font-semibold", tooltipClasses(log.description, "left"))} data-tip={log.description}>
+                          {log.name}
+                        </p>
+                        <p className="text-netural-content font-normal text-xs">
+                          {(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
+                        </p>
+                        {log.character && (
                           <p className="text-sm text-neutral-content font-normal">
-                            <span className="font-semibold">DM:</span> {log.dm.name}
+                            <span className="font-semibold">Character:</span> {log.character.name}
                           </p>
                         )}
                         <div className="table-cell sm:hidden print:hidden font-normal">
@@ -101,27 +105,51 @@ const Characters: NextPageWithLayout = () => {
                                   <span className="font-semibold">ACP:</span> {log.acp}
                                 </p>
                               )}
-                              <p>
-                                <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
-                              </p>
+                              {log.level > 0 && (
+                                <p>
+                                  <span className="font-semibold">Level:</span> {log.level}
+                                </p>
+                              )}
                             </>
                           )}
-                          {log.tcp > 0 && (
+                          {log.dtd !== 0 && (
+                            <p>
+                              <span className="font-semibold">Downtime Days:</span> {log.dtd}
+                            </p>
+                          )}
+                          {log.tcp !== 0 && (
                             <p>
                               <span className="font-semibold">TCP:</span> {log.tcp}
                             </p>
                           )}
-                          <p>
-                            <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
-                          </p>
+                          {log.gold !== 0 && (
+                            <p>
+                              <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
+                            </p>
+                          )}
                           <div>
                             <p className="font-semibold">Magic Items:</p>
-                            <p className="text-sm">{log.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="flex flex-wrap divide-x text-sm">
+                              {log.magic_items_gained.length
+                                ? log.magic_items_gained.map(mi => (
+                                    <span
+                                      key={mi.id}
+                                      className={concatenate("px-2 first:pl-0", tooltipClasses(mi.description, "left"))}
+                                      data-tip={mi.description}>
+                                      {mi.name}
+                                    </span>
+                                  ))
+                                : "None"}
+                            </p>
                             <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         </div>
                       </th>
-                      <td className="align-top hidden sm:table-cell print:table-cell">
+                      <td
+                        className={concatenate(
+                          "align-top hidden sm:table-cell print:table-cell",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        )}>
                         {log.type === "game" && (
                           <>
                             {log.experience > 0 && (
@@ -134,40 +162,79 @@ const Characters: NextPageWithLayout = () => {
                                 <span className="font-semibold">ACP:</span> {log.acp}
                               </p>
                             )}
-                            <p>
-                              <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
-                            </p>
+                            {log.level > 0 && (
+                              <p>
+                                <span className="font-semibold">Level:</span> {log.level}
+                              </p>
+                            )}
+                            {log.dtd !== 0 && (
+                              <p>
+                                <span className="font-semibold text-sm">Downtime Days:</span> {log.dtd}
+                              </p>
+                            )}
                           </>
                         )}
                       </td>
-                      <td className="align-top hidden sm:table-cell print:table-cell">
-                        {log.tcp > 0 && (
+                      <td
+                        className={concatenate(
+                          "align-top hidden sm:table-cell print:table-cell",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        )}>
+                        {log.tcp !== 0 && (
                           <p>
                             <span className="font-semibold">TCP:</span> {log.tcp}
                           </p>
                         )}
-                        <p>
-                          <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
-                        </p>
+                        {log.gold !== 0 && (
+                          <p>
+                            <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
+                          </p>
+                        )}
                         {(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
                           <div>
                             <p className="font-semibold">Magic Items:</p>
-                            <p className="text-sm">{log.magic_items_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="flex flex-wrap divide-x text-sm">
+                              {log.magic_items_gained.length
+                                ? log.magic_items_gained.map(mi => (
+                                    <span
+                                      key={mi.id}
+                                      className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description))}
+                                      data-tip={mi.description}>
+                                      {mi.name}
+                                    </span>
+                                  ))
+                                : "None"}
+                            </p>
                             <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
                       </td>
-                      <td className="align-top hidden sm:table-cell print:!hidden">
+                      <td
+                        className={concatenate(
+                          "align-top hidden md:table-cell print:!hidden",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        )}>
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
-                            <p className="text-sm">{log.story_awards_gained.map(mi => mi.name).join(" | ")}</p>
+                            <p className="flex flex-wrap divide-x text-sm">
+                              {log.story_awards_gained.length
+                                ? log.story_awards_gained.map(mi => (
+                                    <span
+                                      key={mi.id}
+                                      className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description, "right"))}
+                                      data-tip={mi.description}>
+                                      {mi.name}
+                                    </span>
+                                  ))
+                                : "None"}
+                            </p>
                             <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
                       </td>
                       <td className="w-8 print:hidden">
                         <div className="flex flex-col justify-center gap-2">
-                          <Link href={`/characters/${params.characterId}/log/${log.id}`}>
+                          <Link href={`/dm-logs/${log.id}`}>
                             <a className="btn btn-sm btn-primary">
                               <Icon path={mdiPencil} size={0.8} />
                             </a>
@@ -176,33 +243,39 @@ const Characters: NextPageWithLayout = () => {
                             className="btn btn-sm"
                             onClick={async () => {
                               if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
-                              deleteGameMutation.mutate({ logId: log.id });
+                              deleteLogMutation.mutate({ logId: log.id });
                             }}>
                             <Icon path={mdiTrashCan} size={0.8} />
                           </button>
                         </div>
                       </td>
                     </tr>
-                    <tr className="hidden print:table-row">
-                      <td colSpan={3}>
-                        <p className="text-sm">
-                          <span className="font-semibold">Notes:</span> {log.description}
-                        </p>
-                        {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
-                          <div>
-                            {log.story_awards_gained.map(mi => (
-                              <p key={mi.id} className="text-sm">
-                                <span className="font-semibold">{mi.name}:</span> {mi.description}
-                              </p>
-                            ))}
-                            <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
+                    {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
+                      <tr className="hidden print:table-row">
+                        <td colSpan={3} className="pt-0">
+                          <p className="text-sm">
+                            <span className="font-semibold">Notes:</span> {log.description}
+                          </p>
+                          {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
+                            <div>
+                              {log.story_awards_gained.map(mi => (
+                                <p key={mi.id} className="text-sm">
+                                  <span className="font-semibold">
+                                    {mi.name}
+                                    {mi.description ? ":" : ""}
+                                  </span>{" "}
+                                  {mi.description}
+                                </p>
+                              ))}
+                              <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )}
                   </Fragment>
-                );
-              })} */}
+                ))
+              )}
             </tbody>
           </table>
         </div>
