@@ -245,17 +245,17 @@ const Characters: NextPageWithLayout = () => {
                               </p>
                             </>
                           )}
-                          {log.dtd > 0 && (
+                          {log.dtd !== 0 && (
                             <p>
                               <span className="font-semibold">Downtime Days:</span> {log.dtd}
                             </p>
                           )}
-                          {log.tcp > 0 && (
+                          {log.tcp !== 0 && (
                             <p>
                               <span className="font-semibold">TCP:</span> {log.tcp}
                             </p>
                           )}
-                          {log.gold > 0 && (
+                          {log.gold !== 0 && (
                             <p>
                               <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
                             </p>
@@ -294,7 +294,7 @@ const Characters: NextPageWithLayout = () => {
                             <p>
                               <span className="font-semibold">Levels:</span> {level_gained ? level_gained.levels : 0} {`(${level.current})`}
                             </p>
-                            {log.dtd > 0 && (
+                            {log.dtd !== 0 && (
                               <p>
                                 <span className="font-semibold text-sm">Downtime Days:</span> {log.dtd}
                               </p>
@@ -303,12 +303,12 @@ const Characters: NextPageWithLayout = () => {
                         )}
                       </td>
                       <td className="align-top hidden sm:table-cell print:table-cell">
-                        {log.tcp > 0 && (
+                        {log.tcp !== 0 && (
                           <p>
                             <span className="font-semibold">TCP:</span> {log.tcp}
                           </p>
                         )}
-                        {log.gold > 0 && (
+                        {log.gold !== 0 && (
                           <p>
                             <span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
                           </p>
