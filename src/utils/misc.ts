@@ -60,3 +60,14 @@ export const slugify = (text: string) => {
     .replace(/[^\w\-]+/g, "")
     .replace(/\-\-+/g, "-");
 };
+
+export const tooltipClasses = (text?: string | null, align = "center") => {
+  if (!text) return "";
+  return concatenate(
+    "before:hidden before:lg:block before:max-h-[50vh] before:overflow-hidden before:text-ellipsis",
+    "before:z-20 before:whitespace-normal before:![content:attr(data-tip)]",
+    align == "left" && "before:left-0 before:translate-x-0",
+    align == "right" && "before:right-0 before:translate-x-0",
+    text?.trim() && "tooltip"
+  );
+};

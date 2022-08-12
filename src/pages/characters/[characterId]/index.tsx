@@ -10,7 +10,7 @@ import Icon from "@mdi/react";
 import { Fragment, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { concatenate, slugify } from "$src/utils/misc";
+import { concatenate, slugify, tooltipClasses } from "$src/utils/misc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Characters: NextPageWithLayout = () => {
@@ -200,14 +200,14 @@ const Characters: NextPageWithLayout = () => {
         )}
       </section>
       <section className="mt-6">
-        <div className="overflow-x-auto rounded-lg">
+        <div className="rounded-lg">
           <table className="table w-full">
             <thead>
               <tr>
                 <th>Log Entry</th>
                 <th className="hidden sm:table-cell print:table-cell">Advancement</th>
                 <th className="hidden sm:table-cell print:table-cell">Treasure</th>
-                <th className="hidden sm:table-cell print:!hidden">Story Awards</th>
+                <th className="hidden md:table-cell print:!hidden">Story Awards</th>
                 <th className="print:hidden"></th>
               </tr>
             </thead>
@@ -219,8 +219,10 @@ const Characters: NextPageWithLayout = () => {
                 return (
                   <Fragment key={log.id}>
                     <tr>
-                      <th className="align-top">
-                        <p className="text-primary-content font-semibold">{log.name}</p>
+                      <th className="align-top !static">
+                        <p className={concatenate("text-primary-content font-semibold", tooltipClasses(log.description, "left"))} data-tip={log.description}>
+                          {log.name}
+                        </p>
                         <p className="text-netural-content font-normal text-xs">
                           {(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
                         </p>
@@ -269,7 +271,7 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.magic_items_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
+                                      className={concatenate("px-2 first:pl-0", tooltipClasses(mi.description, "left"))}
                                       data-tip={mi.description}>
                                       {mi.name}
                                     </span>
@@ -323,7 +325,7 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.magic_items_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
+                                      className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description))}
                                       data-tip={mi.description}>
                                       {mi.name}
                                     </span>
@@ -334,7 +336,7 @@ const Characters: NextPageWithLayout = () => {
                           </div>
                         )}
                       </td>
-                      <td className="align-top hidden sm:table-cell print:!hidden">
+                      <td className="align-top hidden md:table-cell print:!hidden">
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
                             <p className="flex flex-wrap divide-x text-sm">
@@ -342,7 +344,7 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.story_awards_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
+                                      className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description, "right"))}
                                       data-tip={mi.description}>
                                       {mi.name}
                                     </span>
