@@ -226,7 +226,7 @@ const Characters: NextPageWithLayout = () => {
                         <p className="text-netural-content font-normal text-xs">
                           {(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
                         </p>
-                        {log.dm && log.type === "game" && (
+                        {log.dm && log.type === "game" && log.dm.uid !== character.user.id && (
                           <p className="text-sm text-neutral-content font-normal">
                             <span className="font-semibold">DM:</span> {log.dm.name}
                           </p>

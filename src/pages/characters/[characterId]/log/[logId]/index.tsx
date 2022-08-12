@@ -1,26 +1,26 @@
 import type { NextPageWithLayout } from "$src/pages/_app";
-import type { GetServerSideProps, GetServerSidePropsContext } from "next";
+import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
-import type { Session } from "next-auth";
 import { useRouter } from "next/router";
-import { FormEventHandler } from "react";
+import type { FormEventHandler } from "react";
+import { useMemo } from "react";
 import { useState } from "react";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "$src/layouts/main";
-import { inferQueryOutput, trpc } from "$src/utils/trpc";
-import { z } from "zod";
+import { trpc } from "$src/utils/trpc";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { useQueryString } from "$src/utils/hooks";
-import type { DungeonMaster, Log, LogType, MagicItem, StoryAward } from "@prisma/client";
-import { prisma } from "$src/server/db/client";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { getOne } from "$src/server/router/routers/characters";
 import type { AsyncReturnType } from "$src/types/util";
+import type { DungeonMaster, LogType, MagicItem } from "@prisma/client";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { prisma } from "$src/server/db/client";
+import { getOne } from "$src/server/router/routers/characters";
 
 type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
 
@@ -102,41 +102,45 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ ssrCharacter }) => {
 
   const character = ssrCharacter;
 
-  const selectedGame = character.logs
-    .map(log => ({
-      ...log,
-      date: new Date(log.date),
-      applied_date: log.applied_date !== null ? new Date(log.applied_date) : null,
-      created_at: new Date(log.created_at)
-    }))
-    .find(g => g.id === params.logId) || {
-    characterId: params.characterId,
-    id: "",
-    name: "",
-    description: "",
-    date: new Date(),
-    type: "game" as LogType,
-    created_at: new Date(),
-    experience: 0,
-    acp: 0,
-    tcp: 0,
-    level: 0,
-    gold: 0,
-    dtd: 0,
-    dungeonMasterId: "",
-    dm: {
-      id: "",
-      name: "",
-      DCI: null,
-      uid: ""
-    },
-    applied_date: new Date(),
-    is_dm_log: false,
-    magic_items_gained: [],
-    magic_items_lost: [],
-    story_awards_gained: [],
-    story_awards_lost: []
-  };
+  const selectedGame = useMemo(
+    () =>
+      character.logs
+        .map(log => ({
+          ...log,
+          date: new Date(log.date),
+          applied_date: log.applied_date !== null ? new Date(log.applied_date) : null,
+          created_at: new Date(log.created_at)
+        }))
+        .find(g => g.id === params.logId) || {
+        characterId: params.characterId,
+        id: "",
+        name: "",
+        description: "",
+        date: new Date(),
+        type: "game" as LogType,
+        created_at: new Date(),
+        experience: 0,
+        acp: 0,
+        tcp: 0,
+        level: 0,
+        gold: 0,
+        dtd: 0,
+        dungeonMasterId: "",
+        dm: {
+          id: "",
+          name: "",
+          DCI: null,
+          uid: ""
+        },
+        applied_date: new Date(),
+        is_dm_log: false,
+        magic_items_gained: [],
+        magic_items_lost: [],
+        story_awards_gained: [],
+        story_awards_lost: []
+      },
+    [params, character]
+  );
 
   const [parent1] = useAutoAnimate<HTMLDivElement>();
   const [parent2] = useAutoAnimate<HTMLDivElement>();
