@@ -204,8 +204,7 @@ const Characters: NextPageWithLayout = () => {
           <table className="table w-full">
             <thead>
               <tr>
-                <th className="table-cell sm:hidden print:hidden">Game</th>
-                <th className="hidden sm:table-cell print:table-cell">Title</th>
+                <th>Log Entry</th>
                 <th className="hidden sm:table-cell print:table-cell">Advancement</th>
                 <th className="hidden sm:table-cell print:table-cell">Treasure</th>
                 <th className="hidden sm:table-cell print:!hidden">Story Awards</th>
@@ -222,6 +221,7 @@ const Characters: NextPageWithLayout = () => {
                     <tr>
                       <th className="align-top">
                         <p className="text-primary-content font-semibold">{log.name}</p>
+                        <p className="text-netural-content font-normal text-xs">{log.date.toLocaleString()}</p>
                         {log.dm && log.type === "game" && (
                           <p className="text-sm text-neutral-content font-normal">
                             <span className="font-semibold">DM:</span> {log.dm.name}
