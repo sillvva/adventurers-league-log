@@ -38,7 +38,7 @@ const Layout = (props: PropsWithChildren) => {
               </a>
             </Link>
             <Link href="/characters">
-              <a className="p-2 hidden md:flex items-center">Characters</a>
+              <a className="p-2 hidden md:flex items-center">Character Logs</a>
             </Link>
             <Link href="/dm-logs">
               <a className="p-2 hidden md:flex items-center">DM Logs</a>
@@ -127,7 +127,7 @@ const Layout = (props: PropsWithChildren) => {
           <ul className="menu w-full" onClick={() => setDrawer(false)}>
             <li>
               <Link href="/characters">
-                <a>Characters</a>
+                <a>Character Logs</a>
               </Link>
             </li>
             <li>
