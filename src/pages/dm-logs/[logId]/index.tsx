@@ -132,6 +132,9 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 
       if (!values.date) errors.push(setError("date", { message: "Required" }));
       else values.date = new Date(values.date.replace("T", " ")).toISOString();
+      
+      if (!values.applied_date) errors.push(setError("applied_date", { message: "Required" }));
+      else values.applied_date = new Date(values.applied_date.replace("T", " ")).toISOString();
 
       if (values.characterName.trim() && !characters.find(c => c.id === values.characterId || c.name === values.characterName.trim()))
         errors.push(setError("characterId", { message: "Character Not Found" }));
@@ -142,10 +145,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
       if (values.applied_date && !values.characterId) errors.push(setError("characterId", { message: "Required" }));
 
       values.dm = {
-        id: "",
+        id: selectedGame.dm?.id || "",
         DCI: null,
-        name: session?.user?.name || "",
-        uid: session?.user?.id || ""
+        name: selectedGame.dm?.name || session?.user?.name || "",
+        uid: selectedGame.dm?.uid || session?.user?.id || ""
       };
 
       if (values.experience) values.experience = parseInt(values.experience.toString());
@@ -154,7 +157,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
       if (values.level) values.level = parseInt(values.level.toString());
       if (values.gold) values.gold = parseInt(values.gold.toString());
       if (values.dtd) values.dtd = parseInt(values.dtd.toString());
-
+      values.is_dm_log = true;
       values.magic_items_gained = magicItemsGained;
       values.magic_items_lost = [];
       values.story_awards_gained = storyAwardsGained;
@@ -225,7 +228,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
       )}
 
       <form onSubmit={handleSubmit}>
-        <input type="hidden" {...register("gameId", { value: params.logId === "new" ? "" : params.logId })} />
+        <input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
         <div className="grid grid-cols-12 gap-4">
           <div className={concatenate("form-control col-span-12", selectedGame.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
             <label className="label">

@@ -76,7 +76,7 @@ export const protectedLogsRouter = createProtectedRouter()
       };
       const log: Log = await ctx.prisma.log.upsert({
         where: {
-          id: input.gameId
+          id: input.logId
         },
         update: data,
         create: data

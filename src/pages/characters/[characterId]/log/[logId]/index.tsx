@@ -27,7 +27,7 @@ type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
 export const logSchema = z.object({
   characterId: z.string().default(""),
   characterName: z.string().default(""),
-  gameId: z.string().default(""),
+  logId: z.string().default(""),
   name: z.string().min(1, "Required"),
   date: z
     .string()
@@ -293,7 +293,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
 
       <form onSubmit={handleSubmit}>
         <input type="hidden" {...register("characterId", { value: params.characterId })} />
-        <input type="hidden" {...register("gameId", { value: params.logId === "new" ? "" : params.logId })} />
+        <input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
         <div className="grid grid-cols-12 gap-4">
           {!selectedGame.is_dm_log && (
             <div className="form-control col-span-12 sm:col-span-4">
