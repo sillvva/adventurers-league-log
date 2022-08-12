@@ -118,12 +118,12 @@ const Characters: NextPageWithLayout = () => {
             <p className="flex-1 text-xs text-neutral-content">
               {character.campaign}
               {character.character_sheet_url && (
-                <>
+                <span className="print:hidden">
                   {" - "}
                   <a href={character.character_sheet_url} target="_blank" rel="noreferrer noopner" className="text-secondary drop-shadow-sm font-semibold">
                     Character Sheet
                   </a>
-                </>
+                </span>
               )}
             </p>
           </div>

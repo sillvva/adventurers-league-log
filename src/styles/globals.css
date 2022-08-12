@@ -40,8 +40,12 @@
 }
 
 @layer utilities {
+	.text-primary-content {
+		@apply print:text-gray-700;
+	}
 	.text-secondary {
 		--tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / 0.2)) drop-shadow(0 1px 1px rgb(0 0 0 / 1));
+		@apply print:drop-shadow-none
 	}
 }
 

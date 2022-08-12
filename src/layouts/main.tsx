@@ -28,12 +28,12 @@ const Layout = (props: PropsWithChildren) => {
       <div className="flex flex-col min-h-screen">
         <header className="relative z-20 border-b-[1px] border-slate-500 w-full">
           <nav className="container mx-auto p-4 max-w-5xl flex gap-2">
-            <button className="py-3 pr-4 flex md:hidden" onClick={() => setDrawer(true)}>
+            <button className="py-3 pr-4 flex md:hidden print:hidden" onClick={() => setDrawer(true)}>
               <Icon path={mdiMenu} size={1} />
             </button>
             <Link href={session.data?.user ? "/characters" : "/"}>
               <a className="flex flex-col font-draconis text-center mr-8">
-                <h1 className="text-base leading-4">Adventurers League</h1>
+                <h1 className="text-base leading-4 text-primary-content">Adventurers League</h1>
                 <h2 className="text-3xl leading-7">Log Sheet</h2>
               </a>
             </Link>
@@ -53,7 +53,7 @@ const Layout = (props: PropsWithChildren) => {
                   <>
                     <div className="dropdown dropdown-end">
                       <label tabIndex={0} className="flex cursor-pointer">
-                        <div className="px-4 hidden sm:flex items-center text-primary-content">{session.data.user.name}</div>
+                        <div className="px-4 hidden sm:flex print:flex items-center text-primary-content">{session.data.user.name}</div>
                         <div className="avatar">
                           <div className="w-12 relative rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
                             <Image
