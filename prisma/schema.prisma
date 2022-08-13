@@ -72,7 +72,7 @@ model Log {
     id                  String         @id @unique @default(cuid())
     date                DateTime
     name                String
-    description         String?
+    description         String?        @db.Text
     type                LogType        @default(game)
     dm                  DungeonMaster? @relation(fields: [dungeonMasterId], references: [id])
     is_dm_log           Boolean        @default(false)
@@ -109,19 +109,19 @@ model DungeonMaster {
 model MagicItem {
     id           String  @id @unique @default(cuid())
     name         String
-    description  String?
-    logGained    Log?   @relation("magic_items_gained", fields: [logGainedId], references: [id])
+    description  String? @db.Text
+    logGained    Log?    @relation("magic_items_gained", fields: [logGainedId], references: [id])
     logGainedId  String?
-    logLost      Log?   @relation("magic_items_lost", fields: [logLostId], references: [id])
+    logLost      Log?    @relation("magic_items_lost", fields: [logLostId], references: [id])
     logLostId    String?
 }
 
 model StoryAward {
     id           String   @id @unique @default(cuid())
     name         String
-    description  String?
-    logGained    Log?    @relation("story_awards_gained", fields: [logGainedId], references: [id])
+    description  String?  @db.Text
+    logGained    Log?     @relation("story_awards_gained", fields: [logGainedId], references: [id])
     logGainedId  String?
-    logLost      Log?    @relation("story_awards_lost", fields: [logLostId], references: [id])
+    logLost      Log?     @relation("story_awards_lost", fields: [logLostId], references: [id])
     logLostId    String?
 }
