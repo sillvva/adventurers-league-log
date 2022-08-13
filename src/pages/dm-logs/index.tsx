@@ -8,7 +8,7 @@ import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
 import Head from "next/head";
 import Link from "next/link";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 const minisearch = new MiniSearch({
   fields: ["logName", "characterName", "magicItems", "storyAwards"],
@@ -22,7 +22,6 @@ const minisearch = new MiniSearch({
 const Characters: NextPageWithLayout = () => {
   const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
-  const [indexed, setIndexed] = useState<{ logId: string; logName: string; characterName: string; magicItems: string; storyAwards: string }[]>([]);
   const [results, setResults] = useState<inferQueryOutput<"_logs.dm-logs">>([]);
 
   const utils = trpc.useContext();
@@ -33,18 +32,13 @@ const Characters: NextPageWithLayout = () => {
     }
   });
 
-  useEffect(() => {
-    if (logs) {
-      setIndexed(
-        logs.map(log => ({
-          logId: log.id,
-          logName: log.name,
-          characterName: log.character?.name || "",
-          magicItems: log.magic_items_gained.map(item => item.name).join(", "),
-          storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
-        }))
-      );
-    }
+  const indexed = useMemo(() => {
+    return logs ? logs.map(log => ({
+      logId: log.id,
+      logName: log.name,
+      magicItems: log.magic_items_gained.map(item => item.name).join(", "),
+      storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
+    })) : [];
   }, [logs]);
 
   useEffect(() => {

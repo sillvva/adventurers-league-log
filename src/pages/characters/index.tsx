@@ -10,7 +10,7 @@ import type { Session } from "next-auth";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { NextPageWithLayout } from "../_app";
 
 const minisearch = new MiniSearch({
@@ -29,39 +29,36 @@ interface PageProps {
 const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
   const [parent] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
-  const [indexed, setIndexed] = useState<{ characterId: string; characterName: string; race: string; class: string; campaign: string; magicItems: string }[]>(
-    []
-  );
   const [results, setResults] = useState<inferQueryOutput<"characters.getAll">>([]);
   const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id || "" }], {
     enabled: !!session.user,
     refetchOnWindowFocus: false
   });
 
-  useEffect(() => {
-    if (characters) {
-      setIndexed(
-        characters.map(character => ({
-          characterId: character.id,
-          characterName: character.name,
-          campaign: character.campaign || "",
-          race: character.race || "",
-          class: character.class || "",
-          magicItems: character.logs
-            .reduce((acc, log) => {
-              if (!log.magic_items_gained.length) return acc;
-              const itemNames = [...acc, ...log.magic_items_gained.map(item => item.name)];
-              log.magic_items_lost.forEach(item => {
-                const index = itemNames.indexOf(item.name);
-                if (index > -1) itemNames.splice(index, 1);
-              });
-              return itemNames;
-            }, [] as string[])
-            .join(", ")
-        }))
-      );
-    }
-  }, [characters]);
+  const indexed = useMemo(
+    () =>
+      characters
+        ? characters.map(character => ({
+            characterId: character.id,
+            characterName: character.name,
+            campaign: character.campaign || "",
+            race: character.race || "",
+            class: character.class || "",
+            magicItems: character.logs
+              .reduce((acc, log) => {
+                if (!log.magic_items_gained.length) return acc;
+                const itemNames = [...acc, ...log.magic_items_gained.map(item => item.name)];
+                log.magic_items_lost.forEach(item => {
+                  const index = itemNames.indexOf(item.name);
+                  if (index > -1) itemNames.splice(index, 1);
+                });
+                return itemNames;
+              }, [] as string[])
+              .join(", ")
+          }))
+        : [],
+    [characters]
+  );
 
   useEffect(() => {
     if (indexed.length) minisearch.addAll(indexed);
