@@ -487,7 +487,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
               <label className="label">
                 <span className="label-text whitespace-nowrap overflow-hidden text-ellipsis">Downtime Days</span>
               </label>
-              <input type="number" value={selectedGame.dtd} {...register("dtd")} className="input input-bordered focus:border-primary w-full" />
+              <input type="number" {...register("dtd", { value: selectedGame.dtd })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.dtd?.message}</span>
               </label>

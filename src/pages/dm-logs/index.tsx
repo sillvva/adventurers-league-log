@@ -1,14 +1,17 @@
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
-import { concatenate, tooltipClasses } from "$src/utils/misc";
-import { inferQueryOutput, trpc } from "$src/utils/trpc";
+import { concatenate } from "$src/utils/misc";
+import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
+import { GetServerSideProps } from "next";
+import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { authOptions } from "../api/auth/[...nextauth]";
 
 const minisearch = new MiniSearch({
   fields: ["logName", "characterName", "magicItems", "storyAwards"],
@@ -22,7 +25,7 @@ const minisearch = new MiniSearch({
 const Characters: NextPageWithLayout = () => {
   const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<inferQueryOutput<"_logs.dm-logs">>([]);
+  const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
 
   const utils = trpc.useContext();
   const { data: logs } = trpc.useQuery(["_logs.dm-logs"]);
@@ -33,12 +36,14 @@ const Characters: NextPageWithLayout = () => {
   });
 
   const indexed = useMemo(() => {
-    return logs ? logs.map(log => ({
-      logId: log.id,
-      logName: log.name,
-      magicItems: log.magic_items_gained.map(item => item.name).join(", "),
-      storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
-    })) : [];
+    return logs
+      ? logs.map(log => ({
+          logId: log.id,
+          logName: log.name,
+          magicItems: log.magic_items_gained.map(item => item.name).join(", "),
+          storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
+        }))
+      : [];
   }, [logs]);
 
   useEffect(() => {
@@ -46,21 +51,19 @@ const Characters: NextPageWithLayout = () => {
     return () => minisearch.removeAll();
   }, [indexed]);
 
-  useEffect(() => {
+  const results = useMemo(() => {
     if (logs && indexed.length) {
       if (search.length) {
         const results = minisearch.search(search);
-        setResults(
-          logs
-            .filter(log => results.find(result => result.id === log.id))
-            .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || (0 - log.date.getTime()) }))
-            .sort((a, b) => (b.score > a.score ? 1 : -1))
-        );
+        return logs
+          .filter(log => results.find(result => result.id === log.id))
+          .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime() }))
+          .sort((a, b) => (b.score > a.score ? 1 : -1));
       } else {
-        setResults(logs.sort((a, b) => (b.date < a.date ? 1 : -1)));
+        return logs.sort((a, b) => (b.date < a.date ? 1 : -1));
       }
     } else {
-      setResults([]);
+      return [];
     }
   }, [indexed, search, logs]);
 
@@ -127,7 +130,9 @@ const Characters: NextPageWithLayout = () => {
                           "align-top !static",
                           (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                         )}>
-                        <p className={concatenate("text-primary-content font-semibold", tooltipClasses(log.description, "left"))} data-tip={log.description}>
+                        <p
+                          className="text-primary-content font-semibold"
+                          onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
                           {log.name}
                         </p>
                         <p className="text-netural-content font-normal text-xs">
@@ -180,8 +185,8 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.magic_items_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate("px-2 first:pl-0", tooltipClasses(mi.description, "left"))}
-                                      data-tip={mi.description}>
+                                      className="px-2 first:pl-0"
+                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                       {mi.name}
                                     </span>
                                   ))
@@ -244,8 +249,8 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.magic_items_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description))}
-                                      data-tip={mi.description}>
+                                      className="px-2 first:pl-0"
+                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                       {mi.name}
                                     </span>
                                   ))
@@ -267,8 +272,8 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.story_awards_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description, "right"))}
-                                      data-tip={mi.description}>
+                                      className="px-2 first:pl-0"
+                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                       {mi.name}
                                     </span>
                                   ))
@@ -326,6 +331,16 @@ const Characters: NextPageWithLayout = () => {
           </div>
         </section>
       </div>
+
+      <label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
+        {modal && (
+          <label className="modal-box relative">
+            <h3 className="text-lg font-bold text-primary-content">{modal.name}</h3>
+            {modal.date && <p className="text-sm text-neutral-content">{modal.date.toLocaleString()}</p>}
+            <p className="text-xs py-4">{modal.description}</p>
+          </label>
+        )}
+      </label>
     </>
   );
 };
@@ -335,3 +350,22 @@ Characters.getLayout = page => {
 };
 
 export default Characters;
+
+export const getServerSideProps: GetServerSideProps = async context => {
+  const session = await unstable_getServerSession(context.req, context.res, authOptions);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false
+      }
+    };
+  }
+
+  return {
+    props: {
+      session
+    }
+  };
+};

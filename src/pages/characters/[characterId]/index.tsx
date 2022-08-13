@@ -1,8 +1,8 @@
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { useQueryString } from "$src/utils/hooks";
-import { concatenate, slugify, tooltipClasses } from "$src/utils/misc";
-import { inferQueryOutput, trpc } from "$src/utils/trpc";
+import { concatenate, slugify } from "$src/utils/misc";
+import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -29,13 +29,7 @@ const Characters: NextPageWithLayout = () => {
   const [parent1] = useAutoAnimate<HTMLDivElement>();
   const [parent2] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<
-    (inferQueryOutput<"characters.getOne">["logs"][number] & {
-      score: number;
-      level_gained: number;
-      total_level: number;
-    })[]
-  >([]);
+  const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
 
   const { data: params } = useQueryString(
     z.object({
@@ -47,6 +41,8 @@ const Characters: NextPageWithLayout = () => {
     ssr: true,
     refetchOnWindowFocus: false
   });
+
+  const myCharacter = character?.user.id === session.data?.user?.id;
 
   const utils = trpc.useContext();
   const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
@@ -91,21 +87,19 @@ const Characters: NextPageWithLayout = () => {
     return () => minisearch.removeAll();
   }, [indexed]);
 
-  useEffect(() => {
+  const results = useMemo(() => {
     if (logData.length) {
       if (search.length) {
         const results = minisearch.search(search);
-        setResults(
-          logData
-            .filter(log => results.find(result => result.id === log.id))
-            .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime() }))
-            .sort((a, b) => (b.score > a.score ? 1 : -1))
-        );
+        return logData
+          .filter(log => results.find(result => result.id === log.id))
+          .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime() }))
+          .sort((a, b) => (b.score > a.score ? 1 : -1));
       } else {
-        setResults(logData.sort((a, b) => (b.date < a.date ? 1 : -1)));
+        return logData.sort((a, b) => (b.date < a.date ? 1 : -1));
       }
     } else {
-      setResults([]);
+      return [];
     }
   }, [search, logData]);
 
@@ -136,7 +130,7 @@ const Characters: NextPageWithLayout = () => {
             <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{character.name}</li>
           </ul>
         </div>
-        {session.data?.user && (
+        {myCharacter && (
           <div className="dropdown dropdown-end">
             <label tabIndex={1} className="btn btn-sm">
               <Icon path={mdiDotsHorizontal} size={1} />
@@ -220,8 +214,8 @@ const Characters: NextPageWithLayout = () => {
                       ? character.story_awards.map(mi => (
                           <span
                             key={mi.id}
-                            className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
-                            data-tip={mi.description}>
+                            className="tooltip-bottom px-2 first:pl-0"
+                            onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                             {mi.name}
                           </span>
                         ))
@@ -235,8 +229,8 @@ const Characters: NextPageWithLayout = () => {
                       ? character.magic_items.map(mi => (
                           <span
                             key={mi.id}
-                            className={concatenate(mi.description?.trim() && "tooltip", "tooltip-bottom px-2 first:pl-0")}
-                            data-tip={mi.description}>
+                            className="tooltip-bottom px-2 first:pl-0"
+                            onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                             {mi.name}
                           </span>
                         ))
@@ -247,7 +241,7 @@ const Characters: NextPageWithLayout = () => {
             </div>
           </div>
           <div className="flex gap-4 print:hidden">
-            {session.data?.user && (
+            {myCharacter && (
               <Link href={`/characters/${params.characterId}/log/new`}>
                 <a className="btn btn-primary btn-sm">New Log</a>
               </Link>
@@ -273,7 +267,7 @@ const Characters: NextPageWithLayout = () => {
                 <th className="hidden sm:table-cell print:table-cell">Advancement</th>
                 <th className="hidden sm:table-cell print:table-cell">Treasure</th>
                 <th className="hidden md:table-cell print:!hidden">Story Awards</th>
-                <th className="print:hidden"></th>
+                {myCharacter && <th className="print:hidden"></th>}
               </tr>
             </thead>
             <tbody ref={parent2}>
@@ -285,7 +279,9 @@ const Characters: NextPageWithLayout = () => {
                         "align-top !static",
                         (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                       )}>
-                      <p className={concatenate("text-primary-content font-semibold", tooltipClasses(log.description, "left"))} data-tip={log.description}>
+                      <p
+                        className={concatenate("text-primary-content font-semibold")}
+                        onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
                         {log.name}
                       </p>
                       <p className="text-netural-content font-normal text-xs">
@@ -336,8 +332,8 @@ const Characters: NextPageWithLayout = () => {
                               ? log.magic_items_gained.map(mi => (
                                   <span
                                     key={mi.id}
-                                    className={concatenate("px-2 first:pl-0", tooltipClasses(mi.description, "left"))}
-                                    data-tip={mi.description}>
+                                    className="px-2 first:pl-0"
+                                    onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                     {mi.name}
                                   </span>
                                 ))
@@ -398,8 +394,8 @@ const Characters: NextPageWithLayout = () => {
                               ? log.magic_items_gained.map(mi => (
                                   <span
                                     key={mi.id}
-                                    className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description))}
-                                    data-tip={mi.description}>
+                                    className="tooltip-bottom px-2 first:pl-0"
+                                    onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                     {mi.name}
                                   </span>
                                 ))
@@ -421,8 +417,8 @@ const Characters: NextPageWithLayout = () => {
                               ? log.story_awards_gained.map(mi => (
                                   <span
                                     key={mi.id}
-                                    className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description, "right"))}
-                                    data-tip={mi.description}>
+                                    className="tooltip-bottom px-2 first:pl-0"
+                                    onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                     {mi.name}
                                   </span>
                                 ))
@@ -432,23 +428,25 @@ const Characters: NextPageWithLayout = () => {
                         </div>
                       )}
                     </td>
-                    <td className="w-8 print:hidden">
-                      <div className="flex flex-col justify-center gap-2">
-                        <Link href={`/characters/${params.characterId}/log/${log.id}`}>
-                          <a className="btn btn-sm btn-primary">
-                            <Icon path={mdiPencil} size={0.8} />
-                          </a>
-                        </Link>
-                        <button
-                          className="btn btn-sm"
-                          onClick={async () => {
-                            if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
-                            deleteLogMutation.mutate({ logId: log.id });
-                          }}>
-                          <Icon path={mdiTrashCan} size={0.8} />
-                        </button>
-                      </div>
-                    </td>
+                    {myCharacter && (
+                      <td className="w-8 print:hidden">
+                        <div className="flex flex-col justify-center gap-2">
+                          <Link href={`/characters/${params.characterId}/log/${log.id}`}>
+                            <a className="btn btn-sm btn-primary">
+                              <Icon path={mdiPencil} size={0.8} />
+                            </a>
+                          </Link>
+                          <button
+                            className="btn btn-sm"
+                            onClick={async () => {
+                              if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
+                              deleteLogMutation.mutate({ logId: log.id });
+                            }}>
+                            <Icon path={mdiTrashCan} size={0.8} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                   {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                     <tr className="hidden print:table-row">
@@ -479,6 +477,16 @@ const Characters: NextPageWithLayout = () => {
           </table>
         </div>
       </section>
+
+      <label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
+        {modal && (
+          <label className="modal-box relative">
+            <h3 className="text-lg font-bold text-primary-content">{modal.name}</h3>
+            {modal.date && <p className="text-sm text-neutral-content">{modal.date.toLocaleString()}</p>}
+            <p className="text-xs py-4">{modal.description}</p>
+          </label>
+        )}
+      </label>
     </>
   );
 };

@@ -1,6 +1,6 @@
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import { inferQueryOutput, trpc } from "$src/utils/trpc";
+import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -29,7 +29,6 @@ interface PageProps {
 const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
   const [parent] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<inferQueryOutput<"characters.getAll">>([]);
   const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id || "" }], {
     enabled: !!session.user,
     refetchOnWindowFocus: false
@@ -65,21 +64,25 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
     return () => minisearch.removeAll();
   }, [indexed]);
 
-  useEffect(() => {
+  const results = useMemo(() => {
     if (characters && indexed.length) {
       if (search.length) {
         const results = minisearch.search(search);
-        setResults(
-          characters
-            .filter(character => results.find(result => result.id === character.id))
-            .map(character => ({ ...character, score: results.find(result => result.id === character.id)?.score || character.name }))
-            .sort((a, b) => (b.score > a.score ? 1 : -1))
-        );
+        return characters
+          .filter(character => results.find(result => result.id === character.id))
+          .map(character => ({
+            ...character,
+            score: results.find(result => result.id === character.id)?.score || character.name,
+            match: Object.entries(results.find(result => result.id === character.id)?.match || {})
+              .map(([, value]) => value[0] || "")
+              .filter(v => !!v)
+          }))
+          .sort((a, b) => (b.score > a.score ? 1 : -1));
       } else {
-        setResults(characters.sort((a, b) => (b.name > a.name ? 1 : -1)));
+        return characters.sort((a, b) => (b.name > a.name ? 1 : -1)).map(character => ({ ...character, score: 0, match: [] }));
       }
     } else {
-      setResults([]);
+      return [];
     }
   }, [indexed, search, characters]);
 
@@ -172,13 +175,19 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
                       <td className="transition-colors">
                         <div className="flex flex-col">
                           <div className="text-base sm:text-xl font-bold text-primary-content">{character.name}</div>
-                          <div className="text-xs sm:text-sm text-neutral-content mb-2">
+                          <div className="text-xs sm:text-sm text-neutral-content">
                             {character.race} {character.class}
                             <span className="inline sm:hidden"> (Level {character.total_level})</span>
                           </div>
-                          <div className="block sm:hidden text-xs">
+                          <div className="block sm:hidden text-xs mb-2">
                             <p>{character.campaign}</p>
                           </div>
+                          {character.match.includes("magicItems") && (
+                            <div className="text-neutral-content mb-2 whitespace-pre-wrap">
+                              <p className="font-semibold">Magic Items:</p>
+                              {character.magic_items.map(item => item.name).join(" | ")}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="hidden sm:table-cell transition-colors">{character.campaign}</td>
