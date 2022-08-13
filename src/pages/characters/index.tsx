@@ -1,6 +1,6 @@
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import { inferQueryOutput, trpc } from "$src/utils/trpc";
+import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -29,7 +29,6 @@ interface PageProps {
 const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
   const [parent] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<inferQueryOutput<"characters.getAll">>([]);
   const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id || "" }], {
     enabled: !!session.user,
     refetchOnWindowFocus: false
@@ -65,21 +64,19 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
     return () => minisearch.removeAll();
   }, [indexed]);
 
-  useEffect(() => {
+  const results = useMemo(() => {
     if (characters && indexed.length) {
       if (search.length) {
         const results = minisearch.search(search);
-        setResults(
-          characters
-            .filter(character => results.find(result => result.id === character.id))
-            .map(character => ({ ...character, score: results.find(result => result.id === character.id)?.score || character.name }))
-            .sort((a, b) => (b.score > a.score ? 1 : -1))
-        );
+        return characters
+          .filter(character => results.find(result => result.id === character.id))
+          .map(character => ({ ...character, score: results.find(result => result.id === character.id)?.score || character.name }))
+          .sort((a, b) => (b.score > a.score ? 1 : -1));
       } else {
-        setResults(characters.sort((a, b) => (b.name > a.name ? 1 : -1)));
+        return characters.sort((a, b) => (b.name > a.name ? 1 : -1));
       }
     } else {
-      setResults([]);
+      return [];
     }
   }, [indexed, search, characters]);
 

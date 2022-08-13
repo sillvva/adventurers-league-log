@@ -2,7 +2,7 @@ import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, slugify, tooltipClasses } from "$src/utils/misc";
-import { inferQueryOutput, trpc } from "$src/utils/trpc";
+import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -29,13 +29,6 @@ const Characters: NextPageWithLayout = () => {
   const [parent1] = useAutoAnimate<HTMLDivElement>();
   const [parent2] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<
-    (inferQueryOutput<"characters.getOne">["logs"][number] & {
-      score: number;
-      level_gained: number;
-      total_level: number;
-    })[]
-  >([]);
 
   const { data: params } = useQueryString(
     z.object({
@@ -91,21 +84,19 @@ const Characters: NextPageWithLayout = () => {
     return () => minisearch.removeAll();
   }, [indexed]);
 
-  useEffect(() => {
+  const results = useMemo(() => {
     if (logData.length) {
       if (search.length) {
         const results = minisearch.search(search);
-        setResults(
-          logData
-            .filter(log => results.find(result => result.id === log.id))
-            .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime() }))
-            .sort((a, b) => (b.score > a.score ? 1 : -1))
-        );
+        return logData
+          .filter(log => results.find(result => result.id === log.id))
+          .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime() }))
+          .sort((a, b) => (b.score > a.score ? 1 : -1));
       } else {
-        setResults(logData.sort((a, b) => (b.date < a.date ? 1 : -1)));
+        return logData.sort((a, b) => (b.date < a.date ? 1 : -1));
       }
     } else {
-      setResults([]);
+      return [];
     }
   }, [search, logData]);
 

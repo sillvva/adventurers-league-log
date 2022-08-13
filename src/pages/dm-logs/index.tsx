@@ -1,7 +1,7 @@
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { concatenate, tooltipClasses } from "$src/utils/misc";
-import { inferQueryOutput, trpc } from "$src/utils/trpc";
+import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -22,7 +22,6 @@ const minisearch = new MiniSearch({
 const Characters: NextPageWithLayout = () => {
   const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<inferQueryOutput<"_logs.dm-logs">>([]);
 
   const utils = trpc.useContext();
   const { data: logs } = trpc.useQuery(["_logs.dm-logs"]);
@@ -33,12 +32,14 @@ const Characters: NextPageWithLayout = () => {
   });
 
   const indexed = useMemo(() => {
-    return logs ? logs.map(log => ({
-      logId: log.id,
-      logName: log.name,
-      magicItems: log.magic_items_gained.map(item => item.name).join(", "),
-      storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
-    })) : [];
+    return logs
+      ? logs.map(log => ({
+          logId: log.id,
+          logName: log.name,
+          magicItems: log.magic_items_gained.map(item => item.name).join(", "),
+          storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
+        }))
+      : [];
   }, [logs]);
 
   useEffect(() => {
@@ -46,21 +47,19 @@ const Characters: NextPageWithLayout = () => {
     return () => minisearch.removeAll();
   }, [indexed]);
 
-  useEffect(() => {
+  const results = useMemo(() => {
     if (logs && indexed.length) {
       if (search.length) {
         const results = minisearch.search(search);
-        setResults(
-          logs
-            .filter(log => results.find(result => result.id === log.id))
-            .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || (0 - log.date.getTime()) }))
-            .sort((a, b) => (b.score > a.score ? 1 : -1))
-        );
+        return logs
+          .filter(log => results.find(result => result.id === log.id))
+          .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime() }))
+          .sort((a, b) => (b.score > a.score ? 1 : -1));
       } else {
-        setResults(logs.sort((a, b) => (b.date < a.date ? 1 : -1)));
+        return logs.sort((a, b) => (b.date < a.date ? 1 : -1));
       }
     } else {
-      setResults([]);
+      return [];
     }
   }, [indexed, search, logs]);
 
