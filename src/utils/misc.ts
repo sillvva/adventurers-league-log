@@ -1,5 +1,5 @@
-import { ZodSchema } from "zod";
 import qs from "qs";
+import { ZodSchema } from "zod";
 
 const parseObjectPrimitives = (obj: Record<string, any>): any => {
   return Object.fromEntries(

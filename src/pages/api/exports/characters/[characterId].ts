@@ -1,12 +1,12 @@
-import { unstable_getServerSession as getServerSession } from "next-auth";
 import { authOptions as nextAuthOptions } from "$src/pages/api/auth/[...nextauth]";
 import { prisma } from "$src/server/db/client";
-import type { NextApiHandler } from "next";
-import { getOne, getAll } from "$src/server/router/routers/characters";
+import { getAll, getOne } from "$src/server/router/routers/characters";
 import { parseError } from "$src/utils/misc";
+import type { NextApiHandler } from "next";
+import { unstable_getServerSession as getServerSession } from "next-auth";
 
 const handler: NextApiHandler = async function (req, res) {
-  const session = req && res && (await getServerSession(req, res, nextAuthOptions));
+  const session = await getServerSession(req, res, nextAuthOptions);
 
   if (!session || !session.user) return res.status(401).send("Unauthorized");
   const { characterId } = req.query;

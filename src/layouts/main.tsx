@@ -1,13 +1,13 @@
-import { PropsWithChildren, useState } from "react";
-import { useRouter } from "next/router";
+import { concatenate } from "$src/utils/misc";
+import { mdiMenu } from "@mdi/js";
+import Icon from "@mdi/react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import background from "../../public/images/barovia-gate.jpg";
-import google from "../../public/images/google.svg";
 import Image from "next/future/image";
 import Link from "next/link";
-import Icon from "@mdi/react";
-import { mdiMenu } from "@mdi/js";
-import { concatenate } from "$src/utils/misc";
+import { useRouter } from "next/router";
+import { PropsWithChildren, useState } from "react";
+import background from "../../public/images/barovia-gate.jpg";
+import google from "../../public/images/google.svg";
 
 const Layout = (props: PropsWithChildren) => {
   const session = useSession();

@@ -1,13 +1,13 @@
+import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
+import { concatenate, tooltipClasses } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
+import Icon from "@mdi/react";
 import Head from "next/head";
 import Link from "next/link";
-import Layout from "$src/layouts/main";
-import Icon from "@mdi/react";
 import { Fragment } from "react";
-import { concatenate, tooltipClasses } from "$src/utils/misc";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Characters: NextPageWithLayout = () => {
   const [parent1] = useAutoAnimate<HTMLTableSectionElement>();

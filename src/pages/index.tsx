@@ -1,11 +1,11 @@
 import type { NextPage } from "next";
+import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
-import { signIn, useSession } from "next-auth/react";
-import background from "../../public/images/barovia-gate.jpg";
-import google from "../../public/images/google.svg";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import background from "../../public/images/barovia-gate.jpg";
+import google from "../../public/images/google.svg";
 
 const Home: NextPage = () => {
   const router = useRouter();

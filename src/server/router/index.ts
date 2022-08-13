@@ -1,8 +1,8 @@
 // src/server/router/index.ts
-import { createRouter } from "./context";
 import superjson from "superjson";
+import { createRouter } from "./context";
 
-import { charactersRouter as charactersRouter } from "./routers/characters";
+import { charactersRouter } from "./routers/characters";
 import { protectedCharactersRouter } from "./routers/_characters";
 import { protectedLogsRouter } from "./routers/_logs";
 

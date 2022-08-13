@@ -1,15 +1,15 @@
-import type { NextPageWithLayout } from "../_app";
-import type { GetServerSideProps } from "next";
-import { trpc } from "$src/utils/trpc";
-import { unstable_getServerSession } from "next-auth";
-import type { Session } from "next-auth";
+import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
+import { trpc } from "$src/utils/trpc";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome } from "@mdi/js";
+import Icon from "@mdi/react";
+import type { GetServerSideProps } from "next";
+import type { Session } from "next-auth";
+import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
-import Layout from "$src/layouts/main";
-import Icon from "@mdi/react";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import type { NextPageWithLayout } from "../_app";
 
 interface PageProps {
   session: Session;

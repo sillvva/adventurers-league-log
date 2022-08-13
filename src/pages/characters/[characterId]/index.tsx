@@ -1,17 +1,17 @@
+import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
-import { z } from "zod";
-import { trpc } from "$src/utils/trpc";
 import { useQueryString } from "$src/utils/hooks";
+import { concatenate, slugify, tooltipClasses } from "$src/utils/misc";
+import { trpc } from "$src/utils/trpc";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
+import Icon from "@mdi/react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
-import Layout from "$src/layouts/main";
-import Icon from "@mdi/react";
-import { Fragment, useRef } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { concatenate, slugify, tooltipClasses } from "$src/utils/misc";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Fragment, useRef } from "react";
+import { z } from "zod";
 
 const Characters: NextPageWithLayout = () => {
   const session = useSession();

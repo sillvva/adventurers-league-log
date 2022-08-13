@@ -1,6 +1,6 @@
-import { createRouter } from "../context";
-import { z } from "zod";
 import type { Log, MagicItem, PrismaClient, StoryAward } from "@prisma/client";
+import { z } from "zod";
+import { createRouter } from "../context";
 
 export const charactersRouter = createRouter()
   .query("getAll", {
