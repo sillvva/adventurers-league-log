@@ -1,6 +1,6 @@
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
-import { concatenate, tooltipClasses } from "$src/utils/misc";
+import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
@@ -25,6 +25,7 @@ const minisearch = new MiniSearch({
 const Characters: NextPageWithLayout = () => {
   const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
   const [search, setSearch] = useState("");
+  const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
 
   const utils = trpc.useContext();
   const { data: logs } = trpc.useQuery(["_logs.dm-logs"]);
@@ -129,7 +130,9 @@ const Characters: NextPageWithLayout = () => {
                           "align-top !static",
                           (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                         )}>
-                        <p className={concatenate("text-primary-content font-semibold", tooltipClasses(log.description, "left"))} data-tip={log.description}>
+                        <p
+                          className="text-primary-content font-semibold"
+                          onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
                           {log.name}
                         </p>
                         <p className="text-netural-content font-normal text-xs">
@@ -182,8 +185,8 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.magic_items_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate("px-2 first:pl-0", tooltipClasses(mi.description, "left"))}
-                                      data-tip={mi.description}>
+                                      className="px-2 first:pl-0"
+                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                       {mi.name}
                                     </span>
                                   ))
@@ -246,8 +249,8 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.magic_items_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description))}
-                                      data-tip={mi.description}>
+                                      className="px-2 first:pl-0"
+                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                       {mi.name}
                                     </span>
                                   ))
@@ -269,8 +272,8 @@ const Characters: NextPageWithLayout = () => {
                                 ? log.story_awards_gained.map(mi => (
                                     <span
                                       key={mi.id}
-                                      className={concatenate("tooltip-bottom px-2 first:pl-0", tooltipClasses(mi.description, "right"))}
-                                      data-tip={mi.description}>
+                                      className="px-2 first:pl-0"
+                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                       {mi.name}
                                     </span>
                                   ))
@@ -328,6 +331,16 @@ const Characters: NextPageWithLayout = () => {
           </div>
         </section>
       </div>
+
+      <label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
+        {modal && (
+          <label className="modal-box relative">
+            <h3 className="text-lg font-bold text-primary-content">{modal.name}</h3>
+            {modal.date && <p className="text-sm text-neutral-content">{modal.date.toLocaleString()}</p>}
+            <p className="text-xs py-4">{modal.description}</p>
+          </label>
+        )}
+      </label>
     </>
   );
 };
