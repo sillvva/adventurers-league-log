@@ -3,6 +3,7 @@ import { mdiMenu } from "@mdi/js";
 import Icon from "@mdi/react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/future/image";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { PropsWithChildren, useState } from "react";
@@ -17,6 +18,9 @@ const Layout = (props: PropsWithChildren) => {
 
   return (
     <>
+      <Head>
+        <link rel="icon" type="image/x-icon" href="/favicon.png" />
+      </Head>
       <Image
         src={background}
         priority
