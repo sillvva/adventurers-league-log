@@ -21,6 +21,7 @@
     "@trpc/react": "^9.26.2",
     "@trpc/server": "^9.26.2",
     "daisyui": "^2.22.0",
+    "minisearch": "^5.0.0",
     "next": "12.2.3",
     "next-auth": "^4.10.3",
     "qs": "^6.11.0",

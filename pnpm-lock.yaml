@@ -19,6 +19,7 @@ specifiers:
   daisyui: ^2.22.0
   eslint: 8.18.0
   eslint-config-next: 12.2.3
+  minisearch: ^5.0.0
   next: 12.2.3
   next-auth: ^4.10.3
   postcss: ^8.4.16
@@ -45,6 +46,7 @@ dependencies:
   '@trpc/react': 9.26.2_4zadt2mtfbx7275mbcwrjz2noe
   '@trpc/server': 9.26.2
   daisyui: 2.22.0_25hquoklqeoqwmt7fwvvcyxm5e
+  minisearch: 5.0.0
   next: 12.2.3_biqbaboplfbrettd7655fr4n2y
   next-auth: 4.10.3_biqbaboplfbrettd7655fr4n2y
   qs: 6.11.0
@@ -1676,6 +1678,10 @@ packages:
 
   /minimist/1.2.6:
     resolution: {integrity: sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==}
+
+  /minisearch/5.0.0:
+    resolution: {integrity: sha512-VEwBhl8aFtc2UG2XmP7a4XaZxVfNhe7GvB2W/ZRGbLL3P3LbBhkoOezBWsMqG8Mr5VonqXAMRWth79XXKja1bQ==}
+    dev: false
 
   /ms/2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}

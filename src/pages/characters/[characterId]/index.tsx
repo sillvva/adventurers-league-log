@@ -2,16 +2,26 @@ import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, slugify, tooltipClasses } from "$src/utils/misc";
-import { trpc } from "$src/utils/trpc";
+import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
+import MiniSearch from "minisearch";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useRef } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { z } from "zod";
+
+const minisearch = new MiniSearch({
+  fields: ["logName", "magicItems", "storyAwards"],
+  idField: "logId",
+  searchOptions: {
+    boost: { logName: 2 },
+    prefix: true
+  }
+});
 
 const Characters: NextPageWithLayout = () => {
   const session = useSession();
@@ -19,6 +29,9 @@ const Characters: NextPageWithLayout = () => {
   const level = useRef(1);
   const [parent1] = useAutoAnimate<HTMLDivElement>();
   const [parent2] = useAutoAnimate<HTMLTableSectionElement>();
+  const [search, setSearch] = useState("");
+  const [indexed, setIndexed] = useState<{ logId: string; logName: string; magicItems: string; storyAwards: string }[]>([]);
+  const [results, setResults] = useState<inferQueryOutput<"characters.getOne">["logs"]>([]);
   level.current = 1;
 
   const { data: params } = useQueryString(
@@ -44,6 +57,42 @@ const Characters: NextPageWithLayout = () => {
       router.replace("/characters");
     }
   });
+
+  useEffect(() => {
+    if (character) {
+      setIndexed(
+        character.logs.map(log => ({
+          logId: log.id,
+          logName: log.name,
+          magicItems: log.magic_items_gained.map(item => item.name).join(", "),
+          storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
+        }))
+      );
+    }
+  }, [character]);
+
+  useEffect(() => {
+    if (indexed.length) minisearch.addAll(indexed);
+    return () => minisearch.removeAll();
+  }, [indexed]);
+
+  useEffect(() => {
+    if (character?.logs && indexed.length) {
+      if (search.length) {
+        const results = minisearch.search(search);
+        setResults(
+          character.logs
+            .filter(log => results.find(result => result.id === log.id))
+            .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || log.date }))
+            .sort((a, b) => (b.score > a.score ? 1 : -1))
+        );
+      } else {
+        setResults(character.logs.sort((a, b) => (b.date < a.date ? 1 : -1)));
+      }
+    } else {
+      setResults([]);
+    }
+  }, [indexed, search, character]);
 
   if (!character)
     return (
@@ -188,6 +237,7 @@ const Characters: NextPageWithLayout = () => {
                 <a className="btn btn-primary btn-sm">New Log</a>
               </Link>
             )}
+            <input type="text" placeholder="Search" onChange={e => setSearch(e.target.value)} className="input input-bordered input-sm w-full max-w-xs" />
           </div>
         </div>
         {character.image_url && (
@@ -212,7 +262,7 @@ const Characters: NextPageWithLayout = () => {
               </tr>
             </thead>
             <tbody ref={parent2}>
-              {character.logs.map(log => {
+              {results.map(log => {
                 const level_gained = character.log_levels.find(gl => gl.id === log.id);
                 if (level_gained) level.current += level_gained.levels;
 
