@@ -42,6 +42,8 @@ const Characters: NextPageWithLayout = () => {
     refetchOnWindowFocus: false
   });
 
+  const myCharacter = character?.user.id === session.data?.user?.id;
+
   const utils = trpc.useContext();
   const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
     onSuccess() {
@@ -128,7 +130,7 @@ const Characters: NextPageWithLayout = () => {
             <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{character.name}</li>
           </ul>
         </div>
-        {session.data?.user && (
+        {myCharacter && (
           <div className="dropdown dropdown-end">
             <label tabIndex={1} className="btn btn-sm">
               <Icon path={mdiDotsHorizontal} size={1} />
@@ -239,7 +241,7 @@ const Characters: NextPageWithLayout = () => {
             </div>
           </div>
           <div className="flex gap-4 print:hidden">
-            {session.data?.user && (
+            {myCharacter && (
               <Link href={`/characters/${params.characterId}/log/new`}>
                 <a className="btn btn-primary btn-sm">New Log</a>
               </Link>
@@ -265,7 +267,7 @@ const Characters: NextPageWithLayout = () => {
                 <th className="hidden sm:table-cell print:table-cell">Advancement</th>
                 <th className="hidden sm:table-cell print:table-cell">Treasure</th>
                 <th className="hidden md:table-cell print:!hidden">Story Awards</th>
-                <th className="print:hidden"></th>
+                {myCharacter && <th className="print:hidden"></th>}
               </tr>
             </thead>
             <tbody ref={parent2}>
@@ -426,23 +428,25 @@ const Characters: NextPageWithLayout = () => {
                         </div>
                       )}
                     </td>
-                    <td className="w-8 print:hidden">
-                      <div className="flex flex-col justify-center gap-2">
-                        <Link href={`/characters/${params.characterId}/log/${log.id}`}>
-                          <a className="btn btn-sm btn-primary">
-                            <Icon path={mdiPencil} size={0.8} />
-                          </a>
-                        </Link>
-                        <button
-                          className="btn btn-sm"
-                          onClick={async () => {
-                            if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
-                            deleteLogMutation.mutate({ logId: log.id });
-                          }}>
-                          <Icon path={mdiTrashCan} size={0.8} />
-                        </button>
-                      </div>
-                    </td>
+                    {myCharacter && (
+                      <td className="w-8 print:hidden">
+                        <div className="flex flex-col justify-center gap-2">
+                          <Link href={`/characters/${params.characterId}/log/${log.id}`}>
+                            <a className="btn btn-sm btn-primary">
+                              <Icon path={mdiPencil} size={0.8} />
+                            </a>
+                          </Link>
+                          <button
+                            className="btn btn-sm"
+                            onClick={async () => {
+                              if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
+                              deleteLogMutation.mutate({ logId: log.id });
+                            }}>
+                            <Icon path={mdiTrashCan} size={0.8} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                   {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                     <tr className="hidden print:table-row">
