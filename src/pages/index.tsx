@@ -22,7 +22,7 @@ const Home: NextPage = () => {
       <Head>
         <title>Adventurers League Log Sheet</title>
         <meta name="description" content="An online log sheet made for Adventurers League characters" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="/favicon.png" />
       </Head>
 
       <Image src={background} layout="fill" objectFit="cover" objectPosition="center" priority alt="Background" className="relative z-0 opacity-25" />
