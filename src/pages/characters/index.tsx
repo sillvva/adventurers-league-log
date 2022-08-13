@@ -79,7 +79,9 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
           }))
           .sort((a, b) => (b.score > a.score ? 1 : -1));
       } else {
-        return characters.sort((a, b) => (b.name > a.name ? 1 : -1)).map(character => ({ ...character, score: 0, match: [] }));
+        return characters
+          .sort((a, b) => a.total_level - b.total_level || a.name.localeCompare(b.name))
+          .map(character => ({ ...character, score: 0, match: [] }));
       }
     } else {
       return [];
@@ -100,12 +102,11 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
               <li className="text-secondary drop-shadow-md">Characters</li>
             </ul>
           </div>
+          <div className="flex-1" />
           {characters && characters.length > 0 && (
-            <div className="flex-1 flex justify-end">
-              <Link href="/characters/new">
-                <a className="btn btn-primary btn-sm">New Character</a>
-              </Link>
-            </div>
+            <Link href="/characters/new">
+              <a className="btn btn-primary btn-sm">New Character</a>
+            </Link>
           )}
           <div className="dropdown dropdown-end">
             <label tabIndex={1} className="btn btn-sm">
