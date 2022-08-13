@@ -40,55 +40,22 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
     where: { id: characterId }
   });
 
-  // character.logs.push({
-  //   id: "1234",
-  //   date: new Date(),
-  //   created_at: new Date(),
-  //   name: "Test Game",
-  //   description: "Test Game Description",
-  //   type: "game",
-  //   experience: 400,
-  //   acp: 0,
-  //   tcp: 0,
-  //   level: 0,
-  //   gold: 250,
-  //   magic_items_gained: [{
-  //     id: "123",
-  //     name: "Test Magic Item",
-  //     description: "Test Magic Item Description",
-  //     gameGainedId: "1234",
-  //     gameLostId: null
-  //   }],
-  //   magic_items_lost: [],
-  //   story_awards_gained: [],
-  //   story_awards_lost: [],
-  //   dm: {
-  //     id: "12",
-  //     name: "Test DM",
-  //     DCI: 1234,
-  //     uid: null
-  //   },
-  //   is_dm_log: false,
-  //   dungeonMasterId: "12",
-  //   characterId: character.id
-  // });
-
   const levels = getLevels(character.logs);
 
   const total_level = levels.total;
   const total_gold = character.logs.reduce((acc, log) => acc + log.gold, 0);
   const total_dtd = character.logs.reduce((acc, log) => acc + log.dtd, 0);
-  const magic_items: MagicItem[] = character.logs.reduce((acc, log) => {
+  const magic_items = character.logs.reduce((acc, log) => {
     acc.push(...log.magic_items_gained);
     log.magic_items_lost.forEach(magicItem => {
-      acc.splice(acc.indexOf(magicItem), 1);
+      acc.splice(acc.findIndex(a => a.id === magicItem.id), 1);
     });
     return acc;
   }, [] as MagicItem[]);
-  const story_awards: StoryAward[] = character.logs.reduce((acc, log) => {
+  const story_awards = character.logs.reduce((acc, log) => {
     acc.push(...log.story_awards_gained);
-    log.story_awards_lost.forEach(magicItem => {
-      acc.splice(acc.indexOf(magicItem), 1);
+    log.story_awards_lost.forEach(storyAward => {
+      acc.splice(acc.findIndex(a => a.id === storyAward.id), 1);
     });
     return acc;
   }, [] as StoryAward[]);
@@ -133,14 +100,14 @@ export async function getAll(prisma: PrismaClient, userId: string) {
     const magic_items = character.logs.reduce((acc, log) => {
       acc.push(...log.magic_items_gained);
       log.magic_items_lost.forEach(magicItem => {
-        acc.splice(magic_items.indexOf(magicItem), 1);
+        acc.splice(acc.findIndex(a => a.id === magicItem.id), 1);
       });
       return acc;
     }, [] as MagicItem[]);
-    const story_awards: StoryAward[] = character.logs.reduce((acc, log) => {
+    const story_awards = character.logs.reduce((acc, log) => {
       acc.push(...log.story_awards_gained);
-      log.story_awards_lost.forEach(magicItem => {
-        acc.splice(acc.indexOf(magicItem), 1);
+      log.story_awards_lost.forEach(storyAward => {
+        acc.splice(acc.findIndex(a => a.id === storyAward.id), 1);
       });
       return acc;
     }, [] as StoryAward[]);
