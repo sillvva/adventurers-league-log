@@ -1,16 +1,29 @@
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { concatenate, tooltipClasses } from "$src/utils/misc";
-import { trpc } from "$src/utils/trpc";
+import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
+import MiniSearch from "minisearch";
 import Head from "next/head";
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
+
+const minisearch = new MiniSearch({
+  fields: ["logName", "characterName", "magicItems", "storyAwards"],
+  idField: "logId",
+  searchOptions: {
+    boost: { logName: 2 },
+    prefix: true
+  }
+});
 
 const Characters: NextPageWithLayout = () => {
   const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
+  const [search, setSearch] = useState("");
+  const [indexed, setIndexed] = useState<{ logId: string; logName: string; characterName: string; magicItems: string; storyAwards: string }[]>([]);
+  const [results, setResults] = useState<inferQueryOutput<"_logs.dm-logs">>([]);
 
   const utils = trpc.useContext();
   const { data: logs } = trpc.useQuery(["_logs.dm-logs"]);
@@ -20,60 +33,99 @@ const Characters: NextPageWithLayout = () => {
     }
   });
 
+  useEffect(() => {
+    if (logs) {
+      setIndexed(
+        logs.map(log => ({
+          logId: log.id,
+          logName: log.name,
+          characterName: log.character?.name || "",
+          magicItems: log.magic_items_gained.map(item => item.name).join(", "),
+          storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
+        }))
+      );
+    }
+  }, [logs]);
+
+  useEffect(() => {
+    if (indexed.length) minisearch.addAll(indexed);
+    return () => minisearch.removeAll();
+  }, [indexed]);
+
+  useEffect(() => {
+    if (logs && indexed.length) {
+      if (search.length) {
+        const results = minisearch.search(search);
+        setResults(
+          logs
+            .filter(log => results.find(result => result.id === log.id))
+            .map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || (0 - log.date.getTime()) }))
+            .sort((a, b) => (b.score > a.score ? 1 : -1))
+        );
+      } else {
+        setResults(logs.sort((a, b) => (b.date < a.date ? 1 : -1)));
+      }
+    } else {
+      setResults([]);
+    }
+  }, [indexed, search, logs]);
+
   return (
     <>
       <Head>
         <title>DM Logs</title>
       </Head>
 
-      <div className="flex gap-4 print:hidden">
-        <div className="flex-1 text-sm breadcrumbs mb-4">
-          <ul>
-            <li>
-              <Icon path={mdiHome} className="w-4" />
-            </li>
-            <li className="text-secondary drop-shadow-md">DM Logs</li>
-          </ul>
-        </div>
-        {logs && logs.length > 0 && (
-          <div className="flex-1 flex justify-end">
-            <Link href="/dm-logs/new">
-              <a className="btn btn-primary btn-sm">New Log</a>
-            </Link>
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-4 print:hidden">
+          <div className="flex-1 text-sm breadcrumbs">
+            <ul>
+              <li>
+                <Icon path={mdiHome} className="w-4" />
+              </li>
+              <li className="text-secondary drop-shadow-md">DM Logs</li>
+            </ul>
           </div>
-        )}
-        <div className="dropdown dropdown-end">
-          <label tabIndex={1} className="btn btn-sm">
-            <Icon path={mdiDotsHorizontal} size={1} />
-          </label>
-          <ul tabIndex={1} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-            <li>
-              <a download={`dm.json`} href={`/api/exports/dm`} target="_blank" rel="noreferrer noopener">
-                Export
-              </a>
-            </li>
-          </ul>
+          {logs && logs.length > 0 && (
+            <div className="flex-1 flex justify-end">
+              <Link href="/dm-logs/new">
+                <a className="btn btn-primary btn-sm">New Log</a>
+              </Link>
+            </div>
+          )}
+          <div className="dropdown dropdown-end">
+            <label tabIndex={1} className="btn btn-sm">
+              <Icon path={mdiDotsHorizontal} size={1} />
+            </label>
+            <ul tabIndex={1} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+              <li>
+                <a download={`dm.json`} href={`/api/exports/dm`} target="_blank" rel="noreferrer noopener">
+                  Export
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
 
-      <section>
-        <div className="overflow-x-auto rounded-lg">
-          <table className="table w-full">
-            <thead>
-              <tr>
-                <th className="table-cell sm:hidden print:hidden">Game</th>
-                <th className="hidden sm:table-cell print:table-cell">Title</th>
-                <th className="hidden sm:table-cell print:table-cell">Advancement</th>
-                <th className="hidden sm:table-cell print:table-cell">Treasure</th>
-                <th className="hidden sm:table-cell print:!hidden">Story Awards</th>
-                <th className="print:hidden"></th>
-              </tr>
-            </thead>
-            <tbody ref={parent1}>
-              {!logs ? (
-                <></>
-              ) : (
-                logs.map(log => (
+        <div className="flex gap-4">
+          <input type="text" placeholder="Search" onChange={e => setSearch(e.target.value)} className="input input-bordered input-sm w-full sm:max-w-xs" />
+        </div>
+
+        <section>
+          <div className="rounded-lg">
+            <table className="table w-full">
+              <thead>
+                <tr>
+                  <th className="table-cell sm:hidden print:hidden">Game</th>
+                  <th className="hidden sm:table-cell print:table-cell">Title</th>
+                  <th className="hidden sm:table-cell print:table-cell">Advancement</th>
+                  <th className="hidden sm:table-cell print:table-cell">Treasure</th>
+                  <th className="hidden sm:table-cell print:!hidden">Story Awards</th>
+                  <th className="print:hidden"></th>
+                </tr>
+              </thead>
+              <tbody ref={parent1}>
+                {results.map(log => (
                   <Fragment key={log.id}>
                     <tr>
                       <th
@@ -274,12 +326,12 @@ const Characters: NextPageWithLayout = () => {
                       </tr>
                     )}
                   </Fragment>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </>
   );
 };
