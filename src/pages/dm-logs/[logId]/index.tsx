@@ -131,7 +131,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 
       if (!values.date) errors.push(setError("date", { message: "Required" }));
       else values.date = new Date(values.date.replace("T", " ")).toISOString();
-      
+
       if (!values.applied_date) errors.push(setError("applied_date", { message: "Required" }));
       else values.applied_date = new Date(values.applied_date.replace("T", " ")).toISOString();
 
@@ -382,7 +382,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
               <label className="label">
                 <span className="label-text whitespace-nowrap overflow-hidden text-ellipsis">Downtime Days</span>
               </label>
-              <input type="number" value={selectedGame.dtd} {...register("dtd")} className="input input-bordered focus:border-primary w-full" />
+              <input type="number" {...register("dtd", { value: selectedGame.dtd })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.dtd?.message}</span>
               </label>
