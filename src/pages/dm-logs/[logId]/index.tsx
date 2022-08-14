@@ -538,21 +538,28 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
   });
 
   const log = await prisma.log.findFirst({
-    where: { id: typeof context.query.logId === "string" ? context.query.logId : "" },
+    where: { id: typeof context.query.logId === "string" ? context.query.logId : "", is_dm_log: true },
     include: { dm: true, magic_items_gained: true, magic_items_lost: true, story_awards_gained: true, story_awards_lost: true }
   });
+
+  if (!log || log.dm?.uid !== session.user?.id)
+    return {
+      props: { session: null, log: null, characters: [] as SSRChar[] },
+      redirect: {
+        destination: "/dm-logs",
+        permanent: false
+      }
+    };
 
   return {
     props: {
       session,
-      log: log
-        ? {
-            ...log,
-            date: log.date.toISOString(),
-            created_at: log.created_at.toISOString(),
-            applied_date: log.applied_date === null ? null : log.applied_date.toISOString()
-          }
-        : null,
+      log: {
+        ...log,
+        date: log.date.toISOString(),
+        created_at: log.created_at.toISOString(),
+        applied_date: log.applied_date === null ? null : log.applied_date.toISOString()
+      },
       characters: characters.map(character => ({ ...character, created_at: character.created_at.toISOString() }))
     }
   };

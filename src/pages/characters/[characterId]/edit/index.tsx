@@ -1,22 +1,22 @@
-import type { NextPageWithLayout } from "$src/pages/_app";
-import type { GetServerSideProps } from "next";
-import { unstable_getServerSession } from "next-auth";
-import type { Session } from "next-auth";
+import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import { useForm } from "react-hook-form";
+import type { NextPageWithLayout } from "$src/pages/_app";
+import { useQueryString } from "$src/utils/hooks";
+import { concatenate } from "$src/utils/misc";
+import { trpc } from "$src/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mdiHome } from "@mdi/js";
+import Icon from "@mdi/react";
+import type { GetServerSideProps } from "next";
+import type { Session } from "next-auth";
+import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
-import Layout from "$src/layouts/main";
-import Icon from "@mdi/react";
-import { trpc } from "$src/utils/trpc";
-import { z } from "zod";
 import { useRouter } from "next/router";
-import { concatenate } from "$src/utils/misc";
-import { useQueryString } from "$src/utils/hooks";
-import { newCharacterSchema } from "../../new";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { newCharacterSchema } from "../../new";
 
 interface PageProps {
   session: Session;
@@ -54,6 +54,11 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     refetchOnWindowFocus: false
   });
 
+  if (character && character.userId !== session.user?.id) {
+    router.replace(`/characters/${params.characterId}`);
+    return <div>Not authorized</div>;
+  }
+
   const utils = trpc.useContext();
   const mutation = trpc.useMutation(["_characters.edit"], {
     onSuccess() {
@@ -62,11 +67,12 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     }
   });
 
-  if (!character) return (
-    <Head>
-      <title>Edit Character</title>
-    </Head>
-  );
+  if (!character)
+    return (
+      <Head>
+        <title>Edit Character</title>
+      </Head>
+    );
 
   const submitHandler = handleSubmit(data => {
     setSubmitting(true);
@@ -111,7 +117,11 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                   <span className="text-error">*</span>
                 </span>
               </label>
-              <input type="text" {...register("name", { required: true, value: character.name })} className="input input-bordered focus:border-primary w-full" />
+              <input
+                type="text"
+                {...register("name", { required: true, value: character.name })}
+                className="input input-bordered focus:border-primary w-full"
+              />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.name?.message}</span>
               </label>
@@ -125,7 +135,11 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
                   <span className="text-error">*</span>
                 </span>
               </label>
-              <input type="text" {...register("campaign", { required: true, value: character.campaign || "" })} className="input input-bordered focus:border-primary w-full" />
+              <input
+                type="text"
+                {...register("campaign", { required: true, value: character.campaign || "" })}
+                className="input input-bordered focus:border-primary w-full"
+              />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.campaign?.message}</span>
               </label>
@@ -158,7 +172,11 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text">Character Sheet URL</span>
               </label>
-              <input type="text" {...register("character_sheet_url", { value: character.character_sheet_url || "" })} className="input input-bordered focus:border-primary w-full" />
+              <input
+                type="text"
+                {...register("character_sheet_url", { value: character.character_sheet_url || "" })}
+                className="input input-bordered focus:border-primary w-full"
+              />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.character_sheet_url?.message}</span>
               </label>
@@ -169,7 +187,11 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
               <label className="label">
                 <span className="label-text">Image URL</span>
               </label>
-              <input type="text" {...register("image_url", { value: character.image_url || "" })} className="input input-bordered focus:border-primary w-full" />
+              <input
+                type="text"
+                {...register("image_url", { value: character.image_url || "" })}
+                className="input input-bordered focus:border-primary w-full"
+              />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.image_url?.message}</span>
               </label>
