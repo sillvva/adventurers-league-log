@@ -9,27 +9,27 @@
 }
 
 @font-face {
-	font-family: "Draconis";
-	src: url("/fonts/Draconis.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Draconis";
+  src: url("/fonts/Draconis.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: "Vecna";
-	src: url("/fonts/Vecna.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Vecna";
+  src: url("/fonts/Vecna.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: "Vecna";
-	src: url("/fonts/VecnaBold.ttf") format("truetype");
-	font-weight: bold;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Vecna";
+  src: url("/fonts/VecnaBold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
 }
 
 @layer base {
@@ -37,16 +37,19 @@
     overflow-x: hidden;
     overflow-y: scroll;
   }
+  thead {
+    display: table-row-group;
+  }
 }
 
 @layer utilities {
-	.text-primary-content {
-		@apply print:text-gray-700;
-	}
-	.text-secondary {
-		--tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / 0.2)) drop-shadow(0 1px 1px rgb(0 0 0 / 1));
-		@apply print:drop-shadow-none
-	}
+  .text-primary-content {
+    @apply print:text-gray-700;
+  }
+  .text-secondary {
+    --tw-drop-shadow: drop-shadow(0 4px 3px rgb(0 0 0 / 0.2)) drop-shadow(0 1px 1px rgb(0 0 0 / 1));
+    @apply print:drop-shadow-none;
+  }
 }
 
 @layer components {
