@@ -200,7 +200,7 @@ const Characters: NextPageWithLayout = () => {
                 <div className="flex-1 text-right">{character.total_gold.toLocaleString("en-US")}</div>
               </div>
               <div className="flex">
-                <h4 className="font-semibold text-secondary-content">Downtime Days</h4>
+                <h4 className="font-semibold text-secondary-content">Downtime</h4>
                 <div className="flex-1 text-right">{character.total_dtd}</div>
               </div>
             </div>
@@ -250,7 +250,7 @@ const Characters: NextPageWithLayout = () => {
           </div>
         </div>
         {character.image_url && (
-          <div className="relative w-56 max-h-80 hidden md:flex print:flex flex-col justify-center items-end ml-8">
+          <div className="relative w-56 max-h-80 print:w-40 hidden md:flex print:hidden flex-col justify-center items-end ml-8">
             <a href={character.image_url} target="_blank" rel="noreferrer noopener">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={character.image_url} className="object-contain object-top max-h-80" alt={character.name} />
@@ -263,9 +263,9 @@ const Characters: NextPageWithLayout = () => {
           <table className="table w-full">
             <thead>
               <tr>
-                <th>Log Entry</th>
-                <th className="hidden sm:table-cell print:table-cell">Advancement</th>
-                <th className="hidden sm:table-cell print:table-cell">Treasure</th>
+                <th className="print:p-2">Log Entry</th>
+                <th className="hidden sm:table-cell print:table-cell print:p-2">Advancement</th>
+                <th className="hidden sm:table-cell print:table-cell print:p-2">Treasure</th>
                 <th className="hidden md:table-cell print:!hidden">Story Awards</th>
                 {myCharacter && <th className="print:hidden"></th>}
               </tr>
@@ -273,14 +273,14 @@ const Characters: NextPageWithLayout = () => {
             <tbody ref={parent2}>
               {results.map(log => (
                 <Fragment key={log.id}>
-                  <tr>
+                  <tr className="print:text-sm">
                     <th
                       className={concatenate(
-                        "align-top !static",
+                        "align-top !static print:p-2",
                         (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                       )}>
                       <p
-                        className={concatenate("text-primary-content font-semibold whitespace-pre-wrap")}
+                        className="text-primary-content font-semibold whitespace-pre-wrap"
                         onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
                         {log.name}
                       </p>
@@ -345,7 +345,7 @@ const Characters: NextPageWithLayout = () => {
                     </th>
                     <td
                       className={concatenate(
-                        "align-top hidden sm:table-cell print:table-cell",
+                        "align-top hidden sm:table-cell print:table-cell print:p-2",
                         (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                       )}>
                       {log.experience > 0 && (
@@ -371,7 +371,7 @@ const Characters: NextPageWithLayout = () => {
                     </td>
                     <td
                       className={concatenate(
-                        "align-top hidden sm:table-cell print:table-cell",
+                        "align-top hidden sm:table-cell print:table-cell print:p-2",
                         (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                       )}>
                       {log.tcp !== 0 && (
@@ -448,7 +448,7 @@ const Characters: NextPageWithLayout = () => {
                   </tr>
                   {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                     <tr className="hidden print:table-row">
-                      <td colSpan={3} className="pt-0">
+                      <td colSpan={3} className="p-2 pt-0">
                         <p className="text-sm">
                           <span className="font-semibold">Notes:</span> {log.description}
                         </p>
