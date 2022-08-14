@@ -1,5 +1,5 @@
 import { concatenate } from "$src/utils/misc";
-import { mdiMenu } from "@mdi/js";
+import { mdiGithub, mdiMenu } from "@mdi/js";
 import Icon from "@mdi/react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/future/image";
@@ -52,6 +52,9 @@ const Layout = (props: PropsWithChildren) => {
             <div className="flex-1">&nbsp;</div>
             {session.status !== "loading" && (
               <>
+                <a href="https://github.com/sillvva/adventurers-league-log" target="_blank" rel="noreferrer noopener" className="p-2 hidden sm:flex items-center">
+                  <Icon path={mdiGithub} size={1} />
+                </a>
                 <a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener" className="p-2 hidden sm:flex items-center">
                   Contribute
                 </a>
@@ -79,6 +82,11 @@ const Layout = (props: PropsWithChildren) => {
                         <li>
                           <a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener" className="sm:hidden items-center">
                             Contribute
+                          </a>
+                        </li>
+                        <li>
+                          <a href="https://github.com/sillvva/adventurers-league-log" target="_blank" rel="noreferrer noopener" className="sm:hidden items-center">
+                            Github
                           </a>
                         </li>
                         <li>
