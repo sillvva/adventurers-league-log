@@ -1,3 +1,4 @@
+import AutoResizeTextArea from "$src/components/textarea";
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
@@ -494,7 +495,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
             <label className="label">
               <span className="label-text">Notes</span>
             </label>
-            <textarea
+            <AutoResizeTextArea
               {...register("description", { value: selectedLog.description || "" })}
               className="textarea textarea-bordered focus:border-primary w-full"
             />
@@ -555,12 +556,13 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
                       <span className="label-text">Description</span>
                     </label>
                     <textarea
-                      value={item.description}
                       onChange={e => {
                         setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
                       }}
                       className="textarea textarea-bordered focus:border-primary w-full"
-                    />
+                      style={{ resize: "none" }}>
+                      {item.description}
+                    </textarea>
                   </div>
                 </div>
               </div>
@@ -614,6 +616,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
                           setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
                         }}
                         className="input input-bordered focus:border-primary w-full"
+                        style={{ resize: "none" }}
                       />
                       <label className="label">
                         <span className="label-text-alt text-error">{(errors.story_awards_gained || [])[index]?.name?.message}</span>
@@ -628,12 +631,12 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
                       <span className="label-text">Description</span>
                     </label>
                     <textarea
-                      value={item.description}
                       onChange={e => {
                         setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
                       }}
-                      className="textarea textarea-bordered focus:border-primary w-full"
-                    />
+                      className="textarea textarea-bordered focus:border-primary w-full">
+                      {item.description}
+                    </textarea>
                   </div>
                 </div>
               </div>

@@ -392,7 +392,7 @@ const Characters: NextPageWithLayout = () => {
                   {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                     <tr className="hidden print:table-row">
                       <td colSpan={3} className="p-2 pt-0">
-                        <p className="text-sm">
+                        <p className="text-sm whitespace-pre-wrap">
                           <span className="font-semibold">Notes:</span> {log.description}
                         </p>
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
@@ -424,7 +424,7 @@ const Characters: NextPageWithLayout = () => {
           <label className="modal-box relative">
             <h3 className="text-lg font-bold text-primary-content">{modal.name}</h3>
             {modal.date && <p className="text-xs text-neutral-content">{modal.date.toLocaleString()}</p>}
-            <p className="text-xs sm:text-sm pt-4">{modal.description}</p>
+            <p className="text-xs sm:text-sm pt-4 whitespace-pre-wrap">{modal.description}</p>
           </label>
         )}
       </label>
