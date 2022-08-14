@@ -36,4 +36,19 @@ export const protectedCharactersRouter = createProtectedRouter()
         where: { id: input.id }
       });
     }
+  })
+  .query("getDMs", {
+    async resolve({ ctx }) {
+      return await ctx.prisma.dungeonMaster.findMany({
+        where: {
+          logs: {
+            every: {
+              character: {
+                userId: ctx.session.user.id
+              }
+            }
+          }
+        }
+      });
+    }
   });

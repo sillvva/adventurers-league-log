@@ -145,7 +145,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
   const [parent2] = useAutoAnimate<HTMLDivElement>();
   const [season, setSeason] = useState<1 | 8 | 9>(selectedGame?.experience ? 1 : selectedGame?.acp ? 8 : 9);
   const [type, setType] = useState<LogType>(selectedGame.type || "game");
-  const [dms, setDMs] = useState<DungeonMaster[]>([]);
+  const [dmSearch, setDmSearch] = useState("");
   const [magicItemsGained, setMagicItemsGained] = useState(
     selectedGame.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
   );
@@ -155,6 +155,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
   );
   const [storyAwardsLost, setStoryAwardsLost] = useState<string[]>(selectedGame.story_awards_lost.map(mi => mi.id));
   const [mutError, setMutError] = useState<string | null>(null);
+
+  const { data: dms } = trpc.useQuery(["_characters.getDMs"], {
+    refetchOnWindowFocus: false,
+  });
 
   const mutation = trpc.useMutation(["_logs.save"], {
     onSuccess() {
@@ -231,20 +235,6 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
   const removeStoryAward = (index: number) => setStoryAwardsGained(storyAwardsGained.filter((_, i) => i !== index));
   const addLostStoryAward = () => setStoryAwardsLost([...storyAwardsLost, storyAwards[0]?.id || ""]);
   const removeLostStoryAward = (index: number) => setStoryAwardsLost(storyAwardsLost.filter((_, i) => i !== index));
-
-  const getDMs = (prop: "name" | "DCI", value: string | number | null) => {
-    if (!character || !value) return setDMs([]);
-
-    const dms: DungeonMaster[] = [];
-    character.logs.forEach(log => {
-      if (!log.dm) return;
-      if (dms.find(dm => dm.id === log.dm?.id)) return;
-      const match = log.dm[prop]?.toString().toLowerCase().includes(value.toString().toLowerCase());
-      if (match) dms.push(log.dm);
-    });
-
-    setDMs(dms);
-  };
 
   const setDM = (dm: DungeonMaster) => {
     setValue("dm.id", dm.id);
@@ -354,20 +344,23 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
                         <label>
                           <input
                             type="text"
-                            {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => getDMs("name", e.target.value) })}
+                            {...register("dm.name", { value: selectedGame.dm?.name || "", onChange: e => setDmSearch(e.target.value) })}
                             className="input input-bordered focus:border-primary w-full"
                           />
                         </label>
-                        {dms.length > 0 && (
+                        {dms && dms.length > 0 && dmSearch.trim() && (
                           <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                            {dms.map(dm => (
-                              <li key={dm.id}>
-                                <a onMouseDown={() => setDM(dm)}>
-                                  {dm.name}
-                                  {dm.DCI && ` (${dm.DCI})`}
-                                </a>
-                              </li>
-                            ))}
+                            {dms
+                              .filter(dm => dm.name.toLowerCase().includes(dmSearch.toLowerCase()))
+                              .map(dm => (
+                                <li key={dm.id}>
+                                  <a onMouseDown={() => setDM(dm)}>
+                                    {dm.name}
+                                    {dm.DCI && ` (${dm.DCI})`}
+                                  </a>
+                                </li>
+                              ))
+                              .slice(0, 8)}
                           </ul>
                         )}
                       </div>
@@ -383,20 +376,23 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
                         <label>
                           <input
                             type="number"
-                            {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => getDMs("DCI", e.target.value) })}
+                            {...register("dm.DCI", { value: selectedGame.dm?.DCI || null, onChange: e => setDmSearch(e.target.value) })}
                             className="input input-bordered focus:border-primary w-full"
                           />
                         </label>
-                        {dms.length > 0 && (
+                        {dms && dms.length > 0 && dmSearch.trim() && (
                           <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                            {dms.map(dm => (
-                              <li key={dm.id}>
-                                <a onMouseDown={() => setDM(dm)}>
-                                  {dm.name}
-                                  {dm.DCI && ` (${dm.DCI})`}
-                                </a>
-                              </li>
-                            ))}
+                            {dms
+                              .filter(dm => dm.DCI && dm.DCI.toString().includes(dmSearch))
+                              .map(dm => (
+                                <li key={dm.id}>
+                                  <a onMouseDown={() => setDM(dm)}>
+                                    {dm.name}
+                                    {dm.DCI && ` (${dm.DCI})`}
+                                  </a>
+                                </li>
+                              ))
+                              .slice(0, 8)}
                           </ul>
                         )}
                       </div>
