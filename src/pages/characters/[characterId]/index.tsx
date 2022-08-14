@@ -348,27 +348,25 @@ const Characters: NextPageWithLayout = () => {
                         "align-top hidden sm:table-cell print:table-cell",
                         (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                       )}>
-                      {log.type === "game" && (
-                        <>
-                          {log.experience > 0 && (
-                            <p>
-                              <span className="font-semibold">Experience:</span> {log.experience}
-                            </p>
-                          )}
-                          {log.acp > 0 && (
-                            <p>
-                              <span className="font-semibold">ACP:</span> {log.acp}
-                            </p>
-                          )}
-                          <p>
-                            <span className="font-semibold">Levels:</span> {log.level_gained} {`(${log.total_level})`}
-                          </p>
-                          {log.dtd !== 0 && (
-                            <p>
-                              <span className="font-semibold text-sm">Downtime Days:</span> {log.dtd}
-                            </p>
-                          )}
-                        </>
+                      {log.experience > 0 && (
+                        <p>
+                          <span className="font-semibold">Experience:</span> {log.experience}
+                        </p>
+                      )}
+                      {log.acp > 0 && (
+                        <p>
+                          <span className="font-semibold">ACP:</span> {log.acp}
+                        </p>
+                      )}
+                      {log.level_gained > 0 && (
+                        <p>
+                          <span className="font-semibold">Levels:</span> {log.level_gained} {`(${log.total_level})`}
+                        </p>
+                      )}
+                      {log.dtd !== 0 && (
+                        <p>
+                          <span className="font-semibold text-sm">Downtime Days:</span> {log.dtd}
+                        </p>
                       )}
                     </td>
                     <td
