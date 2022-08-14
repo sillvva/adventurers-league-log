@@ -1,3 +1,4 @@
+import { Items } from "$src/components/items";
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { useQueryString } from "$src/utils/hooks";
@@ -28,8 +29,8 @@ const Characters: NextPageWithLayout = () => {
   const router = useRouter();
   const [parent1] = useAutoAnimate<HTMLDivElement>();
   const [parent2] = useAutoAnimate<HTMLTableSectionElement>();
-  const [search, setSearch] = useState("");
   const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
+  const [search, setSearch] = useState("");
 
   const { data: params } = useQueryString(
     z.object({
@@ -193,55 +194,27 @@ const Characters: NextPageWithLayout = () => {
           <div className="flex-1 flex flex-wrap sm:flex-nowrap print:flex-nowrap gap-4 sm:gap-4 md:gap-6">
             <div className="basis-1/2 sm:basis-1/3 lg:basis-1/3 print:basis-1/3 flex flex-col gap-2 sm:gap-4">
               <div className="flex">
-                <h4 className="font-semibold text-secondary-content">Level</h4>
+                <h4 className="font-semibold">Level</h4>
                 <div className="flex-1 text-right">{character.total_level}</div>
               </div>
               <div className="flex">
-                <h4 className="font-semibold text-secondary-content">Tier</h4>
+                <h4 className="font-semibold">Tier</h4>
                 <div className="flex-1 text-right">{character.tier}</div>
               </div>
               <div className="flex">
-                <h4 className="font-semibold text-secondary-content">Gold</h4>
+                <h4 className="font-semibold">Gold</h4>
                 <div className="flex-1 text-right">{character.total_gold.toLocaleString("en-US")}</div>
               </div>
               <div className="flex">
-                <h4 className="font-semibold text-secondary-content">Downtime</h4>
+                <h4 className="font-semibold">Downtime</h4>
                 <div className="flex-1 text-right">{character.total_dtd}</div>
               </div>
             </div>
             <div className="divider sm:divider-horizontal before:bg-neutral-content/50 after:bg-neutral-content/50"></div>
             <div className="flex-1 basis-full sm:basis-2/3 lg:basis-2/3 print:basis-2/3 flex flex-col">
               <div className="flex flex-col gap-4" ref={parent1}>
-                <div className="flex-1 flex flex-col">
-                  <h4 className="font-semibold text-secondary-content mb-2">Story Awards</h4>
-                  <p className="flex flex-wrap divide-x text-sm whitespace-pre-wrap">
-                    {character.story_awards.length
-                      ? character.story_awards.map(mi => (
-                          <span
-                            key={mi.id}
-                            className="tooltip-bottom px-2 first:pl-0"
-                            onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                            {mi.name}
-                          </span>
-                        ))
-                      : "None"}
-                  </p>
-                </div>
-                <div className="flex-1 flex flex-col">
-                  <h4 className="font-semibold text-secondary-content mb-2">Magic Items</h4>
-                  <p className="flex flex-wrap divide-x text-sm whitespace-pre-wrap">
-                    {character.magic_items.length
-                      ? character.magic_items.map(mi => (
-                          <span
-                            key={mi.id}
-                            className="tooltip-bottom px-2 first:pl-0"
-                            onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                            {mi.name}
-                          </span>
-                        ))
-                      : "None"}
-                  </p>
-                </div>
+                <Items title="Story Awards" items={character.story_awards} />
+                <Items title="Magic Items" items={character.magic_items} formatting />
               </div>
             </div>
           </div>
@@ -331,19 +304,7 @@ const Characters: NextPageWithLayout = () => {
                           </p>
                         )}
                         <div>
-                          <p className="font-semibold">Magic Items:</p>
-                          <p className="flex flex-wrap divide-x text-sm">
-                            {log.magic_items_gained.length
-                              ? log.magic_items_gained.map(mi => (
-                                  <span
-                                    key={mi.id}
-                                    className="px-2 first:pl-0"
-                                    onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                                    {mi.name}
-                                  </span>
-                                ))
-                              : "None"}
-                          </p>
+                          <Items title="Magic Items" items={log.magic_items_gained} />
                           <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                         </div>
                       </div>
@@ -391,19 +352,7 @@ const Characters: NextPageWithLayout = () => {
                       )}
                       {(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
                         <div>
-                          <p className="font-semibold">Magic Items:</p>
-                          <p className="divide-x text-sm whitespace-pre-wrap">
-                            {log.magic_items_gained.length
-                              ? log.magic_items_gained.map(mi => (
-                                  <span
-                                    key={mi.id}
-                                    className="px-2 first:pl-0"
-                                    onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                                    {mi.name}
-                                  </span>
-                                ))
-                              : "None"}
-                          </p>
+                          <Items title="Magic Items" items={log.magic_items_gained} />
                           <p className="text-sm line-through whitespace-pre-wrap">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                         </div>
                       )}
@@ -415,18 +364,7 @@ const Characters: NextPageWithLayout = () => {
                       )}>
                       {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                         <div>
-                          <p className="divide-x text-sm whitespace-pre-wrap">
-                            {log.story_awards_gained.length
-                              ? log.story_awards_gained.map(mi => (
-                                  <span
-                                    key={mi.id}
-                                    className="px-2 first:pl-0"
-                                    onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                                    {mi.name}
-                                  </span>
-                                ))
-                              : "None"}
-                          </p>
+                          <Items items={log.story_awards_gained} />
                           <p className="text-sm line-through whitespace-pre-wrap">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                         </div>
                       )}

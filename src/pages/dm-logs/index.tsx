@@ -1,3 +1,4 @@
+import { Items } from "$src/components/items";
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { concatenate } from "$src/utils/misc";
@@ -179,19 +180,7 @@ const Characters: NextPageWithLayout = () => {
                             </p>
                           )}
                           <div>
-                            <p className="font-semibold">Magic Items:</p>
-                            <p className="flex flex-wrap divide-x text-sm">
-                              {log.magic_items_gained.length
-                                ? log.magic_items_gained.map(mi => (
-                                    <span
-                                      key={mi.id}
-                                      className="px-2 first:pl-0"
-                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                                      {mi.name}
-                                    </span>
-                                  ))
-                                : "None"}
-                            </p>
+                            <Items title="Magic Items" items={log.magic_items_gained} />
                             <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         </div>
@@ -243,19 +232,7 @@ const Characters: NextPageWithLayout = () => {
                         )}
                         {(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
                           <div>
-                            <p className="font-semibold">Magic Items:</p>
-                            <p className="divide-x text-sm whitespace-pre-wrap">
-                              {log.magic_items_gained.length
-                                ? log.magic_items_gained.map(mi => (
-                                    <span
-                                      key={mi.id}
-                                      className="px-2 first:pl-0"
-                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                                      {mi.name}
-                                    </span>
-                                  ))
-                                : "None"}
-                            </p>
+                            <Items title="Magic Items" items={log.magic_items_gained} />
                             <p className="text-sm line-through whitespace-pre-wrap">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
@@ -267,18 +244,7 @@ const Characters: NextPageWithLayout = () => {
                         )}>
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
-                            <p className="divide-x text-sm whitespace-pre-wrap">
-                              {log.story_awards_gained.length
-                                ? log.story_awards_gained.map(mi => (
-                                    <span
-                                      key={mi.id}
-                                      className="px-2 first:pl-0"
-                                      onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                                      {mi.name}
-                                    </span>
-                                  ))
-                                : "None"}
-                            </p>
+                            <Items items={log.story_awards_gained} />
                             <p className="text-sm line-through whitespace-pre-wrap">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
