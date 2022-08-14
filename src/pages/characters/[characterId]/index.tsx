@@ -209,7 +209,7 @@ const Characters: NextPageWithLayout = () => {
               <div className="flex flex-col gap-4" ref={parent1}>
                 <div className="flex-1 flex flex-col">
                   <h4 className="font-semibold text-secondary-content mb-2">Story Awards</h4>
-                  <p className="flex flex-wrap divide-x text-sm">
+                  <p className="flex flex-wrap divide-x text-sm whitespace-pre-wrap">
                     {character.story_awards.length
                       ? character.story_awards.map(mi => (
                           <span
@@ -224,7 +224,7 @@ const Characters: NextPageWithLayout = () => {
                 </div>
                 <div className="flex-1 flex flex-col">
                   <h4 className="font-semibold text-secondary-content mb-2">Magic Items</h4>
-                  <p className="flex flex-wrap divide-x text-sm">
+                  <p className="flex flex-wrap divide-x text-sm whitespace-pre-wrap">
                     {character.magic_items.length
                       ? character.magic_items.map(mi => (
                           <span
@@ -250,7 +250,7 @@ const Characters: NextPageWithLayout = () => {
           </div>
         </div>
         {character.image_url && (
-          <div className="relative w-56 max-h-80 hidden md:flex print:flex flex-col justify-center items-end">
+          <div className="relative w-56 max-h-80 hidden md:flex print:flex flex-col justify-center items-end ml-8">
             <a href={character.image_url} target="_blank" rel="noreferrer noopener">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={character.image_url} className="object-contain object-top max-h-80" alt={character.name} />
@@ -280,7 +280,7 @@ const Characters: NextPageWithLayout = () => {
                         (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                       )}>
                       <p
-                        className={concatenate("text-primary-content font-semibold")}
+                        className={concatenate("text-primary-content font-semibold whitespace-pre-wrap")}
                         onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
                         {log.name}
                       </p>
@@ -387,19 +387,19 @@ const Characters: NextPageWithLayout = () => {
                       {(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
                         <div>
                           <p className="font-semibold">Magic Items:</p>
-                          <p className="flex flex-wrap divide-x text-sm">
+                          <p className="divide-x text-sm whitespace-pre-wrap">
                             {log.magic_items_gained.length
                               ? log.magic_items_gained.map(mi => (
                                   <span
                                     key={mi.id}
-                                    className="tooltip-bottom px-2 first:pl-0"
+                                    className="px-2 first:pl-0"
                                     onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                     {mi.name}
                                   </span>
                                 ))
                               : "None"}
                           </p>
-                          <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+                          <p className="text-sm line-through whitespace-pre-wrap">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                         </div>
                       )}
                     </td>
@@ -410,19 +410,19 @@ const Characters: NextPageWithLayout = () => {
                       )}>
                       {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                         <div>
-                          <p className="flex flex-wrap divide-x text-sm">
+                          <p className="divide-x text-sm whitespace-pre-wrap">
                             {log.story_awards_gained.length
                               ? log.story_awards_gained.map(mi => (
                                   <span
                                     key={mi.id}
-                                    className="tooltip-bottom px-2 first:pl-0"
+                                    className="px-2 first:pl-0"
                                     onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
                                     {mi.name}
                                   </span>
                                 ))
                               : "None"}
                           </p>
-                          <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                          <p className="text-sm line-through whitespace-pre-wrap">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                         </div>
                       )}
                     </td>

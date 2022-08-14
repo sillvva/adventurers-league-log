@@ -131,7 +131,7 @@ const Characters: NextPageWithLayout = () => {
                           (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                         )}>
                         <p
-                          className="text-primary-content font-semibold"
+                          className="text-primary-content font-semibold whitespace-pre-wrap"
                           onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
                           {log.name}
                         </p>
@@ -244,7 +244,7 @@ const Characters: NextPageWithLayout = () => {
                         {(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
                           <div>
                             <p className="font-semibold">Magic Items:</p>
-                            <p className="flex flex-wrap divide-x text-sm">
+                            <p className="divide-x text-sm whitespace-pre-wrap">
                               {log.magic_items_gained.length
                                 ? log.magic_items_gained.map(mi => (
                                     <span
@@ -256,7 +256,7 @@ const Characters: NextPageWithLayout = () => {
                                   ))
                                 : "None"}
                             </p>
-                            <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through whitespace-pre-wrap">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
                       </td>
@@ -267,7 +267,7 @@ const Characters: NextPageWithLayout = () => {
                         )}>
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
-                            <p className="flex flex-wrap divide-x text-sm">
+                            <p className="divide-x text-sm whitespace-pre-wrap">
                               {log.story_awards_gained.length
                                 ? log.story_awards_gained.map(mi => (
                                     <span
@@ -279,7 +279,7 @@ const Characters: NextPageWithLayout = () => {
                                   ))
                                 : "None"}
                             </p>
-                            <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through whitespace-pre-wrap">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
                       </td>
