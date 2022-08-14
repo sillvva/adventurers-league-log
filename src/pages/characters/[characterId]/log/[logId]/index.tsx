@@ -82,7 +82,7 @@ export const logSchema = z.object({
   story_awards_lost: z.array(z.string().min(1)).default([])
 });
 
-const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
+const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
   const router = useRouter();
   const { data: params } = useQueryString(
     z.object({
@@ -157,7 +157,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
   const [mutError, setMutError] = useState<string | null>(null);
 
   const { data: dms } = trpc.useQuery(["_characters.getDMs"], {
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: false
   });
 
   const mutation = trpc.useMutation(["_logs.save"], {
@@ -185,6 +185,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character }) => {
 
       if (values.type === "game" && !values.dm.name) errors.push(setError("dm.name", { message: "Required" }));
 
+      if (!values.dm) values.dm = { id: "", name: session?.user?.name || "", DCI: null, uid: session?.user?.id || "" };
       values.dm.DCI = values.dm.DCI ? parseInt(values.dm.DCI.toString()) : null;
       if (values.experience) values.experience = parseInt(values.experience.toString());
       if (values.acp) values.acp = parseInt(values.acp.toString());
