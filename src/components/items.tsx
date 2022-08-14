@@ -27,7 +27,7 @@ export function Items({ items, title, formatting }: { title?: string; items: (Ma
           <label className="modal-box relative">
             <h3 className="text-lg font-bold text-primary-content">{modal.name}</h3>
             {modal.date && <p className="text-xs text-neutral-content">{modal.date.toLocaleString()}</p>}
-            <p className="text-xs sm:text-sm pt-4">{modal.description}</p>
+            <p className="text-xs sm:text-sm pt-4 whitespace-pre-wrap">{modal.description}</p>
           </label>
         )}
       </label>
