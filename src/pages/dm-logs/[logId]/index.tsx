@@ -544,7 +544,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 
   if (!log || log.dm?.uid !== session.user?.id)
     return {
-      props: { session: null, log: null, characters: [] as SSRChar[] },
+      props: { session, log: null, characters: [] as SSRChar[] },
       redirect: {
         destination: "/dm-logs",
         permanent: false
