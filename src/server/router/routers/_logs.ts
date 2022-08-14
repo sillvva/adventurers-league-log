@@ -85,7 +85,7 @@ export const protectedLogsRouter = createProtectedRouter()
         create: data
       });
 
-      if (!log.id) throw new TRPCError({ message: "Could not save game", code: "INTERNAL_SERVER_ERROR" });
+      if (!log.id) throw new TRPCError({ message: "Could not save log", code: "INTERNAL_SERVER_ERROR" });
 
       const itemsToUpdate = input.magic_items_gained.filter(item => item.id);
 
@@ -148,7 +148,7 @@ export const protectedLogsRouter = createProtectedRouter()
           .map(item => ({
             name: item.name,
             description: item.description,
-            gameGainedId: log.id
+            logGainedId: log.id
           }))
       });
 
