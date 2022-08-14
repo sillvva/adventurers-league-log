@@ -11,7 +11,7 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { CSSProperties, Fragment, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 const minisearch = new MiniSearch({
@@ -105,9 +105,14 @@ const Characters: NextPageWithLayout = () => {
 
   if (!character)
     return (
-      <Head>
-        <title>Character</title>
-      </Head>
+      <>
+        <Head>
+          <title>Character</title>
+        </Head>
+        <div className="flex justify-center items-center w-full h-96">
+          <div className="radial-progress text-secondary animate-spin" style={{ "--value": 20 } as CSSProperties} />
+        </div>
+      </>
     );
 
   return (
