@@ -40,7 +40,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
     setError
   } = useForm<z.infer<typeof logSchema>>();
 
-  const selectedGame = useMemo(
+  const selectedLog = useMemo(
     () =>
       log
         ? {
@@ -83,12 +83,12 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
   const [parent1] = useAutoAnimate<HTMLDivElement>();
   const [parent2] = useAutoAnimate<HTMLDivElement>();
   const [charSel, setCharSel] = useState<PageProps["characters"]>([]);
-  const [season, setSeason] = useState<1 | 8 | 9>(selectedGame?.experience ? 1 : selectedGame?.acp ? 8 : 9);
+  const [season, setSeason] = useState<1 | 8 | 9>(selectedLog?.experience ? 1 : selectedLog?.acp ? 8 : 9);
   const [magicItemsGained, setMagicItemsGained] = useState(
-    selectedGame.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
+    selectedLog.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
   );
   const [storyAwardsGained, setStoryAwardsGained] = useState(
-    (selectedGame?.story_awards_gained || []).map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
+    (selectedLog?.story_awards_gained || []).map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
   );
   const [mutError, setMutError] = useState<string | null>(null);
 
@@ -144,10 +144,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
       if (values.applied_date && !values.characterId) errors.push(setError("characterId", { message: "Required" }));
 
       values.dm = {
-        id: selectedGame.dm?.id || "",
+        id: selectedLog.dm?.id || "",
         DCI: null,
-        name: selectedGame.dm?.name || session?.user?.name || "",
-        uid: selectedGame.dm?.uid || session?.user?.id || ""
+        name: selectedLog.dm?.name || session?.user?.name || "",
+        uid: selectedLog.dm?.uid || session?.user?.id || ""
       };
 
       if (values.experience) values.experience = parseInt(values.experience.toString());
@@ -196,7 +196,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
   return (
     <>
       <Head>
-        <title>{selectedGame.name ? `Edit Log - ${selectedGame.name}` : "New Log"}</title>
+        <title>{selectedLog.name ? `Edit Log - ${selectedLog.name}` : "New Log"}</title>
       </Head>
 
       <div className="text-sm breadcrumbs mb-4">
@@ -209,8 +209,8 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
               <a className="text-neutral-content">DM Logs</a>
             </Link>
           </li>
-          {selectedGame.name ? (
-            <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{selectedGame.name}</li>
+          {selectedLog.name ? (
+            <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{selectedLog.name}</li>
           ) : (
             <li className="text-secondary drop-shadow-md">New Log</li>
           )}
@@ -229,7 +229,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
       <form onSubmit={handleSubmit}>
         <input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
         <div className="grid grid-cols-12 gap-4">
-          <div className={concatenate("form-control col-span-12", selectedGame.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
+          <div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
             <label className="label">
               <span className="label-text">
                 Title
@@ -238,14 +238,14 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
             </label>
             <input
               type="text"
-              {...register("name", { required: true, value: selectedGame.name })}
+              {...register("name", { required: true, value: selectedLog.name })}
               className="input input-bordered focus:border-primary w-full"
             />
             <label className="label">
               <span className="label-text-alt text-error">{errors.name?.message}</span>
             </label>
           </div>
-          <div className={concatenate("form-control col-span-12", selectedGame.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
+          <div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
             <label className="label">
               <span className="label-text">
                 Date
@@ -254,14 +254,14 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
             </label>
             <input
               type="datetime-local"
-              {...register("date", { required: true, value: formatDate(selectedGame.date) })}
+              {...register("date", { required: true, value: formatDate(selectedLog.date) })}
               className="input input-bordered focus:border-primary w-full"
             />
             <label className="label">
               <span className="label-text-alt text-error">{errors.date?.message}</span>
             </label>
           </div>
-          <input type="hidden" {...register("characterId", { value: selectedGame.characterId || "" })} />
+          <input type="hidden" {...register("characterId", { value: selectedLog.characterId || "" })} />
           <div className="form-control col-span-12 sm:col-span-6 lg:col-span-3">
             <label className="label">
               <span className="label-text">Assigned Character</span>
@@ -271,7 +271,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
                 <input
                   type="text"
                   {...register("characterName", {
-                    value: characters.find(c => c.id === selectedGame.characterId)?.name || "",
+                    value: characters.find(c => c.id === selectedLog.characterId)?.name || "",
                     onChange: e => getCharSel(e.target.value)
                   })}
                   className="input input-bordered focus:border-primary w-full"
@@ -297,7 +297,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
             </label>
             <input
               type="datetime-local"
-              {...register("applied_date", { required: true, value: selectedGame.applied_date === null ? null : formatDate(selectedGame.applied_date) })}
+              {...register("applied_date", { required: true, value: selectedLog.applied_date === null ? null : formatDate(selectedLog.applied_date) })}
               className="input input-bordered focus:border-primary w-full"
             />
             <label className="label">
@@ -322,7 +322,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
                 </label>
                 <input
                   type="number"
-                  {...register("experience", { value: selectedGame.experience })}
+                  {...register("experience", { value: selectedLog.experience })}
                   className="input input-bordered focus:border-primary w-full"
                 />
                 <label className="label">
@@ -339,7 +339,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
                   type="number"
                   min="0"
                   max="1"
-                  {...register("level", { value: selectedGame.level, min: 0, max: 1 })}
+                  {...register("level", { value: selectedLog.level, min: 0, max: 1 })}
                   className="input input-bordered focus:border-primary w-full"
                 />
                 <label className="label">
@@ -353,7 +353,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
                   <label className="label">
                     <span className="label-text">ACP</span>
                   </label>
-                  <input type="number" {...register("acp", { value: selectedGame.acp })} className="input input-bordered focus:border-primary w-full" />
+                  <input type="number" {...register("acp", { value: selectedLog.acp })} className="input input-bordered focus:border-primary w-full" />
                   <label className="label">
                     <span className="label-text-alt text-error">{errors.acp?.message}</span>
                   </label>
@@ -362,7 +362,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
                   <label className="label">
                     <span className="label-text">TCP</span>
                   </label>
-                  <input type="number" {...register("tcp", { value: selectedGame.tcp })} className="input input-bordered focus:border-primary w-full" />
+                  <input type="number" {...register("tcp", { value: selectedLog.tcp })} className="input input-bordered focus:border-primary w-full" />
                   <label className="label">
                     <span className="label-text-alt text-error">{errors.tcp?.message}</span>
                   </label>
@@ -373,7 +373,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
               <label className="label">
                 <span className="label-text">Gold</span>
               </label>
-              <input type="number" {...register("gold", { value: selectedGame.gold })} className="input input-bordered focus:border-primary w-full" />
+              <input type="number" {...register("gold", { value: selectedLog.gold })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.gold?.message}</span>
               </label>
@@ -382,7 +382,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
               <label className="label">
                 <span className="label-text whitespace-nowrap overflow-hidden text-ellipsis">Downtime Days</span>
               </label>
-              <input type="number" {...register("dtd", { value: selectedGame.dtd })} className="input input-bordered focus:border-primary w-full" />
+              <input type="number" {...register("dtd", { value: selectedLog.dtd })} className="input input-bordered focus:border-primary w-full" />
               <label className="label">
                 <span className="label-text-alt text-error">{errors.dtd?.message}</span>
               </label>
@@ -393,7 +393,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
               <span className="label-text">Notes</span>
             </label>
             <textarea
-              {...register("description", { value: selectedGame.description || "" })}
+              {...register("description", { value: selectedLog.description || "" })}
               className="textarea textarea-bordered focus:border-primary w-full"
             />
             <label className="label">
@@ -492,7 +492,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
           </div>
           <div className="col-span-12 text-center">
             <button type="submit" className={concatenate("btn btn-primary", submitting && "loading")} disabled={submitting}>
-              Save Game
+              Save Log
             </button>
           </div>
         </div>
