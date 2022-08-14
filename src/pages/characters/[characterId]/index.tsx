@@ -398,7 +398,7 @@ const Characters: NextPageWithLayout = () => {
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
                             {log.story_awards_gained.map(mi => (
-                              <p key={mi.id} className="text-sm">
+                              <p key={mi.id} className="text-sm whitespace-pre-wrap">
                                 <span className="font-semibold">
                                   {mi.name}
                                   {mi.description ? ":" : ""}
@@ -406,7 +406,7 @@ const Characters: NextPageWithLayout = () => {
                                 {mi.description}
                               </p>
                             ))}
-                            <p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+                            <p className="text-sm line-through whitespace-pre-wrap">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
                           </div>
                         )}
                       </td>
