@@ -690,17 +690,16 @@ EditLog.getLayout = page => {
 export default EditLog;
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-  const session = await unstable_getServerSession(context.req, context.res, authOptions);
+  let session = await unstable_getServerSession(context.req, context.res, authOptions);
   const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
   const character = await getOne(prisma, characterId);
 
   return {
-    ...(!session && {
-      redirect: {
-        destination: "/",
-        permanent: false
-      }
-    }),
+    ...(!session
+      ? { redirect: { destination: "/", permanent: false } }
+      : character.userId !== session.user?.id
+      ? { redirect: { destination: `/characters/${characterId}`, permanent: false } }
+      : null),
     props: {
       session,
       character: {
