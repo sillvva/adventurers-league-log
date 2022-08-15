@@ -15,7 +15,7 @@ export function Items({ items, title, formatting }: { title?: string; items: (Ma
                   key={mi.id}
                   className="px-2 first:pl-0 whitespace-pre-wrap"
                   onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
-                  {formatting && !mi.name.match(/^(\d+x? )?((Potion|Scroll|Spell Scroll|Charm|Elixir) of)/) ? <strong className="text-secondary-content/70 print:text-neutral-content">{mi.name}</strong> : mi.name}
+                  {formatting && !mi.name.match(/^(\d+x? )?((Potion|Scroll|Spell Scroll|Charm|Elixir)s? of)/) ? <strong className="text-secondary-content/70 print:text-neutral-content">{mi.name}</strong> : mi.name}
                   {mi.description && "*"}
                 </span>
               ))

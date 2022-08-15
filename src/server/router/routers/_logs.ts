@@ -122,6 +122,18 @@ export const protectedLogsRouter = createProtectedRouter()
 
       await ctx.prisma.magicItem.updateMany({
         where: {
+          logLostId: log.id,
+          id: {
+            notIn: input.magic_items_lost
+          }
+        },
+        data: {
+          logLostId: null
+        }
+      });
+
+      await ctx.prisma.magicItem.updateMany({
+        where: {
           id: {
             in: input.magic_items_lost
           }
@@ -163,6 +175,17 @@ export const protectedLogsRouter = createProtectedRouter()
           }
         });
       }
+      await ctx.prisma.storyAward.updateMany({
+        where: {
+          logLostId: log.id,
+          id: {
+            notIn: input.story_awards_lost
+          }
+        },
+        data: {
+          logLostId: null
+        }
+      });
 
       await ctx.prisma.storyAward.updateMany({
         where: {
