@@ -144,6 +144,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 
   const [parent1] = useAutoAnimate<HTMLDivElement>();
   const [parent2] = useAutoAnimate<HTMLDivElement>();
+  const [dmKeySel, setDMKeySel] = useState<number>(0);
   const [season, setSeason] = useState<1 | 8 | 9>(selectedLog?.experience ? 1 : selectedLog?.acp ? 8 : 9);
   const [type, setType] = useState<LogType>(selectedLog.type || "game");
   const [dmSearch, setDmSearch] = useState("");
@@ -172,6 +173,9 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault();
+    const activeName = document.activeElement?.getAttribute("name");
+    if (activeName === "dm.name" && !(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name"))) return;
+    if (activeName === "dm.DCI" && !(dmDCIMatches.length === 1 && dmDCIMatches[0]?.DCI === getValues("dm.DCI"))) return;
 
     clearErrors();
     let errors = [];
@@ -243,6 +247,17 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
     setValue("dm.name", dm.name);
     setValue("dm.DCI", dm.DCI);
   };
+
+  const dmNameMatches = useMemo(
+    () => (dms && dms.length > 0 && dmSearch.trim() ? dms.filter(dm => dm.name.toLowerCase().includes(dmSearch.toLowerCase())) : []),
+    [dms, dmSearch]
+  );
+
+  const dmDCIMatches = useMemo(
+    () =>
+      dms && dms.length > 0 && dmSearch.trim() ? dms.filter(dm => dm.DCI !== null && dm.DCI.toString().toLowerCase().includes(dmSearch.toLowerCase())) : [],
+    [dms, dmSearch]
+  );
 
   return (
     <>
@@ -347,15 +362,38 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
                           <input
                             type="text"
                             {...register("dm.name", { value: selectedLog.dm?.name || "", onChange: e => setDmSearch(e.target.value) })}
+                            onKeyUp={e => {
+                              const isSearching = dms && dms.length > 0 && dmSearch.trim();
+                              if (!isSearching) return;
+                              const isSelected = dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name");
+                              if (e.code === "ArrowDown") {
+                                if (isSelected) return;
+                                setDMKeySel(dmKeySel + 1);
+                                if (dmKeySel >= dmNameMatches.length) setDMKeySel(0);
+                                return false;
+                              }
+                              if (e.code === "ArrowUp") {
+                                if (isSelected) return;
+                                setDMKeySel(dmKeySel - 1);
+                                if (dmKeySel < 0) setDMKeySel(dmNameMatches.length - 1);
+                                return false;
+                              }
+                              if (e.code === "Enter") {
+                                if (isSelected) return;
+                                setDM(dmNameMatches[dmKeySel] as DungeonMaster);
+                                setDmSearch((dmNameMatches[dmKeySel] as DungeonMaster).name);
+                                return false;
+                              }
+                            }}
+                            onBlur={e => setDMKeySel(-1)}
                             className="input input-bordered focus:border-primary w-full"
                           />
                         </label>
-                        {dms && dms.length > 0 && dmSearch.trim() && (
+                        {dms && dms.length > 0 && dmSearch.trim() && !(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name")) && (
                           <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                            {dms
-                              .filter(dm => dm.name.toLowerCase().includes(dmSearch.toLowerCase()))
-                              .map(dm => (
-                                <li key={dm.id}>
+                            {dmNameMatches
+                              .map((dm, i) => (
+                                <li key={dm.id} className={concatenate(dmKeySel === i && "bg-primary text-primary-content")}>
                                   <a onMouseDown={() => setDM(dm)}>
                                     {dm.name}
                                     {dm.DCI && ` (${dm.DCI})`}
@@ -379,13 +417,36 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
                           <input
                             type="number"
                             {...register("dm.DCI", { value: selectedLog.dm?.DCI || null, onChange: e => setDmSearch(e.target.value) })}
+                            onKeyUp={e => {
+                              const isSearching = dms && dms.length > 0 && dmSearch.trim();
+                              if (!isSearching) return;
+                              const isSelected = dmDCIMatches.length === 1 && dmDCIMatches[0]?.DCI === getValues("dm.DCI");
+                              if (e.code === "ArrowDown") {
+                                if (isSelected) return;
+                                setDMKeySel(dmKeySel + 1);
+                                if (dmKeySel >= dmDCIMatches.length) setDMKeySel(0);
+                                return false;
+                              }
+                              if (e.code === "ArrowUp") {
+                                if (isSelected) return;
+                                setDMKeySel(dmKeySel - 1);
+                                if (dmKeySel < 0) setDMKeySel(dmDCIMatches.length - 1);
+                                return false;
+                              }
+                              if (e.code === "Enter") {
+                                if (isSelected) return;
+                                setDM(dmDCIMatches[dmKeySel] as DungeonMaster);
+                                setDmSearch((dmDCIMatches[dmKeySel] as DungeonMaster).name);
+                                return false;
+                              }
+                            }}
+                            onBlur={e => setDMKeySel(-1)}
                             className="input input-bordered focus:border-primary w-full"
                           />
                         </label>
                         {dms && dms.length > 0 && dmSearch.trim() && (
                           <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg">
-                            {dms
-                              .filter(dm => dm.DCI && dm.DCI.toString().includes(dmSearch))
+                            {dmDCIMatches
                               .map(dm => (
                                 <li key={dm.id}>
                                   <a onMouseDown={() => setDM(dm)}>
