@@ -22,7 +22,7 @@ const Layout = (props: PropsWithChildren) => {
       <Head>
         <link rel="icon" type="image/x-icon" href="/favicon.png" />
       </Head>
-			<NextNProgress color="#6518e7" height={2} options={{ showSpinner: false }} />
+			<NextNProgress color="#6518e7" height={3} options={{ showSpinner: false }} />
       <Image
         src={background}
         priority
