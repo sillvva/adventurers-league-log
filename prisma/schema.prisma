@@ -99,9 +99,9 @@ enum LogType {
 }
 
 model DungeonMaster {
-    id    String @id @unique @default(cuid())
+    id    String  @id @unique @default(cuid())
     name  String
-    DCI   Int?
+    DCI   String?
     uid   String?
     logs  Log[]
 }
