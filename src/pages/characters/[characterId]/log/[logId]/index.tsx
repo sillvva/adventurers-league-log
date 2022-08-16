@@ -190,8 +190,9 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 
       if (values.type === "game" && !values.dm.name) errors.push(setError("dm.name", { message: "Required" }));
 
-      if (!values.dm) values.dm = { id: "", name: session?.user?.name || "", DCI: null, uid: session?.user?.id || "" };
+      if (!values.dm || !values.dm.name) values.dm = { id: "", name: session?.user?.name || "", DCI: null, uid: session?.user?.id || "" };
       values.dm.DCI = (values.dm.DCI || "").replace(/[^\d]+/g, "").trim() || null;
+
       if (values.experience) values.experience = parseInt(values.experience.toString());
       if (values.acp) values.acp = parseInt(values.acp.toString());
       if (values.tcp) values.tcp = parseInt(values.tcp.toString());
@@ -206,6 +207,8 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
     } catch (err) {
       console.error(err);
     }
+
+    if (errors.length) return;
 
     const result = logSchema.safeParse(values);
     if (result.success) {
@@ -353,7 +356,6 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
                       <label className="label">
                         <span className="label-text">
                           DM Name
-                          <span className="text-error">*</span>
                         </span>
                       </label>
                       <div className="dropdown">
