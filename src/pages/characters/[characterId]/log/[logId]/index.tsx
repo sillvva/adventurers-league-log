@@ -46,7 +46,7 @@ export const logSchema = z.object({
   dm: z.object({
     id: z.string().default(""),
     name: z.string().default(""),
-    DCI: z.number().nullable().default(null),
+    DCI: z.string().nullable().default(null),
     uid: z.string().default("")
   }),
   is_dm_log: z.boolean().default(false),
@@ -191,7 +191,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
       if (values.type === "game" && !values.dm.name) errors.push(setError("dm.name", { message: "Required" }));
 
       if (!values.dm) values.dm = { id: "", name: session?.user?.name || "", DCI: null, uid: session?.user?.id || "" };
-      values.dm.DCI = values.dm.DCI ? parseInt(values.dm.DCI.toString()) : null;
+      values.dm.DCI = (values.dm.DCI || "").replace(/[^\d]+/g, "").trim() || null;
       if (values.experience) values.experience = parseInt(values.experience.toString());
       if (values.acp) values.acp = parseInt(values.acp.toString());
       if (values.tcp) values.tcp = parseInt(values.tcp.toString());
@@ -254,8 +254,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
   );
 
   const dmDCIMatches = useMemo(
-    () =>
-      dms && dms.length > 0 && dmSearch.trim() ? dms.filter(dm => dm.DCI !== null && dm.DCI.toString().toLowerCase().includes(dmSearch.toLowerCase())) : [],
+    () => (dms && dms.length > 0 && dmSearch.trim() ? dms.filter(dm => dm.DCI !== null && dm.DCI.includes(dmSearch)) : []),
     [dms, dmSearch]
   );
 
