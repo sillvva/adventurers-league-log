@@ -24,17 +24,15 @@ import { z } from "zod";
 
 type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
 
+const dateRegex =
+  /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/;
+
 export const logSchema = z.object({
   characterId: z.string().default(""),
   characterName: z.string().default(""),
   logId: z.string().default(""),
   name: z.string().min(1, "Required"),
-  date: z
-    .string()
-    .regex(
-      /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/,
-      "Not a valid date"
-    ),
+  date: z.string().regex(dateRegex, "Not a valid date"),
   type: z.union([z.literal("game"), z.literal("nongame")]).default("game"),
   experience: z.number().default(0),
   acp: z.number().default(0),
@@ -50,17 +48,7 @@ export const logSchema = z.object({
     uid: z.string().default("")
   }),
   is_dm_log: z.boolean().default(false),
-  applied_date: z
-    .union([
-      z.null(),
-      z
-        .string()
-        .regex(
-          /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/,
-          "Not a valid date"
-        )
-    ])
-    .default(null),
+  applied_date: z.union([z.null(), z.string().regex(dateRegex, "Not a valid date")]).default(null),
   magic_items_gained: z
     .array(
       z.object({
@@ -354,9 +342,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
                   <>
                     <div className="form-control col-span-12 sm:col-span-6">
                       <label className="label">
-                        <span className="label-text">
-                          DM Name
-                        </span>
+                        <span className="label-text">DM Name</span>
                       </label>
                       <div className="dropdown">
                         <label>

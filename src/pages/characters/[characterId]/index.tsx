@@ -5,14 +5,14 @@ import { useQueryString } from "$src/utils/hooks";
 import { concatenate, slugify } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
+import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiPlus, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { CSSProperties, Fragment, useEffect, useMemo, useState } from "react";
+import { CSSProperties, Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 const minisearch = new MiniSearch({
@@ -31,6 +31,7 @@ const Characters: NextPageWithLayout = () => {
   const [parent2] = useAutoAnimate<HTMLTableSectionElement>();
   const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
   const [search, setSearch] = useState("");
+  const [descriptions, setDescriptions] = useState(false);
 
   const { data: params } = useQueryString(
     z.object({
@@ -87,6 +88,15 @@ const Characters: NextPageWithLayout = () => {
     if (indexed.length) minisearch.addAll(indexed);
     return () => minisearch.removeAll();
   }, [indexed]);
+
+  const toggleDescriptions = useCallback(() => {
+    localStorage.setItem("descriptions", descriptions ? "false" : "true");
+    setDescriptions(!descriptions);
+  }, [descriptions]);
+
+  useEffect(() => {
+    setDescriptions(localStorage.getItem("descriptions") === "true");
+  }, []);
 
   const results = useMemo(() => {
     if (logData.length) {
@@ -221,10 +231,19 @@ const Characters: NextPageWithLayout = () => {
           <div className="flex gap-4 print:hidden">
             {myCharacter && (
               <Link href={`/characters/${params.characterId}/log/new`}>
-                <a className="btn btn-primary btn-sm">New Log</a>
+                <a className="btn btn-primary btn-sm">
+                  <span className="hidden sm:inline">New Log</span>
+                  <Icon path={mdiPlus} size={1} className="inline sm:hidden" />
+                </a>
               </Link>
             )}
             <input type="text" placeholder="Search" onChange={e => setSearch(e.target.value)} className="input input-bordered input-sm w-full max-w-xs" />
+            <div className="form-control">
+              <label className="label py-1 cursor-pointer">
+                <span className="label-text pr-4 hidden sm:inline">Descriptions</span>
+                <input type="checkbox" className="toggle toggle-sm toggle-primary" checked={descriptions} onChange={toggleDescriptions} />
+              </label>
+            </div>
           </div>
         </div>
         {character.image_url && (
@@ -390,8 +409,8 @@ const Characters: NextPageWithLayout = () => {
                     )}
                   </tr>
                   {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
-                    <tr className="hidden print:table-row">
-                      <td colSpan={3} className="p-2 pt-0">
+                    <tr className={concatenate(!descriptions && "hidden print:table-row")}>
+                      <td colSpan={100} className="print:p-2 print:pt-0">
                         <p className="text-sm whitespace-pre-wrap">
                           <span className="font-semibold">Notes:</span> {log.description}
                         </p>
