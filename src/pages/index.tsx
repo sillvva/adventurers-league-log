@@ -33,13 +33,13 @@ const Home: NextPage = () => {
       <main ref={main} className="container relative mx-auto flex flex-col items-center justify-center min-h-screen p-4">
         {loaded && (
           <>
-            <h1 className="text-4xl lg:text-6xl font-draconis text-primary-content text-center mb-20">
+            <h1 className="text-4xl lg:text-6xl font-draconis text-accent-content text-center mb-20">
               Adventurers League
               <br />
               Log Sheet
             </h1>
             <button
-              className="flex items-centers bg-neutral/50 hover:bg-neutral text-neutral-content hover:text-primary-content transition-colors rounded-lg gap-2 p-2 w-64 h-16"
+              className="flex items-centers bg-neutral/50 hover:bg-neutral text-neutral-content hover:text-accent-content transition-colors rounded-lg gap-2 p-2 w-64 h-16"
               onClick={() =>
                 signIn("google", {
                   callbackUrl: `${router.basePath}/characters`

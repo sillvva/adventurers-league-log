@@ -1,20 +1,20 @@
-import type { NextPageWithLayout } from "$src/pages/_app";
-import type { GetServerSideProps } from "next";
-import { unstable_getServerSession } from "next-auth";
-import type { Session } from "next-auth";
+import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import { useForm } from "react-hook-form";
+import type { NextPageWithLayout } from "$src/pages/_app";
+import { concatenate } from "$src/utils/misc";
+import { trpc } from "$src/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mdiHome } from "@mdi/js";
+import Icon from "@mdi/react";
+import type { GetServerSideProps } from "next";
+import type { Session } from "next-auth";
+import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
-import Layout from "$src/layouts/main";
-import Icon from "@mdi/react";
-import { trpc } from "$src/utils/trpc";
-import { z } from "zod";
 import { useRouter } from "next/router";
-import { concatenate } from "$src/utils/misc";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 interface PageProps {
   session: Session;
@@ -64,7 +64,7 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
           </li>
           <li>
             <Link href="/characters">
-              <a className="text-neutral-content">Characters</a>
+              <a className="">Characters</a>
             </Link>
           </li>
           <li className="text-secondary">New</li>

@@ -95,15 +95,15 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
           </li>
           <li>
             <Link href="/characters">
-              <a className="text-neutral-content">Characters</a>
+              <a className="">Characters</a>
             </Link>
           </li>
           <li>
             <Link href={`/characters/${params.characterId}`}>
-              <a className="text-neutral-content">{character.name}</a>
+              <a className="">{character.name}</a>
             </Link>
           </li>
-          <li className="text-secondary drop-shadow-md">Edit</li>
+          <li className="text-secondary dark:drop-shadow-md">Edit</li>
         </ul>
       </div>
 

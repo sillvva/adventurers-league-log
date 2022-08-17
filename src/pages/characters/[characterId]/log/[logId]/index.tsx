@@ -262,18 +262,18 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
           </li>
           <li>
             <Link href="/characters">
-              <a className="text-neutral-content">Characters</a>
+              <a className="">Characters</a>
             </Link>
           </li>
           <li>
             <Link href={`/characters/${params.characterId}`}>
-              <a className="text-neutral-content">{character?.name}</a>
+              <a className="">{character?.name}</a>
             </Link>
           </li>
           {selectedLog.name ? (
-            <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{selectedLog.name}</li>
+            <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis dark:drop-shadow-md">{selectedLog.name}</li>
           ) : (
-            <li className="text-secondary drop-shadow-md">New Log</li>
+            <li className="text-secondary dark:drop-shadow-md">New Log</li>
           )}
         </ul>
       </div>

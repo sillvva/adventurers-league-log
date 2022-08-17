@@ -81,7 +81,7 @@ const Characters: NextPageWithLayout = () => {
               <li>
                 <Icon path={mdiHome} className="w-4" />
               </li>
-              <li className="text-secondary drop-shadow-md">DM Logs</li>
+              <li className="text-secondary dark:drop-shadow-md">DM Logs</li>
             </ul>
           </div>
           {logs && logs.length > 0 && (
@@ -132,7 +132,7 @@ const Characters: NextPageWithLayout = () => {
                           (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
                         )}>
                         <p
-                          className="text-primary-content font-semibold whitespace-pre-wrap"
+                          className="text-accent-content font-semibold whitespace-pre-wrap"
                           onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
                           {log.name}
                         </p>
@@ -140,7 +140,7 @@ const Characters: NextPageWithLayout = () => {
                           {(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
                         </p>
                         {log.character && (
-                          <p className="text-sm text-neutral-content font-normal">
+                          <p className="text-sm font-normal">
                             <span className="font-semibold">Character:</span> {log.character.name}
                           </p>
                         )}
@@ -301,8 +301,8 @@ const Characters: NextPageWithLayout = () => {
       <label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
         {modal && (
           <label className="modal-box relative">
-            <h3 className="text-lg font-bold text-primary-content">{modal.name}</h3>
-            {modal.date && <p className="text-xs text-neutral-content">{modal.date.toLocaleString()}</p>}
+            <h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
+            {modal.date && <p className="text-xs">{modal.date.toLocaleString()}</p>}
             <p className="text-xs sm:text-sm pt-4">{modal.description}</p>
           </label>
         )}

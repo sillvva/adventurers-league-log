@@ -24,6 +24,7 @@
     "minisearch": "^5.0.0",
     "next": "12.2.3",
     "next-auth": "^4.10.3",
+    "next-themes": "^0.2.0",
     "nprogress": "^0.2.0",
     "qs": "^6.11.0",
     "react": "18.2.0",

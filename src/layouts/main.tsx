@@ -2,6 +2,7 @@ import { concatenate } from "$src/utils/misc";
 import { mdiGithub, mdiMenu } from "@mdi/js";
 import Icon from "@mdi/react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useTheme } from "next-themes";
 import Image from "next/future/image";
 import Head from "next/head";
 import Link from "next/link";
@@ -14,8 +15,19 @@ import google from "../../public/images/google.svg";
 const Layout = (props: PropsWithChildren) => {
   const session = useSession();
   const router = useRouter();
-
+	const { theme, setTheme } = useTheme();
   const [drawer, setDrawer] = useState(false);
+
+	useEffect(() => {
+		const mm = matchMedia("(prefers-color-scheme: dark)");
+		const listener = () => setTheme(mm.matches ? "dark" : "light");
+
+    console.log(theme)
+
+		if (!theme || theme == "system") listener();
+		mm.addEventListener("change", listener);
+		return () => mm.removeEventListener("change", listener);
+	}, [theme, setTheme]);
 
   return (
     <>
@@ -39,7 +51,7 @@ const Layout = (props: PropsWithChildren) => {
             </button>
             <Link href={session.data?.user ? "/characters" : "/"}>
               <a className="flex flex-col font-draconis text-center mr-8">
-                <h1 className="text-base leading-4 text-primary-content">Adventurers League</h1>
+                <h1 className="text-base leading-4 text-accent-content">Adventurers League</h1>
                 <h2 className="text-3xl leading-7">Log Sheet</h2>
               </a>
             </Link>
@@ -62,7 +74,7 @@ const Layout = (props: PropsWithChildren) => {
                   <>
                     <div className="dropdown dropdown-end">
                       <label tabIndex={0} className="flex cursor-pointer">
-                        <div className="px-4 hidden sm:flex print:flex items-center text-primary-content">{session.data.user.name}</div>
+                        <div className="px-4 hidden sm:flex print:flex items-center text-accent-content">{session.data.user.name}</div>
                         <div className="avatar">
                           <div className="w-12 relative rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
                             <Image
@@ -98,7 +110,7 @@ const Layout = (props: PropsWithChildren) => {
                 ) : (
                   <>
                     <button
-                      className="flex items-center bg-neutral/50 hover:bg-neutral text-neutral-content hover:text-primary-content transition-colors rounded-lg gap-2 p-2 h-12"
+                      className="flex items-center bg-neutral/50 hover:bg-neutral text-neutral-content hover:text-accent-content transition-colors rounded-lg gap-2 p-2 h-12"
                       onClick={() =>
                         signIn("google", {
                           callbackUrl: `${router.basePath}/characters`

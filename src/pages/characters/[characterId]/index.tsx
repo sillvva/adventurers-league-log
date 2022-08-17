@@ -120,7 +120,7 @@ const Characters: NextPageWithLayout = () => {
 
   const components: Partial<Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents> = {
     table({ children }) {
-      return <table className="table">{children}</table>;
+      return <table className="table table-compact">{children}</table>;
     },
     th({ children }) {
       return <th className="bg-base-200 print:p-2">{children}</th>;
@@ -156,10 +156,10 @@ const Characters: NextPageWithLayout = () => {
             </li>
             <li>
               <Link href="/characters">
-                <a className="text-neutral-content">Characters</a>
+                <a className="">Characters</a>
               </Link>
             </li>
-            <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis drop-shadow-md">{character.name}</li>
+            <li className="text-secondary whitespace-nowrap overflow-hidden text-ellipsis dark:drop-shadow-md">{character.name}</li>
           </ul>
         </div>
         {myCharacter && (
@@ -201,16 +201,16 @@ const Characters: NextPageWithLayout = () => {
       <section className="flex">
         <div className="flex-1 flex flex-col gap-6">
           <div className="flex flex-col">
-            <h3 className="flex-1 text-4xl font-vecna text-primary-content font-bold">{character.name}</h3>
-            <p className="flex-1 text-sm text-neutral-content font-semibold">
+            <h3 className="flex-1 text-4xl font-vecna text-accent-content font-bold">{character.name}</h3>
+            <p className="flex-1 text-sm font-semibold">
               {character.race} {character.class}
             </p>
-            <p className="flex-1 text-xs text-neutral-content">
+            <p className="flex-1 text-xs">
               {character.campaign}
               {character.character_sheet_url && (
                 <span className="print:hidden">
                   {" - "}
-                  <a href={character.character_sheet_url} target="_blank" rel="noreferrer noopner" className="text-secondary drop-shadow-sm font-semibold">
+                  <a href={character.character_sheet_url} target="_blank" rel="noreferrer noopner" className="text-secondary dark:drop-shadow-sm font-semibold">
                     Character Sheet
                   </a>
                 </span>
@@ -272,8 +272,8 @@ const Characters: NextPageWithLayout = () => {
         )}
       </section>
       <section className="mt-6">
-        <div className="rounded-lg">
-          <table className="table w-full bg-base-100">
+        <div className="rounded-lg bg-base-100">
+          <table className="table w-full">
             <thead>
               <tr>
                 <td className="print:p-2">Log Entry</td>
@@ -293,7 +293,7 @@ const Characters: NextPageWithLayout = () => {
                         (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
                       )}>
                       <p
-                        className="text-primary-content font-semibold whitespace-pre-wrap"
+                        className="text-accent-content font-semibold whitespace-pre-wrap"
                         onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
                         {log.name}
                       </p>
@@ -301,7 +301,7 @@ const Characters: NextPageWithLayout = () => {
                         {(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
                       </p>
                       {log.dm && log.type === "game" && log.dm.uid !== character.user.id && (
-                        <p className="text-sm text-neutral-content font-normal">
+                        <p className="text-sm font-normal">
                           <span className="font-semibold">DM:</span> {log.dm.name}
                         </p>
                       )}
@@ -430,7 +430,7 @@ const Characters: NextPageWithLayout = () => {
                   </tr>
                   {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                     <tr className={concatenate(!descriptions && "hidden print:table-row")}>
-                      <td className="hidden sm:table-cell print:hidden print:p-2 print:pt-0 align-top font-semibold text-sm text-primary-content">Notes:</td>
+                      <td className="hidden sm:table-cell print:hidden print:p-2 print:pt-0 align-top font-semibold text-sm text-accent-content">Notes:</td>
                       <td colSpan={100} className="print:p-2 print:pt-0 whitespace-pre-wrap text-sm print:text-xs">
                         <h4 className="hidden print:block font-semibold text-base">Notes:</h4>
                         <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
@@ -463,8 +463,8 @@ const Characters: NextPageWithLayout = () => {
       <label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
         {modal && (
           <label className="modal-box relative">
-            <h3 className="text-lg font-bold text-primary-content">{modal.name}</h3>
-            {modal.date && <p className="text-xs text-neutral-content">{modal.date.toLocaleString()}</p>}
+            <h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
+            {modal.date && <p className="text-xs ">{modal.date.toLocaleString()}</p>}
             <ReactMarkdown className="text-xs sm:text-sm pt-4 whitespace-pre-wrap" remarkPlugins={[remarkGfm]}>
               {modal.description}
             </ReactMarkdown>

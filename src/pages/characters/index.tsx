@@ -99,7 +99,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
               <li>
                 <Icon path={mdiHome} className="w-4" />
               </li>
-              <li className="text-secondary drop-shadow-md">Characters</li>
+              <li className="text-secondary dark:drop-shadow-md">Characters</li>
             </ul>
           </div>
           <div className="flex-1" />
@@ -175,8 +175,8 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
                       </td>
                       <td className="transition-colors">
                         <div className="flex flex-col">
-                          <div className="text-base sm:text-xl font-bold text-primary-content">{character.name}</div>
-                          <div className="text-xs sm:text-sm text-neutral-content">
+                          <div className="text-base sm:text-xl font-bold text-accent-content">{character.name}</div>
+                          <div className="text-xs sm:text-sm">
                             {character.race} {character.class}
                             <span className="inline sm:hidden"> (Level {character.total_level})</span>
                           </div>
@@ -184,7 +184,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
                             <p>{character.campaign}</p>
                           </div>
                           {character.match.includes("magicItems") && (
-                            <div className="text-neutral-content mb-2 whitespace-pre-wrap">
+                            <div className=" mb-2 whitespace-pre-wrap">
                               <p className="font-semibold">Magic Items:</p>
                               {character.magic_items.map(item => item.name).join(" | ")}
                             </div>
