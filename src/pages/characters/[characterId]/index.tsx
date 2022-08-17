@@ -13,6 +13,10 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { CSSProperties, Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { SpecialComponents } from "react-markdown/lib/ast-to-react";
+import { NormalComponents } from "react-markdown/lib/complex-types";
+import remarkGfm from "remark-gfm";
 import { z } from "zod";
 
 const minisearch = new MiniSearch({
@@ -113,6 +117,18 @@ const Characters: NextPageWithLayout = () => {
       return [];
     }
   }, [search, logData]);
+
+  const components: Partial<Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents> = {
+    table({ children }) {
+      return <table className="table">{children}</table>;
+    },
+    th({ children }) {
+      return <th className="bg-base-200 print:p-2">{children}</th>;
+    },
+    td({ children }) {
+      return <td className="print:p-2">{children}</td>;
+    }
+  };
 
   if (!character)
     return (
@@ -257,24 +273,24 @@ const Characters: NextPageWithLayout = () => {
       </section>
       <section className="mt-6">
         <div className="rounded-lg">
-          <table className="table w-full">
+          <table className="table w-full bg-base-100">
             <thead>
               <tr>
-                <th className="print:p-2">Log Entry</th>
-                <th className="hidden sm:table-cell print:table-cell print:p-2">Advancement</th>
-                <th className="hidden sm:table-cell print:table-cell print:p-2">Treasure</th>
-                <th className="hidden md:table-cell print:!hidden">Story Awards</th>
-                {myCharacter && <th className="print:hidden"></th>}
+                <td className="print:p-2">Log Entry</td>
+                <td className="hidden sm:table-cell print:table-cell print:p-2">Advancement</td>
+                <td className="hidden sm:table-cell print:table-cell print:p-2">Treasure</td>
+                <td className="hidden md:table-cell print:!hidden">Story Awards</td>
+                {myCharacter && <td className="print:hidden"></td>}
               </tr>
             </thead>
             <tbody ref={parent2}>
               {results.map(log => (
                 <Fragment key={log.id}>
                   <tr className="print:text-sm">
-                    <th
+                    <td
                       className={concatenate(
                         "align-top !static print:p-2",
-                        (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
                       )}>
                       <p
                         className="text-primary-content font-semibold whitespace-pre-wrap"
@@ -327,11 +343,11 @@ const Characters: NextPageWithLayout = () => {
                           <p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
                         </div>
                       </div>
-                    </th>
+                    </td>
                     <td
                       className={concatenate(
                         "align-top hidden sm:table-cell print:table-cell print:p-2",
-                        (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
                       )}>
                       {log.experience > 0 && (
                         <p>
@@ -357,7 +373,7 @@ const Characters: NextPageWithLayout = () => {
                     <td
                       className={concatenate(
                         "align-top hidden sm:table-cell print:table-cell print:p-2",
-                        (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
                       )}>
                       {log.tcp !== 0 && (
                         <p>
@@ -379,7 +395,7 @@ const Characters: NextPageWithLayout = () => {
                     <td
                       className={concatenate(
                         "align-top hidden md:table-cell print:!hidden",
-                        (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
+                        (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
                       )}>
                       {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                         <div>
@@ -389,7 +405,11 @@ const Characters: NextPageWithLayout = () => {
                       )}
                     </td>
                     {myCharacter && (
-                      <td className="w-8 print:hidden">
+                      <td
+                        className={concatenate(
+                          "w-8 print:hidden",
+                          (log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
+                        )}>
                         <div className="flex flex-col justify-center gap-2">
                           <Link href={`/characters/${params.characterId}/log/${log.id}`}>
                             <a className="btn btn-sm btn-primary">
@@ -410,18 +430,20 @@ const Characters: NextPageWithLayout = () => {
                   </tr>
                   {(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                     <tr className={concatenate(!descriptions && "hidden print:table-row")}>
-                      <td colSpan={100} className="print:p-2 print:pt-0">
-                        <p className="text-sm whitespace-pre-wrap">
-                          <span className="font-semibold">Notes:</span> {log.description}
-                        </p>
+                      <td className="hidden sm:table-cell print:hidden print:p-2 print:pt-0 align-top font-semibold text-sm text-primary-content">Notes:</td>
+                      <td colSpan={100} className="print:p-2 print:pt-0 whitespace-pre-wrap text-sm print:text-xs">
+                        <h4 className="hidden print:block font-semibold text-base">Notes:</h4>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                          {log.description || ""}
+                        </ReactMarkdown>
                         {(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
                           <div>
                             {log.story_awards_gained.map(mi => (
                               <p key={mi.id} className="text-sm whitespace-pre-wrap">
-                                <span className="font-semibold">
+                                <span className="font-semibold print:block pr-2">
                                   {mi.name}
                                   {mi.description ? ":" : ""}
-                                </span>{" "}
+                                </span>
                                 {mi.description}
                               </p>
                             ))}
@@ -443,7 +465,9 @@ const Characters: NextPageWithLayout = () => {
           <label className="modal-box relative">
             <h3 className="text-lg font-bold text-primary-content">{modal.name}</h3>
             {modal.date && <p className="text-xs text-neutral-content">{modal.date.toLocaleString()}</p>}
-            <p className="text-xs sm:text-sm pt-4 whitespace-pre-wrap">{modal.description}</p>
+            <ReactMarkdown className="text-xs sm:text-sm pt-4 whitespace-pre-wrap" remarkPlugins={[remarkGfm]}>
+              {modal.description}
+            </ReactMarkdown>
           </label>
         )}
       </label>
