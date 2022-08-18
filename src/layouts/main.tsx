@@ -13,171 +13,179 @@ import background from "../../public/images/barovia-gate.jpg";
 import google from "../../public/images/google.svg";
 
 const Layout = (props: PropsWithChildren) => {
-  const session = useSession();
-  const router = useRouter();
+	const session = useSession();
+	const router = useRouter();
 	const { theme, setTheme } = useTheme();
-  const [drawer, setDrawer] = useState(false);
+	const [drawer, setDrawer] = useState(false);
 
 	useEffect(() => {
 		const mm = matchMedia("(prefers-color-scheme: dark)");
 		const listener = () => setTheme(mm.matches ? "dark" : "light");
 
-    console.log(theme)
+		console.log(theme);
 
 		if (!theme || theme == "system") listener();
 		mm.addEventListener("change", listener);
 		return () => mm.removeEventListener("change", listener);
 	}, [theme, setTheme]);
 
-  return (
-    <>
-      <Head>
-        <link rel="icon" type="image/x-icon" href="/favicon.png" />
-      </Head>
+	return (
+		<>
+			<Head>
+				<link rel="icon" type="image/x-icon" href="/favicon.png" />
+			</Head>
 			<NextNProgress color="#6518e7" height={3} options={{ showSpinner: false }} />
-      <Image
-        src={background}
-        priority
-        alt="Background"
-        width={1280}
-        height={1080}
-        className="!fixed z-0 min-w-full min-h-screen object-cover object-center opacity-20 print:hidden"
-      />
-      <div className="flex flex-col min-h-screen">
-        <header className="relative z-20 border-b-[1px] border-slate-500 w-full">
-          <nav className="container mx-auto p-4 max-w-5xl flex gap-2">
-            <button className="py-3 pr-4 flex md:hidden print:hidden" onClick={() => setDrawer(true)}>
-              <Icon path={mdiMenu} size={1} />
-            </button>
-            <Link href={session.data?.user ? "/characters" : "/"}>
-              <a className="flex flex-col font-draconis text-center mr-8">
-                <h1 className="text-base leading-4 text-accent-content">Adventurers League</h1>
-                <h2 className="text-3xl leading-7">Log Sheet</h2>
-              </a>
-            </Link>
-            <Link href="/characters">
-              <a className="p-2 hidden md:flex items-center">Character Logs</a>
-            </Link>
-            <Link href="/dm-logs">
-              <a className="p-2 hidden md:flex items-center">DM Logs</a>
-            </Link>
-            <div className="flex-1">&nbsp;</div>
-            {session.status !== "loading" && (
-              <>
-                <a href="https://github.com/sillvva/adventurers-league-log" target="_blank" rel="noreferrer noopener" className="p-2 hidden sm:flex items-center">
-                  <Icon path={mdiGithub} size={1} />
-                </a>
-                <a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener" className="p-2 hidden sm:flex items-center">
-                  Contribute
-                </a>
-                {session.data?.user ? (
-                  <>
-                    <div className="dropdown dropdown-end">
-                      <label tabIndex={0} className="flex cursor-pointer">
-                        <div className="px-4 hidden sm:flex print:flex items-center text-accent-content">{session.data.user.name}</div>
-                        <div className="avatar">
-                          <div className="w-12 relative rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
-                            <Image
-                              src={session.data.user.image || ""}
-                              alt={session.data.user.name as string}
-                              width={48}
-                              height={48}
-                              className="rounded-full object-cover object-center"
-                            />
-                          </div>
-                        </div>
-                      </label>
-                      <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                        <li className="sm:hidden">
-                          <a>{session.data.user.name}</a>
-                        </li>
-                        <li>
-                          <a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener" className="sm:hidden items-center">
-                            Contribute
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://github.com/sillvva/adventurers-league-log" target="_blank" rel="noreferrer noopener" className="sm:hidden items-center">
-                            Github
-                          </a>
-                        </li>
-                        <li>
-                          <a onClick={() => signOut()}>Logout</a>
-                        </li>
-                      </ul>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className="flex items-center bg-neutral/50 hover:bg-neutral text-neutral-content hover:text-accent-content transition-colors rounded-lg gap-2 p-2 h-12"
-                      onClick={() =>
-                        signIn("google", {
-                          callbackUrl: `${router.basePath}/characters`
-                        })
-                      }>
-                      <Image src={google} width={24} height={24} alt="Google" />
-                      <span className="flex-1 flex h-full justify-center items-center font-semibold">Login</span>
-                    </button>
-                  </>
-                )}
-              </>
-            )}
-          </nav>
-        </header>
-        <main className="container flex-1 relative z-10 mx-auto p-4 max-w-5xl">{props.children}</main>
-        <footer className="footer footer-center relative z-16 p-4 bg-base-300/50 text-base-content print:hidden">
-          <div>
-            <p>
-              All{" "}
-              <a
-                href="https://www.dndbeyond.com/sources/cos/the-lands-of-barovia#BGatesofBarovia"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="text-secondary">
-                images
-              </a>{" "}
-              and the name{" "}
-              <a href="https://dnd.wizards.com/adventurers-league" target="_blank" rel="noreferrer noopener" className="text-secondary">
-                Adventurers League
-              </a>{" "}
-              are property of Hasbro and{" "}
-              <a href="https://dnd.wizards.com/adventurers-league" target="_blank" rel="noreferrer noopener" className="text-secondary">
-                Wizards of the Coast
-              </a>
-              . This website is affiliated with neither.
-            </p>
-          </div>
-        </footer>
-        <div className={concatenate("fixed z-50 top-0 bottom-0 -left-72 w-72 bg-neutral py-4 px-4 transition-all", drawer && "left-0")}>
-          <ul className="menu w-full" onClick={() => setDrawer(false)}>
-            <li>
-              <Link href="/characters">
-                <a>Character Logs</a>
-              </Link>
-            </li>
-            <li>
-              <Link href="/dm-logs">
-                <a>DM Logs</a>
-              </Link>
-            </li>
-          </ul>
-          <div className="divider"></div>
-          <ul className="menu w-full">
-            <li>
-              <a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener">
-                Contribute
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div
-          className={concatenate("fixed inset-0 bg-black/50 transition-all", drawer ? "z-40 opacity-100" : "-z-10 opacity-0")}
-          onClick={() => setDrawer(false)}
-        />
-      </div>
-    </>
-  );
+			<Image
+				src={background}
+				priority
+				alt="Background"
+				width={1280}
+				height={1080}
+				className="!fixed z-0 min-h-screen min-w-full object-cover object-center opacity-20 print:hidden"
+			/>
+			<div className="flex min-h-screen flex-col">
+				<header className="relative z-20 w-full border-b-[1px] border-slate-500">
+					<nav className="container mx-auto flex max-w-5xl gap-2 p-4">
+						<button className="flex py-3 pr-4 print:hidden md:hidden" onClick={() => setDrawer(true)}>
+							<Icon path={mdiMenu} size={1} />
+						</button>
+						<Link href={session.data?.user ? "/characters" : "/"}>
+							<a className="mr-8 flex flex-col text-center font-draconis">
+								<h1 className="text-base leading-4 text-accent-content">Adventurers League</h1>
+								<h2 className="text-3xl leading-7">Log Sheet</h2>
+							</a>
+						</Link>
+						<Link href="/characters">
+							<a className="hidden items-center p-2 md:flex">Character Logs</a>
+						</Link>
+						<Link href="/dm-logs">
+							<a className="hidden items-center p-2 md:flex">DM Logs</a>
+						</Link>
+						<div className="flex-1">&nbsp;</div>
+						{session.status !== "loading" && (
+							<>
+								<a
+									href="https://github.com/sillvva/adventurers-league-log"
+									target="_blank"
+									rel="noreferrer noopener"
+									className="hidden items-center p-2 sm:flex">
+									<Icon path={mdiGithub} size={1} />
+								</a>
+								<a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener" className="hidden items-center p-2 sm:flex">
+									Contribute
+								</a>
+								{session.data?.user ? (
+									<>
+										<div className="dropdown-end dropdown">
+											<label tabIndex={0} className="flex cursor-pointer">
+												<div className="hidden items-center px-4 text-accent-content print:flex sm:flex">{session.data.user.name}</div>
+												<div className="avatar">
+													<div className="relative w-12 overflow-hidden rounded-full ring ring-primary ring-offset-2 ring-offset-base-100">
+														<Image
+															src={session.data.user.image || ""}
+															alt={session.data.user.name as string}
+															width={48}
+															height={48}
+															className="rounded-full object-cover object-center"
+														/>
+													</div>
+												</div>
+											</label>
+											<ul tabIndex={0} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
+												<li className="sm:hidden">
+													<a>{session.data.user.name}</a>
+												</li>
+												<li>
+													<a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener" className="items-center sm:hidden">
+														Contribute
+													</a>
+												</li>
+												<li>
+													<a
+														href="https://github.com/sillvva/adventurers-league-log"
+														target="_blank"
+														rel="noreferrer noopener"
+														className="items-center sm:hidden">
+														Github
+													</a>
+												</li>
+												<li>
+													<a onClick={() => signOut()}>Logout</a>
+												</li>
+											</ul>
+										</div>
+									</>
+								) : (
+									<>
+										<button
+											className="flex h-12 items-center gap-2 rounded-lg bg-neutral/50 p-2 text-neutral-content transition-colors hover:bg-neutral hover:text-accent-content"
+											onClick={() =>
+												signIn("google", {
+													callbackUrl: `${router.basePath}/characters`
+												})
+											}>
+											<Image src={google} width={24} height={24} alt="Google" />
+											<span className="flex h-full flex-1 items-center justify-center font-semibold">Login</span>
+										</button>
+									</>
+								)}
+							</>
+						)}
+					</nav>
+				</header>
+				<main className="container relative z-10 mx-auto max-w-5xl flex-1 p-4">{props.children}</main>
+				<footer className="z-16 footer footer-center relative bg-base-300/50 p-4 text-base-content print:hidden">
+					<div>
+						<p>
+							All{" "}
+							<a
+								href="https://www.dndbeyond.com/sources/cos/the-lands-of-barovia#BGatesofBarovia"
+								target="_blank"
+								rel="noreferrer noopener"
+								className="text-secondary">
+								images
+							</a>{" "}
+							and the name{" "}
+							<a href="https://dnd.wizards.com/adventurers-league" target="_blank" rel="noreferrer noopener" className="text-secondary">
+								Adventurers League
+							</a>{" "}
+							are property of Hasbro and{" "}
+							<a href="https://dnd.wizards.com/adventurers-league" target="_blank" rel="noreferrer noopener" className="text-secondary">
+								Wizards of the Coast
+							</a>
+							. This website is affiliated with neither.
+						</p>
+					</div>
+				</footer>
+				<div className={concatenate("fixed top-0 bottom-0 -left-72 z-50 w-72 bg-neutral py-4 px-4 transition-all", drawer && "left-0")}>
+					<ul className="menu w-full" onClick={() => setDrawer(false)}>
+						<li>
+							<Link href="/characters">
+								<a>Character Logs</a>
+							</Link>
+						</li>
+						<li>
+							<Link href="/dm-logs">
+								<a>DM Logs</a>
+							</Link>
+						</li>
+					</ul>
+					<div className="divider"></div>
+					<ul className="menu w-full">
+						<li>
+							<a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener">
+								Contribute
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div
+					className={concatenate("fixed inset-0 bg-black/50 transition-all", drawer ? "z-40 opacity-100" : "-z-10 opacity-0")}
+					onClick={() => setDrawer(false)}
+				/>
+			</div>
+		</>
+	);
 };
 
 export default Layout;
@@ -220,7 +228,15 @@ type NProgress = {
 	nonce?: string;
 };
 
-function NextNProgress({ color = "#29D", startPosition = 0.3, stopDelayMs = 200, height = 3, showOnShallow = true, options, nonce }: NProgress) {
+function NextNProgress({
+	color = "#29D",
+	startPosition = 0.3,
+	stopDelayMs = 200,
+	height = 3,
+	showOnShallow = true,
+	options,
+	nonce
+}: NProgress) {
 	useEffect(() => {
 		let timer: NodeJS.Timeout | null = null;
 
