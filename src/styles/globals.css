@@ -43,7 +43,7 @@
 }
 
 @layer utilities {
-  .text-primary-content {
+  .text-accent-content {
     @apply print:text-gray-700;
   }
   .text-secondary {

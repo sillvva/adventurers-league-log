@@ -2,6 +2,7 @@
 import { withTRPC } from "@trpc/next";
 import type { NextPage } from "next";
 import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "next-themes";
 import type { AppProps } from "next/app";
 import type { ReactElement, ReactNode } from "react";
 import superjson from "superjson";
@@ -9,19 +10,19 @@ import type { AppRouter } from "../server/router";
 import "../styles/globals.css";
 
 export type NextPageWithLayout<P = {}> = NextPage<P> & {
-	getLayout?: (page: ReactElement, props: P) => ReactNode;
+  getLayout?: (page: ReactElement, props: P) => ReactNode;
 };
 
 type AppPropsWithLayout = AppProps & {
-	Component: NextPageWithLayout;
+  Component: NextPageWithLayout;
 };
 
 const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
-	const getLayout = Component.getLayout ?? (page => page);
+  const getLayout = Component.getLayout ?? (page => page);
   return (
-    <SessionProvider session={pageProps.session}>
-      {getLayout(<Component {...pageProps} />, pageProps)}
-    </SessionProvider>
+    <ThemeProvider>
+      <SessionProvider session={pageProps.session}>{getLayout(<Component {...pageProps} />, pageProps)}</SessionProvider>
+    </ThemeProvider>
   );
 };
 
@@ -44,7 +45,7 @@ export default withTRPC<AppRouter>({
 
     return {
       url,
-      transformer: superjson,
+      transformer: superjson
       /**
        * @link https://react-query.tanstack.com/reference/QueryClient
        */
@@ -54,5 +55,5 @@ export default withTRPC<AppRouter>({
   /**
    * @link https://trpc.io/docs/ssr
    */
-  ssr: false,
+  ssr: false
 })(MyApp);
