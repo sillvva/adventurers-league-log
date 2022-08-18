@@ -130,10 +130,10 @@ const Characters: NextPageWithLayout = () => {
 			return <table className="table-compact table">{children}</table>;
 		},
 		th({ children }) {
-			return <th className="bg-base-200 print:p-2">{children}</th>;
+			return <th className="whitespace-pre-wrap bg-base-200 print:p-2">{children}</th>;
 		},
 		td({ children }) {
-			return <td className="print:p-2">{children}</td>;
+			return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
 		}
 	};
 
@@ -260,7 +260,7 @@ const Characters: NextPageWithLayout = () => {
 					<div className="flex gap-4 print:hidden">
 						{myCharacter && (
 							<Link href={`/characters/${params.characterId}/log/new`}>
-								<a className="btn btn-primary btn-sm">
+								<a className="btn btn-primary btn-sm px-2 sm:px-3">
 									<span className="hidden sm:inline">New Log</span>
 									<Icon path={mdiPlus} size={1} className="inline sm:hidden" />
 								</a>
@@ -270,12 +270,12 @@ const Characters: NextPageWithLayout = () => {
 							type="text"
 							placeholder="Search"
 							onChange={e => setSearch(e.target.value)}
-							className="input input-bordered input-sm w-full max-w-xs"
+							className="input input-bordered input-sm w-full sm:max-w-xs"
 						/>
 						<div className="form-control">
 							<label className="label cursor-pointer py-1">
-								<span className="label-text hidden pr-4 sm:inline">Descriptions</span>
-								<input type="checkbox" className="toggle toggle-primary toggle-sm" checked={descriptions} onChange={toggleDescriptions} />
+								<span className="label-text hidden pr-4 sm:inline">Notes</span>
+								<input type="checkbox" className="toggle toggle-primary" checked={descriptions} onChange={toggleDescriptions} />
 							</label>
 						</div>
 					</div>
@@ -432,7 +432,7 @@ const Characters: NextPageWithLayout = () => {
 										{myCharacter && (
 											<td
 												className={concatenate(
-													"w-8 print:hidden",
+													"w-8 print:hidden align-top",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
 														"border-b-0"
 												)}>
@@ -456,10 +456,10 @@ const Characters: NextPageWithLayout = () => {
 									</tr>
 									{(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 										<tr className={concatenate(!descriptions && "hidden print:table-row")}>
-											<td className="hidden align-top text-sm font-semibold text-accent-content print:hidden print:p-2 print:pt-0 sm:table-cell">
+											<td className="hidden pt-0 align-top text-sm font-semibold text-accent-content print:hidden print:p-2 sm:table-cell">
 												Notes:
 											</td>
-											<td colSpan={100} className="whitespace-pre-wrap text-sm print:p-2 print:pt-0 print:text-xs">
+											<td colSpan={100} className="whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs">
 												<h4 className="hidden text-base font-semibold print:block">Notes:</h4>
 												<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
 													{log.description || ""}
