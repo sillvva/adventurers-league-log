@@ -388,7 +388,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 													dms.length > 0 &&
 													dmSearch.trim() &&
 													!(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name")) && (
-														<ul className="dropdown-content menu rounded-lg bg-base-100 p-2 shadow">
+														<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
 															{dmNameMatches
 																.map((dm, i) => (
 																	<li key={dm.id} className={concatenate(dmKeySel === i && "bg-primary text-primary-content")}>
@@ -443,7 +443,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 													/>
 												</label>
 												{dms && dms.length > 0 && dmSearch.trim() && (
-													<ul className="dropdown-content menu rounded-lg bg-base-100 p-2 shadow">
+													<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
 														{dmDCIMatches
 															.map(dm => (
 																<li key={dm.id}>

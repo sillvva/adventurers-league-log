@@ -41,7 +41,7 @@ const Layout = (props: PropsWithChildren) => {
 				alt="Background"
 				width={1280}
 				height={1080}
-				className="!fixed z-0 min-h-screen min-w-full object-cover object-center opacity-20 print:hidden"
+				className="!fixed z-0 min-h-screen min-w-full object-cover object-center opacity-25 dark:opacity-20 print:hidden"
 			/>
 			<div className="flex min-h-screen flex-col">
 				<header className="relative z-20 w-full border-b-[1px] border-slate-500">
