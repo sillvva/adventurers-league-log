@@ -176,7 +176,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 			if (!values.date) errors.push(setError("date", { message: "Required" }));
 			else values.date = new Date(values.date.replace("T", " ")).toISOString();
 
-			if (values.type === "game" && !values.dm.name) errors.push(setError("dm.name", { message: "Required" }));
+			if (values.type === "game" && !values.dm.name && !values.dm.id) errors.push(setError("dm.name", { message: "Required" }));
 
 			if (!values.dm || !values.dm.name) values.dm = { id: "", name: session?.user?.name || "", DCI: null, uid: session?.user?.id || "" };
 			values.dm.DCI = (values.dm.DCI || "").replace(/[^\d]+/g, "").trim() || null;
@@ -346,7 +346,13 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 						{type === "game" && (
 							<>
 								<input type="hidden" {...register("dm.id", { value: selectedLog.dm?.id || "" })} />
-								{!selectedLog.is_dm_log && (
+								{selectedLog.is_dm_log ? (
+									<>
+										<input type="hidden" {...register("dm.name", { value: selectedLog.dm?.name || "" })} />
+										<input type="hidden" {...register("dm.DCI", { value: selectedLog.dm?.DCI || "" })} />
+										<input type="hidden" {...register("dm.uid", { value: selectedLog.dm?.uid || "" })} />
+									</>
+								) : (
 									<>
 										<div className="form-control col-span-12 sm:col-span-6">
 											<label className="label">
@@ -640,9 +646,9 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 												);
 											}}
 											className="textarea textarea-bordered w-full focus:border-primary"
-											style={{ resize: "none" }}>
-											{item.description}
-										</textarea>
+											style={{ resize: "none" }}
+											value={item.description}
+										/>
 									</div>
 								</div>
 							</div>
@@ -718,9 +724,9 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 													storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item))
 												);
 											}}
-											className="textarea textarea-bordered w-full focus:border-primary">
-											{item.description}
-										</textarea>
+											className="textarea textarea-bordered w-full focus:border-primary"
+											value={item.description}
+										/>
 									</div>
 								</div>
 							</div>
