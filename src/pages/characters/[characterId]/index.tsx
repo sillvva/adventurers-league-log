@@ -20,24 +20,24 @@ import remarkGfm from "remark-gfm";
 import { z } from "zod";
 
 export const components: Partial<Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents> = {
-  h1({ children }) {
-    return <h1 className="mb-4 text-3xl font-bold">{children}</h1>;
-  },
-  h2({ children }) {
-    return <h2 className="mb-4 text-2xl font-bold">{children}</h2>;
-  },
-  h3({ children }) {
-    return <h3 className="mb-4 text-xl font-semibold">{children}</h3>;
-  },
-  table({ children }) {
-    return <table className="table-compact table">{children}</table>;
-  },
-  th({ children }) {
-    return <th className="whitespace-pre-wrap bg-base-200 print:p-2">{children}</th>;
-  },
-  td({ children }) {
-    return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
-  }
+	h1({ children }) {
+		return <h1 className="mb-4 text-3xl font-bold">{children}</h1>;
+	},
+	h2({ children }) {
+		return <h2 className="mb-4 text-2xl font-bold">{children}</h2>;
+	},
+	h3({ children }) {
+		return <h3 className="mb-4 text-xl font-semibold">{children}</h3>;
+	},
+	table({ children }) {
+		return <table className="table-compact table">{children}</table>;
+	},
+	th({ children }) {
+		return <th className="whitespace-pre-wrap bg-base-200 print:p-2">{children}</th>;
+	},
+	td({ children }) {
+		return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
+	}
 };
 
 const minisearch = new MiniSearch({
@@ -504,7 +504,7 @@ const Characters: NextPageWithLayout = () => {
 					<label className="modal-box relative">
 						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
 						{modal.date && <p className="text-xs ">{modal.date.toLocaleString()}</p>}
-						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" remarkPlugins={[remarkGfm]}>
+						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
 							{modal.description}
 						</ReactMarkdown>
 					</label>
