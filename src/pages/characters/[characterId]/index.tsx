@@ -37,7 +37,10 @@ export const components: Partial<Omit<NormalComponents, keyof SpecialComponents>
 	},
 	td({ children }) {
 		return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
-	}
+	},
+  a({ children, href }) {
+    return <a href={href} className="text-secondary" target="_blank" rel="noreferrer noopener">{children}</a>;
+  }
 };
 
 const minisearch = new MiniSearch({
