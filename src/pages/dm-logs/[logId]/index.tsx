@@ -472,9 +472,9 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 												);
 											}}
 											className="textarea textarea-bordered w-full focus:border-primary"
-											style={{ resize: "none" }}>
-											{item.description}
-										</textarea>
+											style={{ resize: "none" }}
+											value={item.description}
+										/>
 									</div>
 								</div>
 							</div>
@@ -516,9 +516,9 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 													storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item))
 												);
 											}}
-											className="textarea textarea-bordered w-full focus:border-primary">
-											{item.description}
-										</textarea>
+											className="textarea textarea-bordered w-full focus:border-primary"
+											value={item.description}
+										/>
 									</div>
 								</div>
 							</div>
