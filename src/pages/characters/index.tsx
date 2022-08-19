@@ -14,7 +14,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { NextPageWithLayout } from "../_app";
 
 const minisearch = new MiniSearch({
-	fields: ["characterName", "campaign", "race", "class", "magicItems"],
+	fields: ["characterName", "campaign", "race", "class", "magicItems", "tier", "level"],
 	idField: "characterId",
 	searchOptions: {
 		boost: { characterName: 2 },
@@ -43,6 +43,8 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 						campaign: character.campaign || "",
 						race: character.race || "",
 						class: character.class || "",
+						tier: `T${character.tier}`,
+						level: `L${character.total_level}`,
 						magicItems: character.logs
 							.reduce((acc, log) => {
 								if (!log.magic_items_gained.length) return acc;
@@ -111,7 +113,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 							</a>
 						</Link>
 					)}
-					<div className="dropdown dropdown-end">
+					<div className="dropdown-end dropdown">
 						<label tabIndex={1} className="btn btn-sm">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
@@ -185,7 +187,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 												<div className="flex flex-col">
 													<div className="whitespace-pre-wrap text-base font-bold text-accent-content sm:text-xl">{character.name}</div>
 													<div className="whitespace-pre-wrap text-xs sm:text-sm">
-														<span className="inline sm:hidden">Level {character.total_level}{" "}</span>
+														<span className="inline sm:hidden">Level {character.total_level} </span>
 														{character.race} {character.class}
 													</div>
 													<div className="mb-2 block text-xs sm:hidden">

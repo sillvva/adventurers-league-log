@@ -21,13 +21,13 @@ import { z } from "zod";
 
 export const components: Partial<Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents> = {
 	h1({ children }) {
-		return <h1 className="mb-4 text-3xl font-bold">{children}</h1>;
+		return <h1 className="text-3xl font-bold">{children}</h1>;
 	},
 	h2({ children }) {
-		return <h2 className="mb-4 text-2xl font-bold">{children}</h2>;
+		return <h2 className="text-2xl font-bold">{children}</h2>;
 	},
 	h3({ children }) {
-		return <h3 className="mb-4 text-xl font-semibold">{children}</h3>;
+		return <h3 className="text-xl font-semibold">{children}</h3>;
 	},
 	table({ children }) {
 		return <table className="table-compact table">{children}</table>;
@@ -37,7 +37,10 @@ export const components: Partial<Omit<NormalComponents, keyof SpecialComponents>
 	},
 	td({ children }) {
 		return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
-	}
+	},
+  a({ children, href }) {
+    return <a href={href} className="text-secondary" target="_blank" rel="noreferrer noopener">{children}</a>;
+  }
 };
 
 const minisearch = new MiniSearch({
