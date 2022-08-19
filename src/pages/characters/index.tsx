@@ -2,7 +2,7 @@ import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { mdiDotsHorizontal, mdiHome } from "@mdi/js";
+import { mdiDotsHorizontal, mdiHome, mdiPlus } from "@mdi/js";
 import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
 import type { GetServerSideProps } from "next";
@@ -105,10 +105,13 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 					<div className="flex-1" />
 					{characters && characters.length > 0 && (
 						<Link href="/characters/new">
-							<a className="btn btn-primary btn-sm">New Character</a>
+							<a className="btn btn-primary btn-sm">
+								<span className="hidden sm:inline">New Character</span>
+								<Icon path={mdiPlus} className="inline w-4 sm:hidden" />
+							</a>
 						</Link>
 					)}
-					<div className="dropdown-end dropdown">
+					<div className="dropdown dropdown-end">
 						<label tabIndex={1} className="btn btn-sm">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
@@ -180,10 +183,10 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 											</td>
 											<td className="transition-colors">
 												<div className="flex flex-col">
-													<div className="text-base font-bold text-accent-content sm:text-xl">{character.name}</div>
-													<div className="text-xs sm:text-sm">
+													<div className="whitespace-pre-wrap text-base font-bold text-accent-content sm:text-xl">{character.name}</div>
+													<div className="whitespace-pre-wrap text-xs sm:text-sm">
+														<span className="inline sm:hidden">Level {character.total_level}{" "}</span>
 														{character.race} {character.class}
-														<span className="inline sm:hidden"> (Level {character.total_level})</span>
 													</div>
 													<div className="mb-2 block text-xs sm:hidden">
 														<p>{character.campaign}</p>

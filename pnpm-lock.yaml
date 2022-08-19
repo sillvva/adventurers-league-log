@@ -21,6 +21,7 @@ specifiers:
   eslint: 8.18.0
   eslint-config-next: 12.2.3
   minisearch: ^5.0.0
+  moment: ^2.29.4
   next: 12.2.3
   next-auth: ^4.10.3
   next-themes: ^0.2.0
@@ -54,6 +55,7 @@ dependencies:
   '@trpc/server': 9.26.2
   daisyui: 2.22.0_25hquoklqeoqwmt7fwvvcyxm5e
   minisearch: 5.0.0
+  moment: 2.29.4
   next: 12.2.3_biqbaboplfbrettd7655fr4n2y
   next-auth: 4.10.3_biqbaboplfbrettd7655fr4n2y
   next-themes: 0.2.0_53oqlnqnxhbetdy4ljlkkvmoby
@@ -2171,6 +2173,10 @@ packages:
 
   /minisearch/5.0.0:
     resolution: {integrity: sha512-VEwBhl8aFtc2UG2XmP7a4XaZxVfNhe7GvB2W/ZRGbLL3P3LbBhkoOezBWsMqG8Mr5VonqXAMRWth79XXKja1bQ==}
+    dev: false
+
+  /moment/2.29.4:
+    resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
     dev: false
 
   /mri/1.2.0:

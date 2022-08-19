@@ -14,10 +14,31 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { CSSProperties, Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { SpecialComponents } from "react-markdown/lib/ast-to-react";
-import { NormalComponents } from "react-markdown/lib/complex-types";
+import type { SpecialComponents } from "react-markdown/lib/ast-to-react";
+import type { NormalComponents } from "react-markdown/lib/complex-types";
 import remarkGfm from "remark-gfm";
 import { z } from "zod";
+
+export const components: Partial<Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents> = {
+	h1({ children }) {
+		return <h1 className="mb-4 text-3xl font-bold">{children}</h1>;
+	},
+	h2({ children }) {
+		return <h2 className="mb-4 text-2xl font-bold">{children}</h2>;
+	},
+	h3({ children }) {
+		return <h3 className="mb-4 text-xl font-semibold">{children}</h3>;
+	},
+	table({ children }) {
+		return <table className="table-compact table">{children}</table>;
+	},
+	th({ children }) {
+		return <th className="whitespace-pre-wrap bg-base-200 print:p-2">{children}</th>;
+	},
+	td({ children }) {
+		return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
+	}
+};
 
 const minisearch = new MiniSearch({
 	fields: ["logName", "magicItems", "storyAwards"],
@@ -124,18 +145,6 @@ const Characters: NextPageWithLayout = () => {
 			return [];
 		}
 	}, [search, logData]);
-
-	const components: Partial<Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents> = {
-		table({ children }) {
-			return <table className="table-compact table">{children}</table>;
-		},
-		th({ children }) {
-			return <th className="whitespace-pre-wrap bg-base-200 print:p-2">{children}</th>;
-		},
-		td({ children }) {
-			return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
-		}
-	};
 
 	if (!character)
 		return (
@@ -432,7 +441,7 @@ const Characters: NextPageWithLayout = () => {
 										{myCharacter && (
 											<td
 												className={concatenate(
-													"w-8 print:hidden align-top",
+													"w-8 align-top print:hidden",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
 														"border-b-0"
 												)}>
@@ -495,7 +504,7 @@ const Characters: NextPageWithLayout = () => {
 					<label className="modal-box relative">
 						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
 						{modal.date && <p className="text-xs ">{modal.date.toLocaleString()}</p>}
-						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" remarkPlugins={[remarkGfm]}>
+						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
 							{modal.description}
 						</ReactMarkdown>
 					</label>
