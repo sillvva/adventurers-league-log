@@ -12,7 +12,10 @@ import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { authOptions } from "../api/auth/[...nextauth]";
+import { components } from "../characters/[characterId]";
 
 const minisearch = new MiniSearch({
 	fields: ["logName", "characterName", "magicItems", "storyAwards"],
@@ -316,7 +319,11 @@ const Characters: NextPageWithLayout = () => {
 					<label className="modal-box relative">
 						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
 						{modal.date && <p className="text-xs">{modal.date.toLocaleString()}</p>}
-						<p className="pt-4 text-xs sm:text-sm">{modal.description}</p>
+						<p className="pt-4 text-xs sm:text-sm">
+							<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+								{modal.description || ""}
+							</ReactMarkdown>
+						</p>
 					</label>
 				)}
 			</label>

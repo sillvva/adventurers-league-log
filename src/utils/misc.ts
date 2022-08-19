@@ -1,3 +1,4 @@
+import moment from "moment";
 import qs from "qs";
 import { ZodSchema } from "zod";
 
@@ -44,9 +45,7 @@ export const parseError = (e: unknown) => {
 };
 
 export const formatDate = (date: Date) => {
-  const dateString = date.toISOString().split("T")[0];
-  const timeString = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-  return `${dateString}T${timeString}`;
+  return moment(date).format("YYYY-MM-DD\THH:mm");
 };
 
 export const slugify = (text: string) => {
