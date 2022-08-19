@@ -576,7 +576,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 		include: { dm: true, magic_items_gained: true, magic_items_lost: true, story_awards_gained: true, story_awards_lost: true }
 	});
 
-	if (!log || log.dm?.uid !== session.user?.id)
+	if (context.query.logId !== "new" && (!log || log.dm?.uid !== session.user?.id))
 		return {
 			props: { session, log: null, characters: [] as SSRChar[] },
 			redirect: {
@@ -588,7 +588,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	return {
 		props: {
 			session,
-			log: {
+			log: log && {
 				...log,
 				date: log.date.toISOString(),
 				created_at: log.created_at.toISOString(),
