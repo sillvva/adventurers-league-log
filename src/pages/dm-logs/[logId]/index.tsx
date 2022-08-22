@@ -425,6 +425,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.description?.message}</span>
+							<span className="label-text-alt">Markdown Allowed</span>
 						</label>
 					</div>
 					<div className="col-span-12 flex flex-wrap gap-4">
@@ -475,6 +476,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 											style={{ resize: "none" }}
 											value={item.description}
 										/>
+										<label className="label">
+											<span className="label-text-alt text-error"></span>
+											<span className="label-text-alt">Markdown Allowed</span>
+										</label>
 									</div>
 								</div>
 							</div>
@@ -519,6 +524,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 											className="textarea textarea-bordered w-full focus:border-primary"
 											value={item.description}
 										/>
+										<label className="label">
+											<span className="label-text-alt text-error"></span>
+											<span className="label-text-alt">Markdown Allowed</span>
+										</label>
 									</div>
 								</div>
 							</div>
