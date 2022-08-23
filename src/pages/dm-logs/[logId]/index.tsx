@@ -4,7 +4,6 @@ import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { logSchema } from "$src/pages/characters/[characterId]/log/[logId]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
-import type { AsyncReturnType } from "$src/types/util";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
@@ -21,7 +20,7 @@ import { FormEventHandler, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
+type PageProps = Awaited<ReturnType<typeof getServerSideProps>>["props"];
 
 const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) => {
 	const router = useRouter();

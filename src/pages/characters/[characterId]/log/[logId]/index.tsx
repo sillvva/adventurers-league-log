@@ -4,7 +4,6 @@ import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { getOne } from "$src/server/router/routers/characters";
-import type { AsyncReturnType } from "$src/types/util";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
@@ -22,7 +21,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
+type PageProps = Awaited<ReturnType<typeof getServerSideProps>>["props"];
 
 const dateRegex =
 	/^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/;
