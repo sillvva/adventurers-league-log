@@ -485,7 +485,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 							</div>
 						))}
 						{storyAwardsGained.map((item, index) => (
-							<div key={`storyAwardsGained${index}`} className="card col-span-12 bg-base-300/70 sm:col-span-6">
+							<div key={`storyAwardsGained${index}`} className="card col-span-12 h-[370px] bg-base-300/70 sm:col-span-6">
 								<div className="card-body flex flex-col gap-4">
 									<h4 className="text-2xl">Add Story Award</h4>
 									<div className="flex gap-4">

@@ -612,7 +612,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 					</div>
 					<div className="col-span-12 grid grid-cols-12 gap-4" ref={parent2}>
 						{magicItemsGained.map((item, index) => (
-							<div key={`magicItemsGained${index}`} className="card col-span-12 h-[338px] bg-base-300/70 sm:col-span-6">
+							<div key={`magicItemsGained${index}`} className="card col-span-12 h-[370px] bg-base-300/70 sm:col-span-6">
 								<div className="card-body flex flex-col gap-4">
 									<h4 className="text-2xl">Add Magic Item</h4>
 									<div className="flex gap-4">
@@ -692,7 +692,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 							</div>
 						))}
 						{storyAwardsGained.map((item, index) => (
-							<div key={`storyAwardsGained${index}`} className="card col-span-12 bg-base-300/70 sm:col-span-6">
+							<div key={`storyAwardsGained${index}`} className="card col-span-12 h-[370px] bg-base-300/70 sm:col-span-6">
 								<div className="card-body flex flex-col gap-4">
 									<h4 className="text-2xl">Add Story Award</h4>
 									<div className="flex gap-4">
