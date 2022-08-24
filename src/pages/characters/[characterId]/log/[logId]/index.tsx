@@ -4,7 +4,6 @@ import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { getOne } from "$src/server/router/routers/characters";
-import type { AsyncReturnType } from "$src/types/util";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
@@ -22,7 +21,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
+type PageProps = Awaited<ReturnType<typeof getServerSideProps>>["props"];
 
 const dateRegex =
 	/^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$/;
@@ -585,6 +584,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.description?.message}</span>
+    					<span className="label-text-alt">Markdown Allowed</span>
 						</label>
 					</div>
 					<div className="col-span-12 flex flex-wrap gap-4">
@@ -611,7 +611,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 					</div>
 					<div className="col-span-12 grid grid-cols-12 gap-4" ref={parent2}>
 						{magicItemsGained.map((item, index) => (
-							<div key={`magicItemsGained${index}`} className="card col-span-12 h-[338px] bg-base-300/70 sm:col-span-6">
+							<div key={`magicItemsGained${index}`} className="card col-span-12 h-[370px] bg-base-300/70 sm:col-span-6">
 								<div className="card-body flex flex-col gap-4">
 									<h4 className="text-2xl">Add Magic Item</h4>
 									<div className="flex gap-4">
@@ -649,6 +649,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 											style={{ resize: "none" }}
 											value={item.description}
 										/>
+										<label className="label">
+											<span className="label-text-alt text-error"></span>
+											<span className="label-text-alt">Markdown Allowed</span>
+										</label>
 									</div>
 								</div>
 							</div>
@@ -687,7 +691,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 							</div>
 						))}
 						{storyAwardsGained.map((item, index) => (
-							<div key={`storyAwardsGained${index}`} className="card col-span-12 bg-base-300/70 sm:col-span-6">
+							<div key={`storyAwardsGained${index}`} className="card col-span-12 h-[370px] bg-base-300/70 sm:col-span-6">
 								<div className="card-body flex flex-col gap-4">
 									<h4 className="text-2xl">Add Story Award</h4>
 									<div className="flex gap-4">
@@ -727,6 +731,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 											className="textarea textarea-bordered w-full focus:border-primary"
 											value={item.description}
 										/>
+										<label className="label">
+											<span className="label-text-alt text-error"></span>
+											<span className="label-text-alt">Markdown Allowed</span>
+										</label>
 									</div>
 								</div>
 							</div>

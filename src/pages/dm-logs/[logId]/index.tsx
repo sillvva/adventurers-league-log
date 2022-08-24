@@ -4,7 +4,6 @@ import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { logSchema } from "$src/pages/characters/[characterId]/log/[logId]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
-import type { AsyncReturnType } from "$src/types/util";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
@@ -21,7 +20,7 @@ import { FormEventHandler, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-type PageProps = AsyncReturnType<typeof getServerSideProps>["props"];
+type PageProps = Awaited<ReturnType<typeof getServerSideProps>>["props"];
 
 const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) => {
 	const router = useRouter();
@@ -425,6 +424,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.description?.message}</span>
+							<span className="label-text-alt">Markdown Allowed</span>
 						</label>
 					</div>
 					<div className="col-span-12 flex flex-wrap gap-4">
@@ -475,12 +475,16 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 											style={{ resize: "none" }}
 											value={item.description}
 										/>
+										<label className="label">
+											<span className="label-text-alt text-error"></span>
+											<span className="label-text-alt">Markdown Allowed</span>
+										</label>
 									</div>
 								</div>
 							</div>
 						))}
 						{storyAwardsGained.map((item, index) => (
-							<div key={`storyAwardsGained${index}`} className="card col-span-12 bg-base-300/70 sm:col-span-6">
+							<div key={`storyAwardsGained${index}`} className="card col-span-12 h-[370px] bg-base-300/70 sm:col-span-6">
 								<div className="card-body flex flex-col gap-4">
 									<h4 className="text-2xl">Add Story Award</h4>
 									<div className="flex gap-4">
@@ -519,6 +523,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 											className="textarea textarea-bordered w-full focus:border-primary"
 											value={item.description}
 										/>
+										<label className="label">
+											<span className="label-text-alt text-error"></span>
+											<span className="label-text-alt">Markdown Allowed</span>
+										</label>
 									</div>
 								</div>
 							</div>

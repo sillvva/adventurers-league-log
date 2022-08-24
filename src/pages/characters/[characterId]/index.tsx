@@ -38,9 +38,13 @@ export const components: Partial<Omit<NormalComponents, keyof SpecialComponents>
 	td({ children }) {
 		return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
 	},
-  a({ children, href }) {
-    return <a href={href} className="text-secondary" target="_blank" rel="noreferrer noopener">{children}</a>;
-  }
+	a({ children, href }) {
+		return (
+			<a href={href} className="text-secondary" target="_blank" rel="noreferrer noopener">
+				{children}
+			</a>
+		);
+	}
 };
 
 const minisearch = new MiniSearch({
@@ -182,7 +186,7 @@ const Characters: NextPageWithLayout = () => {
 					</ul>
 				</div>
 				{myCharacter && (
-					<div className="dropdown-end dropdown">
+					<div className="dropdown dropdown-end">
 						<label tabIndex={1} className="btn btn-sm">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
@@ -468,11 +472,8 @@ const Characters: NextPageWithLayout = () => {
 									</tr>
 									{(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 										<tr className={concatenate(!descriptions && "hidden print:table-row")}>
-											<td className="hidden pt-0 align-top text-sm font-semibold text-accent-content print:hidden print:p-2 sm:table-cell">
-												Notes:
-											</td>
 											<td colSpan={100} className="whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs">
-												<h4 className="hidden text-base font-semibold print:block">Notes:</h4>
+												<h4 className="text-base font-semibold">Notes:</h4>
 												<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
 													{log.description || ""}
 												</ReactMarkdown>
@@ -484,7 +485,9 @@ const Characters: NextPageWithLayout = () => {
 																	{mi.name}
 																	{mi.description ? ":" : ""}
 																</span>
-																{mi.description}
+																<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+																	{mi.description || ""}
+																</ReactMarkdown>
 															</p>
 														))}
 														<p className="whitespace-pre-wrap text-sm line-through">

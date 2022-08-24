@@ -1,4 +1,4 @@
-import moment from "moment";
+import dayjs from "dayjs";
 import qs from "qs";
 import { ZodSchema } from "zod";
 
@@ -6,7 +6,7 @@ const parseObjectPrimitives = (obj: Record<string, any>): any => {
   return Object.fromEntries(
     Object.entries(obj).map(([k, v]) => {
       if (typeof v === "object") return [k, parseObjectPrimitives(v)];
-      if (!isNaN(parseFloat(v))) return [k, parseFloat(v)];
+      if (!isNaN(v)) return [k, parseFloat(v)];
       if (v === "true") return [k, true];
       if (v === "false") return [k, false];
       if (typeof v === "string") return [k, v];
@@ -22,7 +22,7 @@ export const qsParse = <T>(queryString: string | Record<string, any>, schema: Zo
           ignoreQueryPrefix: true
         })
       : queryString;
-
+  
   const zResult = schema.safeParse(parseObjectPrimitives(parsed));
 
   return {
@@ -45,7 +45,7 @@ export const parseError = (e: unknown) => {
 };
 
 export const formatDate = (date: Date) => {
-  return moment(date).format("YYYY-MM-DD\THH:mm");
+  return dayjs(date).format("YYYY-MM-DD\THH:mm");
 };
 
 export const slugify = (text: string) => {
