@@ -1,9 +1,9 @@
 import AutoResizeTextArea from "$src/components/textarea";
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import { logSchema } from "$src/pages/characters/[characterId]/log/[logId]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
+import { logSchema } from "$src/server/router/routers/_logs";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
