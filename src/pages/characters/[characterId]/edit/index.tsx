@@ -94,13 +94,13 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 						<Icon path={mdiHome} className="w-4" />
 					</li>
 					<li>
-						<Link href="/characters">
-							<a className="">Characters</a>
+						<Link href="/characters" className="">
+							Characters
 						</Link>
 					</li>
 					<li>
-						<Link href={`/characters/${params.characterId}`}>
-							<a className="">{character.name}</a>
+						<Link href={`/characters/${params.characterId}`} className="">
+							{character.name}
 						</Link>
 					</li>
 					<li className="text-secondary dark:drop-shadow-md">Edit</li>

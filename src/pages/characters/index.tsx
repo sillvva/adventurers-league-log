@@ -10,6 +10,7 @@ import type { Session } from "next-auth";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import type { NextPageWithLayout } from "../_app";
 
@@ -27,6 +28,7 @@ interface PageProps {
 }
 
 const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
+	const router = useRouter();
 	const [parent] = useAutoAnimate<HTMLTableSectionElement>();
 	const [search, setSearch] = useState("");
 	const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id || "" }], {
@@ -106,11 +108,9 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 					</div>
 					<div className="flex-1" />
 					{characters && characters.length > 0 && (
-						<Link href="/characters/new">
-							<a className="btn btn-primary btn-sm">
-								<span className="hidden sm:inline">New Character</span>
-								<Icon path={mdiPlus} className="inline w-4 sm:hidden" />
-							</a>
+						<Link href="/characters/new" className="btn btn-primary btn-sm">
+							<span className="hidden sm:inline">New Character</span>
+							<Icon path={mdiPlus} className="inline w-4 sm:hidden" />
 						</Link>
 					)}
 					<div className="dropdown-end dropdown">
@@ -159,53 +159,54 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 									<td colSpan={5} className="py-20 text-center">
 										<p className="mb-4">You have no log sheets.</p>
 										<p>
-											<Link href="/characters/new">
-												<a className="btn btn-primary">Create one now</a>
+											<Link href="/characters/new" className="btn btn-primary">
+												Create one now
 											</Link>
 										</p>
 									</td>
 								</tr>
 							) : (
 								results.map(character => (
-									<Link key={character.id} href={`/characters/${character.id}`}>
-										<tr className="img-grow hover cursor-pointer">
-											<td className="w-12 pr-0 transition-colors sm:pr-2">
-												<div className="avatar">
-													<div className="mask mask-squircle h-12 w-12 bg-primary">
-														{/* eslint-disable-next-line @next/next/no-img-element */}
-														<img
-															src={character.image_url || ""}
-															width={48}
-															height={48}
-															className="object-cover object-top transition-all hover:scale-125"
-															alt={character.name}
-														/>
-													</div>
+									<tr
+										key={character.id}
+										className="img-grow hover cursor-pointer"
+										onClick={() => router.push(`/characters/${character.id}`)}>
+										<td className="w-12 pr-0 transition-colors sm:pr-2">
+											<div className="avatar">
+												<div className="mask mask-squircle h-12 w-12 bg-primary">
+													{/* eslint-disable-next-line @next/next/no-img-element */}
+													<img
+														src={character.image_url || ""}
+														width={48}
+														height={48}
+														className="object-cover object-top transition-all hover:scale-125"
+														alt={character.name}
+													/>
 												</div>
-											</td>
-											<td className="transition-colors">
-												<div className="flex flex-col">
-													<div className="whitespace-pre-wrap text-base font-bold text-accent-content sm:text-xl">{character.name}</div>
-													<div className="whitespace-pre-wrap text-xs sm:text-sm">
-														<span className="inline sm:hidden">Level {character.total_level} </span>
-														{character.race} {character.class}
-													</div>
-													<div className="mb-2 block text-xs sm:hidden">
-														<p>{character.campaign}</p>
-													</div>
-													{character.match.includes("magicItems") && (
-														<div className=" mb-2 whitespace-pre-wrap">
-															<p className="font-semibold">Magic Items:</p>
-															{character.magic_items.map(item => item.name).join(" | ")}
-														</div>
-													)}
+											</div>
+										</td>
+										<td className="transition-colors">
+											<div className="flex flex-col">
+												<div className="whitespace-pre-wrap text-base font-bold text-accent-content sm:text-xl">{character.name}</div>
+												<div className="whitespace-pre-wrap text-xs sm:text-sm">
+													<span className="inline sm:hidden">Level {character.total_level} </span>
+													{character.race} {character.class}
 												</div>
-											</td>
-											<td className="hidden transition-colors sm:table-cell">{character.campaign}</td>
-											<td className="hidden text-center transition-colors sm:table-cell">{character.tier}</td>
-											<td className="hidden text-center transition-colors sm:table-cell">{character.total_level}</td>
-										</tr>
-									</Link>
+												<div className="mb-2 block text-xs sm:hidden">
+													<p>{character.campaign}</p>
+												</div>
+												{character.match.includes("magicItems") && (
+													<div className=" mb-2 whitespace-pre-wrap">
+														<p className="font-semibold">Magic Items:</p>
+														{character.magic_items.map(item => item.name).join(" | ")}
+													</div>
+												)}
+											</div>
+										</td>
+										<td className="hidden transition-colors sm:table-cell">{character.campaign}</td>
+										<td className="hidden text-center transition-colors sm:table-cell">{character.tier}</td>
+										<td className="hidden text-center transition-colors sm:table-cell">{character.total_level}</td>
+									</tr>
 								))
 							)}
 						</tbody>

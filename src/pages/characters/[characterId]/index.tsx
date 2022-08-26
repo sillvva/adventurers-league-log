@@ -179,23 +179,21 @@ const Characters: NextPageWithLayout = () => {
 							<Icon path={mdiHome} className="w-4" />
 						</li>
 						<li>
-							<Link href="/characters">
-								<a className="">Characters</a>
+							<Link href="/characters" className="">
+								Characters
 							</Link>
 						</li>
 						<li className="overflow-hidden text-ellipsis whitespace-nowrap text-secondary dark:drop-shadow-md">{character.name}</li>
 					</ul>
 				</div>
 				{myCharacter && (
-					<div className="dropdown dropdown-end">
+					<div className="dropdown-end dropdown">
 						<label tabIndex={1} className="btn btn-sm">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
 						<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
 							<li>
-								<Link href={`/characters/${params.characterId}/edit`}>
-									<a>Edit</a>
-								</Link>
+								<Link href={`/characters/${params.characterId}/edit`}>Edit</Link>
 							</li>
 							<li>
 								<a
@@ -276,11 +274,9 @@ const Characters: NextPageWithLayout = () => {
 					</div>
 					<div className="flex gap-4 print:hidden">
 						{myCharacter && (
-							<Link href={`/characters/${params.characterId}/log/new`}>
-								<a className="btn btn-primary btn-sm px-2 sm:px-3">
-									<span className="hidden sm:inline">New Log</span>
-									<Icon path={mdiPlus} size={1} className="inline sm:hidden" />
-								</a>
+							<Link href={`/characters/${params.characterId}/log/new`} className="btn btn-primary btn-sm px-2 sm:px-3">
+								<span className="hidden sm:inline">New Log</span>
+								<Icon path={mdiPlus} size={1} className="inline sm:hidden" />
 							</Link>
 						)}
 						<input
@@ -454,10 +450,8 @@ const Characters: NextPageWithLayout = () => {
 														"border-b-0"
 												)}>
 												<div className="flex flex-col justify-center gap-2">
-													<Link href={`/characters/${params.characterId}/log/${log.id}`}>
-														<a className="btn btn-primary btn-sm">
-															<Icon path={mdiPencil} size={0.8} />
-														</a>
+													<Link href={`/characters/${params.characterId}/log/${log.id}`} className="btn btn-primary btn-sm">
+														<Icon path={mdiPencil} size={0.8} />
 													</Link>
 													<button
 														className="btn btn-sm"

@@ -209,8 +209,8 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 						<Icon path={mdiHome} className="w-4" />
 					</li>
 					<li>
-						<Link href="/dm-logs">
-							<a className="">DM Logs</a>
+						<Link href="/dm-logs" className="">
+							DM Logs
 						</Link>
 					</li>
 					{selectedLog.name ? (
