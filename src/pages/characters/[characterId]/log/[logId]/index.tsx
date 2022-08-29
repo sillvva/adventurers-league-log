@@ -459,7 +459,11 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 											type="number"
 											min="0"
 											max={Math.max(selectedLog.level, character ? 20 - character.total_level : 19)}
-											{...register("level", { value: selectedLog.level, min: 0, max: Math.max(selectedLog.level, character ? 20 - character.total_level : 19) })}
+											{...register("level", {
+												value: selectedLog.level,
+												min: 0,
+												max: Math.max(selectedLog.level, character ? 20 - character.total_level : 19)
+											})}
 											className="input input-bordered w-full focus:border-primary"
 										/>
 										<label className="label">

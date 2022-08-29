@@ -3,6 +3,7 @@ import { parseError } from "$src/utils/misc";
 import { DungeonMaster, Log } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { getLevels } from "../helpers";
 import { createProtectedRouter } from "../protected-router";
 
 // Example router with queries that can only be hit if the user requesting is signed in
@@ -61,6 +62,29 @@ export const protectedLogsRouter = createProtectedRouter()
 				: new Date(input.date);
 			if (input.characterId && applied_date === null)
 				throw new TRPCError({ message: "Applied date is required", code: "INTERNAL_SERVER_ERROR" });
+
+			if (input.characterId) {
+				const character = await ctx.prisma.character.findFirst({
+					include: {
+						logs: true
+					},
+					where: { id: input.characterId }
+				});
+
+				if (!character) throw new TRPCError({ message: "Character not found", code: "INTERNAL_SERVER_ERROR" });
+
+				const currentLevel = getLevels(character.logs).total;
+				if (!input.logId && currentLevel == 20 && (input.level > 0 || input.acp > 0 || input.experience > 0))
+					throw new TRPCError({ message: "Character is already level 20", code: "INTERNAL_SERVER_ERROR" });
+
+				const newLevel = getLevels(character.logs, {
+					experience: input.experience,
+					acp: input.acp,
+					level: input.level,
+				}).total;
+				if (newLevel > 20)
+					throw new TRPCError({ message: "Character cannot be above level 20", code: "INTERNAL_SERVER_ERROR" });
+			}
 
 			const data: Omit<Log, "id" | "created_at"> = {
 				name: input.name,
