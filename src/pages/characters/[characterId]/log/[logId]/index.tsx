@@ -4,7 +4,7 @@ import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { getOne } from "$src/server/router/routers/characters";
-import { logSchema } from "$src/server/router/routers/_logs";
+import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
@@ -458,8 +458,8 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 										<input
 											type="number"
 											min="0"
-											max={character ? 20 - character.total_level : 19}
-											{...register("level", { value: selectedLog.level, min: 0, max: character ? 20 - character.total_level : 19 })}
+											max={Math.max(selectedLog.level, character ? 20 - character.total_level : 19)}
+											{...register("level", { value: selectedLog.level, min: 0, max: Math.max(selectedLog.level, character ? 20 - character.total_level : 19) })}
 											className="input input-bordered w-full focus:border-primary"
 										/>
 										<label className="label">
