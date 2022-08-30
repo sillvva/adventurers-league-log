@@ -51,9 +51,9 @@ export const protectedLogsRouter = createProtectedRouter()
 						throw new TRPCError({ message: parseError(err), code: "INTERNAL_SERVER_ERROR" });
 					}
 				}
-
-				if (!dm.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });
 			}
+
+			if (input.type == "game" && !dm?.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });
 
 			let applied_date: Date | null = input.is_dm_log
 				? input.characterId && input.applied_date !== null
@@ -80,10 +80,9 @@ export const protectedLogsRouter = createProtectedRouter()
 				const newLevel = getLevels(character.logs, {
 					experience: input.experience,
 					acp: input.acp,
-					level: input.level,
+					level: input.level
 				}).total;
-				if (newLevel > 20)
-					throw new TRPCError({ message: "Character cannot be above level 20", code: "INTERNAL_SERVER_ERROR" });
+				if (newLevel > 20) throw new TRPCError({ message: "Character cannot be above level 20", code: "INTERNAL_SERVER_ERROR" });
 			}
 
 			const data: Omit<Log, "id" | "created_at"> = {
@@ -226,6 +225,13 @@ export const protectedLogsRouter = createProtectedRouter()
 			return ctx.prisma.log.findFirst({
 				where: {
 					id: log.id
+				},
+				include: {
+					dm: true,
+					magic_items_gained: true,
+					magic_items_lost: true,
+					story_awards_gained: true,
+					story_awards_lost: true
 				}
 			});
 		}

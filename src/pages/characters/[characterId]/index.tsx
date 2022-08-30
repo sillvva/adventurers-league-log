@@ -77,8 +77,8 @@ const Characters: NextPageWithLayout = () => {
 	);
 
 	const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
-		ssr: true,
-		refetchOnWindowFocus: false
+		refetchOnWindowFocus: false,
+		refetchOnMount: false
 	});
 
 	const myCharacter = character?.user.id === session.data?.user?.id;
@@ -187,7 +187,7 @@ const Characters: NextPageWithLayout = () => {
 					</ul>
 				</div>
 				{myCharacter && (
-					<div className="dropdown-end dropdown">
+					<div className="dropdown dropdown-end">
 						<label tabIndex={1} className="btn btn-sm">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
@@ -317,10 +317,11 @@ const Characters: NextPageWithLayout = () => {
 						<tbody ref={parent2}>
 							{results.map(log => (
 								<Fragment key={log.id}>
-									<tr className="print:text-sm">
+									<tr className={concatenate("print:text-sm", log.saving && "opacity-50")}>
 										<td
 											className={concatenate(
 												"!static align-top print:p-2",
+												log.saving && "bg-neutral-focus",
 												(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 											)}>
 											<p
@@ -385,6 +386,7 @@ const Characters: NextPageWithLayout = () => {
 										<td
 											className={concatenate(
 												"hidden align-top print:table-cell print:p-2 sm:table-cell",
+												log.saving && "bg-neutral-focus",
 												(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 											)}>
 											{log.experience > 0 && (
@@ -411,6 +413,7 @@ const Characters: NextPageWithLayout = () => {
 										<td
 											className={concatenate(
 												"hidden align-top print:table-cell print:p-2 sm:table-cell",
+												log.saving && "bg-neutral-focus",
 												(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 											)}>
 											{log.tcp !== 0 && (
@@ -433,6 +436,7 @@ const Characters: NextPageWithLayout = () => {
 										<td
 											className={concatenate(
 												"hidden align-top print:!hidden md:table-cell",
+												log.saving && "bg-neutral-focus",
 												(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 											)}>
 											{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
@@ -446,15 +450,19 @@ const Characters: NextPageWithLayout = () => {
 											<td
 												className={concatenate(
 													"w-8 align-top print:hidden",
+													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
 														"border-b-0"
 												)}>
 												<div className="flex flex-col justify-center gap-2">
-													<Link href={`/characters/${params.characterId}/log/${log.id}`} className="btn btn-primary btn-sm">
+													<Link
+														href={`/characters/${params.characterId}/log/${log.id}`}
+														className={concatenate("btn btn-primary btn-sm", log.saving && "btn-disabled")}>
 														<Icon path={mdiPencil} size={0.8} />
 													</Link>
 													<button
 														className="btn btn-sm"
+														disabled={log.saving}
 														onClick={async () => {
 															if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
 															deleteLogMutation.mutate({ logId: log.id });
@@ -467,7 +475,12 @@ const Characters: NextPageWithLayout = () => {
 									</tr>
 									{(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 										<tr className={concatenate(!descriptions && "hidden print:table-row")}>
-											<td colSpan={100} className="whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs">
+											<td
+												colSpan={100}
+												className={concatenate(
+													"whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs",
+													log.saving && "bg-neutral-focus"
+												)}>
 												<h4 className="text-base font-semibold">Notes:</h4>
 												<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
 													{log.description || ""}

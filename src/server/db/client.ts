@@ -9,7 +9,7 @@ declare global {
 export const prisma =
   global.prisma ||
   new PrismaClient({
-    log: env.NODE_ENV !== "production" ? ["query"] : [],
+    // log: env.NODE_ENV !== "production" ? ["query"] : [],
   });
 
 if (env.NODE_ENV !== "production") {
