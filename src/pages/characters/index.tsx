@@ -1,3 +1,4 @@
+import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { trpc } from "$src/utils/trpc";
@@ -187,23 +188,30 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 										</td>
 										<td className="transition-colors">
 											<div className="flex flex-col">
-												<div className="whitespace-pre-wrap text-base font-bold text-accent-content sm:text-xl">{character.name}</div>
+												<div className="whitespace-pre-wrap text-base font-bold text-accent-content sm:text-xl">
+													<SearchResults text={character.name} search={search} />
+												</div>
 												<div className="whitespace-pre-wrap text-xs sm:text-sm">
-													<span className="inline sm:hidden">Level {character.total_level} </span>
-													{character.race} {character.class}
+													<span className="inline sm:hidden">Level {character.total_level}</span>
+													<SearchResults text={character.race} search={search} />{" "}
+													<SearchResults text={character.class} search={search} />
 												</div>
 												<div className="mb-2 block text-xs sm:hidden">
-													<p>{character.campaign}</p>
+													<p>
+														<SearchResults text={character.campaign} search={search} />
+													</p>
 												</div>
 												{character.match.includes("magicItems") && (
 													<div className=" mb-2 whitespace-pre-wrap">
 														<p className="font-semibold">Magic Items:</p>
-														{character.magic_items.map(item => item.name).join(" | ")}
+														<SearchResults text={character.magic_items.map(item => item.name).join(" | ")} search={search} />
 													</div>
 												)}
 											</div>
 										</td>
-										<td className="hidden transition-colors sm:table-cell">{character.campaign}</td>
+										<td className="hidden transition-colors sm:table-cell">
+											<SearchResults text={character.campaign} search={search} />
+										</td>
 										<td className="hidden text-center transition-colors sm:table-cell">{character.tier}</td>
 										<td className="hidden text-center transition-colors sm:table-cell">{character.total_level}</td>
 									</tr>

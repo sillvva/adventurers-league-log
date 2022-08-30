@@ -1,4 +1,5 @@
 import { Items } from "$src/components/items";
+import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { useQueryString } from "$src/utils/hooks";
@@ -68,7 +69,6 @@ const Characters: NextPageWithLayout = () => {
 		date?: Date;
 	} | null>(null);
 	const [search, setSearch] = useState("");
-	const [descriptions, setDescriptions] = useState(false);
 
 	const { data: params } = useQueryString(
 		z.object({
@@ -82,6 +82,7 @@ const Characters: NextPageWithLayout = () => {
 	});
 
 	const myCharacter = character?.user.id === session.data?.user?.id;
+	const [descriptions, setDescriptions] = useState(true);
 
 	const utils = trpc.useContext();
 	const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
@@ -116,8 +117,8 @@ const Characters: NextPageWithLayout = () => {
 		return logData.map(log => ({
 			logId: log.id,
 			logName: log.name,
-			magicItems: log.magic_items_gained.map(item => item.name).join(", "),
-			storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
+			magicItems: [...log.magic_items_gained.map(item => item.name), ...log.magic_items_lost.map(item => item.name)].join(", "),
+			storyAwards: [...log.story_awards_gained.map(item => item.name), ...log.story_awards_lost.map(item => item.name)].join(", ")
 		}));
 	}, [logData]);
 
@@ -145,7 +146,7 @@ const Characters: NextPageWithLayout = () => {
 						...log,
 						score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime()
 					}))
-					.sort((a, b) => (b.score > a.score ? 1 : -1));
+					.sort((a, b) => (a.date > b.date ? 1 : -1));
 			} else {
 				return logData.sort((a, b) => (b.date < a.date ? 1 : -1));
 			}
@@ -187,7 +188,7 @@ const Characters: NextPageWithLayout = () => {
 					</ul>
 				</div>
 				{myCharacter && (
-					<div className="dropdown dropdown-end">
+					<div className="dropdown-end dropdown">
 						<label tabIndex={1} className="btn btn-sm">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
@@ -285,12 +286,14 @@ const Characters: NextPageWithLayout = () => {
 							onChange={e => setSearch(e.target.value)}
 							className="input input-bordered input-sm w-full sm:max-w-xs"
 						/>
-						<div className="form-control">
-							<label className="label cursor-pointer py-1">
-								<span className="label-text hidden pr-4 sm:inline">Notes</span>
-								<input type="checkbox" className="toggle toggle-primary" checked={descriptions} onChange={toggleDescriptions} />
-							</label>
-						</div>
+						{myCharacter && (
+							<div className="form-control">
+								<label className="label cursor-pointer py-1">
+									<span className="label-text hidden pr-4 sm:inline">Notes</span>
+									<input type="checkbox" className="toggle toggle-primary" checked={descriptions} onChange={toggleDescriptions} />
+								</label>
+							</div>
+						)}
 					</div>
 				</div>
 				{character.image_url && (
@@ -334,7 +337,7 @@ const Characters: NextPageWithLayout = () => {
 														date: log.date
 													})
 												}>
-												{log.name}
+												<SearchResults text={log.name} search={search} />
 											</p>
 											<p className="text-netural-content text-xs font-normal">
 												{(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
@@ -378,8 +381,10 @@ const Characters: NextPageWithLayout = () => {
 													</p>
 												)}
 												<div>
-													<Items title="Magic Items" items={log.magic_items_gained} />
-													<p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+													<Items title="Magic Items" items={log.magic_items_gained} search={search} />
+													<p className="text-sm line-through">
+														<SearchResults text={log.magic_items_lost.map(mi => mi.name).join(" | ")} search={search} />
+													</p>
 												</div>
 											</div>
 										</td>
@@ -428,8 +433,10 @@ const Characters: NextPageWithLayout = () => {
 											)}
 											{(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
 												<div>
-													<Items title="Magic Items" items={log.magic_items_gained} />
-													<p className="whitespace-pre-wrap text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+													<Items title="Magic Items" items={log.magic_items_gained} search={search} />
+													<p className="whitespace-pre-wrap text-sm line-through">
+														<SearchResults text={log.magic_items_lost.map(mi => mi.name).join(" | ")} search={search} />
+													</p>
 												</div>
 											)}
 										</td>
@@ -441,8 +448,10 @@ const Characters: NextPageWithLayout = () => {
 											)}>
 											{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 												<div>
-													<Items items={log.story_awards_gained} />
-													<p className="whitespace-pre-wrap text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+													<Items items={log.story_awards_gained} search={search} />
+													<p className="whitespace-pre-wrap text-sm line-through">
+														<SearchResults text={log.story_awards_lost.map(mi => mi.name).join(" | ")} search={search} />
+													</p>
 												</div>
 											)}
 										</td>
