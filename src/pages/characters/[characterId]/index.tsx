@@ -1,4 +1,5 @@
 import { Items } from "$src/components/items";
+import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { useQueryString } from "$src/utils/hooks";
@@ -12,7 +13,8 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { CSSProperties, Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import type { SpecialComponents } from "react-markdown/lib/ast-to-react";
 import type { NormalComponents } from "react-markdown/lib/complex-types";
@@ -67,7 +69,6 @@ const Characters: NextPageWithLayout = () => {
 		date?: Date;
 	} | null>(null);
 	const [search, setSearch] = useState("");
-	const [descriptions, setDescriptions] = useState(false);
 
 	const { data: params } = useQueryString(
 		z.object({
@@ -76,11 +77,12 @@ const Characters: NextPageWithLayout = () => {
 	);
 
 	const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
-		ssr: true,
-		refetchOnWindowFocus: false
+		refetchOnWindowFocus: false,
+		refetchOnMount: false
 	});
 
 	const myCharacter = character?.user.id === session.data?.user?.id;
+	const [descriptions, setDescriptions] = useState(true);
 
 	const utils = trpc.useContext();
 	const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
@@ -115,8 +117,8 @@ const Characters: NextPageWithLayout = () => {
 		return logData.map(log => ({
 			logId: log.id,
 			logName: log.name,
-			magicItems: log.magic_items_gained.map(item => item.name).join(", "),
-			storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
+			magicItems: [...log.magic_items_gained.map(item => item.name), ...log.magic_items_lost.map(item => item.name)].join(", "),
+			storyAwards: [...log.story_awards_gained.map(item => item.name), ...log.story_awards_lost.map(item => item.name)].join(", ")
 		}));
 	}, [logData]);
 
@@ -144,7 +146,7 @@ const Characters: NextPageWithLayout = () => {
 						...log,
 						score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime()
 					}))
-					.sort((a, b) => (b.score > a.score ? 1 : -1));
+					.sort((a, b) => (a.date > b.date ? 1 : -1));
 			} else {
 				return logData.sort((a, b) => (b.date < a.date ? 1 : -1));
 			}
@@ -178,23 +180,21 @@ const Characters: NextPageWithLayout = () => {
 							<Icon path={mdiHome} className="w-4" />
 						</li>
 						<li>
-							<Link href="/characters">
-								<a className="">Characters</a>
+							<Link href="/characters" className="">
+								Characters
 							</Link>
 						</li>
 						<li className="overflow-hidden text-ellipsis whitespace-nowrap text-secondary dark:drop-shadow-md">{character.name}</li>
 					</ul>
 				</div>
 				{myCharacter && (
-					<div className="dropdown dropdown-end">
+					<div className="dropdown-end dropdown">
 						<label tabIndex={1} className="btn btn-sm">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
 						<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
 							<li>
-								<Link href={`/characters/${params.characterId}/edit`}>
-									<a>Edit</a>
-								</Link>
+								<Link href={`/characters/${params.characterId}/edit`}>Edit</Link>
 							</li>
 							<li>
 								<a
@@ -275,11 +275,9 @@ const Characters: NextPageWithLayout = () => {
 					</div>
 					<div className="flex gap-4 print:hidden">
 						{myCharacter && (
-							<Link href={`/characters/${params.characterId}/log/new`}>
-								<a className="btn btn-primary btn-sm px-2 sm:px-3">
-									<span className="hidden sm:inline">New Log</span>
-									<Icon path={mdiPlus} size={1} className="inline sm:hidden" />
-								</a>
+							<Link href={`/characters/${params.characterId}/log/new`} className="btn btn-primary btn-sm px-2 sm:px-3">
+								<span className="hidden sm:inline">New Log</span>
+								<Icon path={mdiPlus} size={1} className="inline sm:hidden" />
 							</Link>
 						)}
 						<input
@@ -288,12 +286,14 @@ const Characters: NextPageWithLayout = () => {
 							onChange={e => setSearch(e.target.value)}
 							className="input input-bordered input-sm w-full sm:max-w-xs"
 						/>
-						<div className="form-control">
-							<label className="label cursor-pointer py-1">
-								<span className="label-text hidden pr-4 sm:inline">Notes</span>
-								<input type="checkbox" className="toggle toggle-primary" checked={descriptions} onChange={toggleDescriptions} />
-							</label>
-						</div>
+						{myCharacter && (
+							<div className="form-control">
+								<label className="label cursor-pointer py-1">
+									<span className="label-text hidden pr-4 sm:inline">Notes</span>
+									<input type="checkbox" className="toggle toggle-primary" checked={descriptions} onChange={toggleDescriptions} />
+								</label>
+							</div>
+						)}
 					</div>
 				</div>
 				{character.image_url && (
@@ -320,10 +320,11 @@ const Characters: NextPageWithLayout = () => {
 						<tbody ref={parent2}>
 							{results.map(log => (
 								<Fragment key={log.id}>
-									<tr className="print:text-sm">
+									<tr className={concatenate("print:text-sm", log.saving && "opacity-50")}>
 										<td
 											className={concatenate(
 												"!static align-top print:p-2",
+												log.saving && "bg-neutral-focus",
 												(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 											)}>
 											<p
@@ -336,7 +337,7 @@ const Characters: NextPageWithLayout = () => {
 														date: log.date
 													})
 												}>
-												{log.name}
+												<SearchResults text={log.name} search={search} />
 											</p>
 											<p className="text-netural-content text-xs font-normal">
 												{(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
@@ -380,14 +381,17 @@ const Characters: NextPageWithLayout = () => {
 													</p>
 												)}
 												<div>
-													<Items title="Magic Items" items={log.magic_items_gained} />
-													<p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+													<Items title="Magic Items" items={log.magic_items_gained} search={search} />
+													<p className="text-sm line-through">
+														<SearchResults text={log.magic_items_lost.map(mi => mi.name).join(" | ")} search={search} />
+													</p>
 												</div>
 											</div>
 										</td>
 										<td
 											className={concatenate(
 												"hidden align-top print:table-cell print:p-2 sm:table-cell",
+												log.saving && "bg-neutral-focus",
 												(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 											)}>
 											{log.experience > 0 && (
@@ -414,6 +418,7 @@ const Characters: NextPageWithLayout = () => {
 										<td
 											className={concatenate(
 												"hidden align-top print:table-cell print:p-2 sm:table-cell",
+												log.saving && "bg-neutral-focus",
 												(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 											)}>
 											{log.tcp !== 0 && (
@@ -428,20 +433,25 @@ const Characters: NextPageWithLayout = () => {
 											)}
 											{(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
 												<div>
-													<Items title="Magic Items" items={log.magic_items_gained} />
-													<p className="whitespace-pre-wrap text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+													<Items title="Magic Items" items={log.magic_items_gained} search={search} />
+													<p className="whitespace-pre-wrap text-sm line-through">
+														<SearchResults text={log.magic_items_lost.map(mi => mi.name).join(" | ")} search={search} />
+													</p>
 												</div>
 											)}
 										</td>
 										<td
 											className={concatenate(
 												"hidden align-top print:!hidden md:table-cell",
+												log.saving && "bg-neutral-focus",
 												(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 											)}>
 											{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 												<div>
-													<Items items={log.story_awards_gained} />
-													<p className="whitespace-pre-wrap text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
+													<Items items={log.story_awards_gained} search={search} />
+													<p className="whitespace-pre-wrap text-sm line-through">
+														<SearchResults text={log.story_awards_lost.map(mi => mi.name).join(" | ")} search={search} />
+													</p>
 												</div>
 											)}
 										</td>
@@ -449,17 +459,19 @@ const Characters: NextPageWithLayout = () => {
 											<td
 												className={concatenate(
 													"w-8 align-top print:hidden",
+													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
 														"border-b-0"
 												)}>
 												<div className="flex flex-col justify-center gap-2">
-													<Link href={`/characters/${params.characterId}/log/${log.id}`}>
-														<a className="btn btn-primary btn-sm">
-															<Icon path={mdiPencil} size={0.8} />
-														</a>
+													<Link
+														href={`/characters/${params.characterId}/log/${log.id}`}
+														className={concatenate("btn btn-primary btn-sm", log.saving && "btn-disabled")}>
+														<Icon path={mdiPencil} size={0.8} />
 													</Link>
 													<button
 														className="btn btn-sm"
+														disabled={log.saving}
 														onClick={async () => {
 															if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
 															deleteLogMutation.mutate({ logId: log.id });
@@ -472,7 +484,12 @@ const Characters: NextPageWithLayout = () => {
 									</tr>
 									{(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 										<tr className={concatenate(!descriptions && "hidden print:table-row")}>
-											<td colSpan={100} className="whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs">
+											<td
+												colSpan={100}
+												className={concatenate(
+													"whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs",
+													log.saving && "bg-neutral-focus"
+												)}>
 												<h4 className="text-base font-semibold">Notes:</h4>
 												<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
 													{log.description || ""}

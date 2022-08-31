@@ -89,8 +89,8 @@ const Characters: NextPageWithLayout = () => {
 					</div>
 					{logs && logs.length > 0 && (
 						<div className="flex flex-1 justify-end">
-							<Link href="/dm-logs/new">
-								<a className="btn btn-primary btn-sm">New Log</a>
+							<Link href="/dm-logs/new" className="btn btn-primary btn-sm">
+								New Log
 							</Link>
 						</div>
 					)}
@@ -267,10 +267,8 @@ const Characters: NextPageWithLayout = () => {
 											</td>
 											<td className="w-8 print:hidden">
 												<div className="flex flex-col justify-center gap-2">
-													<Link href={`/dm-logs/${log.id}`}>
-														<a className="btn btn-primary btn-sm">
-															<Icon path={mdiPencil} size={0.8} />
-														</a>
+													<Link href={`/dm-logs/${log.id}`} className="btn btn-primary btn-sm">
+														<Icon path={mdiPencil} size={0.8} />
 													</Link>
 													<button
 														className="btn btn-sm"

@@ -51,109 +51,107 @@ const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
     mutation.mutate(data);
   });
 
-  return (
-    <>
-      <Head>
-        <title>New Character</title>
-      </Head>
+  return <>
+    <Head>
+      <title>New Character</title>
+    </Head>
 
-      <div className="text-sm breadcrumbs mb-4">
-        <ul>
-          <li>
-            <Icon path={mdiHome} className="w-4" />
-          </li>
-          <li>
-            <Link href="/characters">
-              <a className="">Characters</a>
-            </Link>
-          </li>
-          <li className="text-secondary">New</li>
-        </ul>
-      </div>
+    <div className="text-sm breadcrumbs mb-4">
+      <ul>
+        <li>
+          <Icon path={mdiHome} className="w-4" />
+        </li>
+        <li>
+          <Link href="/characters" className="">
+            Characters
+          </Link>
+        </li>
+        <li className="text-secondary">New</li>
+      </ul>
+    </div>
 
-      <form onSubmit={submitHandler}>
-        <div className="flex flex-wrap">
-          <div className="basis-full sm:basis-1/2 px-2">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">
-                  Character Name
-                  <span className="text-error">*</span>
-                </span>
-              </label>
-              <input type="text" {...register("name", { required: true })} className="input input-bordered focus:border-primary w-full" />
-              <label className="label">
-                <span className="label-text-alt text-error">{errors.name?.message}</span>
-              </label>
-            </div>
-          </div>
-          <div className="basis-full sm:basis-1/2 px-2">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">
-                  Campaign
-                  <span className="text-error">*</span>
-                </span>
-              </label>
-              <input type="text" {...register("campaign", { required: true })} className="input input-bordered focus:border-primary w-full" />
-              <label className="label">
-                <span className="label-text-alt text-error">{errors.campaign?.message}</span>
-              </label>
-            </div>
-          </div>
-          <div className="basis-full sm:basis-1/2 px-2">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Race</span>
-              </label>
-              <input type="text" {...register("race")} className="input input-bordered focus:border-primary w-full" />
-              <label className="label">
-                <span className="label-text-alt text-error">{errors.race?.message}</span>
-              </label>
-            </div>
-          </div>
-          <div className="basis-full sm:basis-1/2 px-2">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Class</span>
-              </label>
-              <input type="text" {...register("class")} className="input input-bordered focus:border-primary w-full" />
-              <label className="label">
-                <span className="label-text-alt text-error">{errors.class?.message}</span>
-              </label>
-            </div>
-          </div>
-          <div className="basis-full px-2">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Character Sheet URL</span>
-              </label>
-              <input type="text" {...register("character_sheet_url")} className="input input-bordered focus:border-primary w-full" />
-              <label className="label">
-                <span className="label-text-alt text-error">{errors.character_sheet_url?.message}</span>
-              </label>
-            </div>
-          </div>
-          <div className="basis-full px-2">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Image URL</span>
-              </label>
-              <input type="text" {...register("image_url")} className="input input-bordered focus:border-primary w-full" />
-              <label className="label">
-                <span className="label-text-alt text-error">{errors.image_url?.message}</span>
-              </label>
-            </div>
-          </div>
-          <div className="basis-full text-center m-4">
-            <button type="submit" className={concatenate("btn btn-primary", submitting && "loading")} disabled={submitting}>
-              Create
-            </button>
+    <form onSubmit={submitHandler}>
+      <div className="flex flex-wrap">
+        <div className="basis-full sm:basis-1/2 px-2">
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text">
+                Character Name
+                <span className="text-error">*</span>
+              </span>
+            </label>
+            <input type="text" {...register("name", { required: true })} className="input input-bordered focus:border-primary w-full" />
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.name?.message}</span>
+            </label>
           </div>
         </div>
-      </form>
-    </>
-  );
+        <div className="basis-full sm:basis-1/2 px-2">
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text">
+                Campaign
+                <span className="text-error">*</span>
+              </span>
+            </label>
+            <input type="text" {...register("campaign", { required: true })} className="input input-bordered focus:border-primary w-full" />
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.campaign?.message}</span>
+            </label>
+          </div>
+        </div>
+        <div className="basis-full sm:basis-1/2 px-2">
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text">Race</span>
+            </label>
+            <input type="text" {...register("race")} className="input input-bordered focus:border-primary w-full" />
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.race?.message}</span>
+            </label>
+          </div>
+        </div>
+        <div className="basis-full sm:basis-1/2 px-2">
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text">Class</span>
+            </label>
+            <input type="text" {...register("class")} className="input input-bordered focus:border-primary w-full" />
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.class?.message}</span>
+            </label>
+          </div>
+        </div>
+        <div className="basis-full px-2">
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text">Character Sheet URL</span>
+            </label>
+            <input type="text" {...register("character_sheet_url")} className="input input-bordered focus:border-primary w-full" />
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.character_sheet_url?.message}</span>
+            </label>
+          </div>
+        </div>
+        <div className="basis-full px-2">
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text">Image URL</span>
+            </label>
+            <input type="text" {...register("image_url")} className="input input-bordered focus:border-primary w-full" />
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.image_url?.message}</span>
+            </label>
+          </div>
+        </div>
+        <div className="basis-full text-center m-4">
+          <button type="submit" className={concatenate("btn btn-primary", submitting && "loading")} disabled={submitting}>
+            Create
+          </button>
+        </div>
+      </div>
+    </form>
+  </>;
 };
 
 NewCharacter.getLayout = page => {

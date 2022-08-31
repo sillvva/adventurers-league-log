@@ -1,8 +1,19 @@
 import { concatenate } from "$src/utils/misc";
 import type { MagicItem, StoryAward } from "@prisma/client";
 import { useState } from "react";
+import { SearchResults } from "./search";
 
-export function Items({ items, title, formatting }: { title?: string; items: (MagicItem | StoryAward)[]; formatting?: boolean }) {
+export function Items({
+	items,
+	title,
+	formatting,
+	search
+}: {
+	title?: string;
+	items: (MagicItem | StoryAward)[];
+	formatting?: boolean;
+	search?: string;
+}) {
 	const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
 	return (
 		<>
@@ -16,9 +27,11 @@ export function Items({ items, title, formatting }: { title?: string; items: (Ma
 									className="whitespace-pre-wrap px-2 first:pl-0"
 									onClick={() => mi.description && setModal({ name: mi.name, description: mi.description })}>
 									{formatting && !mi.name.match(/^(\d+x? )?((Potion|Scroll|Spell Scroll|Charm|Elixir)s? of)/) ? (
-										<strong className="text-secondary-content/70 print:text-neutral-content">{mi.name}</strong>
+										<strong className="text-secondary-content/70 print:text-neutral-content">
+											<SearchResults text={mi.name} search={search || ""} />
+										</strong>
 									) : (
-										mi.name
+										<SearchResults text={mi.name} search={search || ""} />
 									)}
 									{mi.description && "*"}
 								</span>

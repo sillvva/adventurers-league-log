@@ -49,17 +49,15 @@ const Layout = (props: PropsWithChildren) => {
 						<button className="flex py-3 pr-4 print:hidden md:hidden" onClick={() => setDrawer(true)}>
 							<Icon path={mdiMenu} size={1} />
 						</button>
-						<Link href={session.data?.user ? "/characters" : "/"}>
-							<a className="mr-8 flex flex-col text-center font-draconis">
-								<h1 className="text-base leading-4 text-accent-content">Adventurers League</h1>
-								<h2 className="text-3xl leading-7">Log Sheet</h2>
-							</a>
+						<Link href={session.data?.user ? "/characters" : "/"} className="mr-8 flex flex-col text-center font-draconis">
+							<h1 className="text-base leading-4 text-accent-content">Adventurers League</h1>
+							<h2 className="text-3xl leading-7">Log Sheet</h2>
 						</Link>
-						<Link href="/characters">
-							<a className="hidden items-center p-2 md:flex">Character Logs</a>
+						<Link href="/characters" className="hidden items-center p-2 md:flex">
+							Character Logs
 						</Link>
-						<Link href="/dm-logs">
-							<a className="hidden items-center p-2 md:flex">DM Logs</a>
+						<Link href="/dm-logs" className="hidden items-center p-2 md:flex">
+							DM Logs
 						</Link>
 						<div className="flex-1">&nbsp;</div>
 						{session.status !== "loading" && (
@@ -160,14 +158,10 @@ const Layout = (props: PropsWithChildren) => {
 				<div className={concatenate("fixed top-0 bottom-0 -left-72 z-50 w-72 bg-neutral py-4 px-4 transition-all", drawer && "left-0")}>
 					<ul className="menu w-full" onClick={() => setDrawer(false)}>
 						<li>
-							<Link href="/characters">
-								<a>Character Logs</a>
-							</Link>
+							<Link href="/characters">Character Logs</Link>
 						</li>
 						<li>
-							<Link href="/dm-logs">
-								<a>DM Logs</a>
-							</Link>
+							<Link href="/dm-logs">DM Logs</Link>
 						</li>
 					</ul>
 					<div className="divider"></div>

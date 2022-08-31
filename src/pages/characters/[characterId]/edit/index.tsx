@@ -13,8 +13,8 @@ import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "react-query";
 import { z } from "zod";
 import { newCharacterSchema } from "../../new";
 
@@ -34,7 +34,6 @@ export const editCharacterSchema = z.object({
 
 const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 	const router = useRouter();
-	const [submitting, setSubmitting] = useState(false);
 	const {
 		register,
 		formState: { errors },
@@ -49,6 +48,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 		})
 	);
 
+	const client = useQueryClient();
 	const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
 		ssr: true,
 		refetchOnWindowFocus: false
@@ -59,10 +59,12 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 		return <div>Not authorized</div>;
 	}
 
-	const utils = trpc.useContext();
 	const mutation = trpc.useMutation(["_characters.edit"], {
-		onSuccess() {
-			utils.invalidateQueries(["characters.getOne", { characterId: params.characterId }]);
+		onSuccess(data) {
+			client.setQueryData(["characters.getOne", { characterId: params.characterId }], {
+				...character,
+				...data
+			});
 			router.push(`/characters/${params.characterId}`);
 		}
 	});
@@ -75,7 +77,6 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 		);
 
 	const submitHandler = handleSubmit(data => {
-		setSubmitting(true);
 		mutation.mutate({
 			id: params.characterId,
 			...data
@@ -94,13 +95,13 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 						<Icon path={mdiHome} className="w-4" />
 					</li>
 					<li>
-						<Link href="/characters">
-							<a className="">Characters</a>
+						<Link href="/characters" className="">
+							Characters
 						</Link>
 					</li>
 					<li>
-						<Link href={`/characters/${params.characterId}`}>
-							<a className="">{character.name}</a>
+						<Link href={`/characters/${params.characterId}`} className="">
+							{character.name}
 						</Link>
 					</li>
 					<li className="text-secondary dark:drop-shadow-md">Edit</li>
@@ -119,7 +120,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 							</label>
 							<input
 								type="text"
-								{...register("name", { required: true, value: character.name })}
+								{...register("name", { required: true, value: character.name, disabled: mutation.isLoading })}
 								className="input input-bordered w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -137,7 +138,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 							</label>
 							<input
 								type="text"
-								{...register("campaign", { required: true, value: character.campaign || "" })}
+								{...register("campaign", { required: true, value: character.campaign || "", disabled: mutation.isLoading })}
 								className="input input-bordered w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -152,7 +153,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 							</label>
 							<input
 								type="text"
-								{...register("race", { value: character.race || "" })}
+								{...register("race", { value: character.race || "", disabled: mutation.isLoading })}
 								className="input input-bordered w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -167,7 +168,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 							</label>
 							<input
 								type="text"
-								{...register("class", { value: character.class || "" })}
+								{...register("class", { value: character.class || "", disabled: mutation.isLoading })}
 								className="input input-bordered w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -182,7 +183,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 							</label>
 							<input
 								type="text"
-								{...register("character_sheet_url", { value: character.character_sheet_url || "" })}
+								{...register("character_sheet_url", { value: character.character_sheet_url || "", disabled: mutation.isLoading })}
 								className="input input-bordered w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -197,7 +198,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 							</label>
 							<input
 								type="text"
-								{...register("image_url", { value: character.image_url || "" })}
+								{...register("image_url", { value: character.image_url || "", disabled: mutation.isLoading })}
 								className="input input-bordered w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -206,7 +207,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 						</div>
 					</div>
 					<div className="m-4 basis-full text-center">
-						<button type="submit" className={concatenate("btn btn-primary", submitting && "loading")} disabled={submitting}>
+						<button type="submit" className={concatenate("btn btn-primary", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
 							Update
 						</button>
 					</div>
