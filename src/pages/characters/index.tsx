@@ -71,7 +71,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 
 	const results = useMemo(() => {
 		if (characters && indexed.length) {
-			if (search.length) {
+			if (search.length > 1) {
 				const results = minisearch.search(search);
 				return characters
 					.filter(character => results.find(result => result.id === character.id))
@@ -82,7 +82,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 							.map(([, value]) => value[0] || "")
 							.filter(v => !!v)
 					}))
-					.sort((a, b) => (b.score > a.score ? 1 : -1));
+					.sort((a, b) => a.total_level - b.total_level || a.name.localeCompare(b.name));
 			} else {
 				return characters
 					.sort((a, b) => a.total_level - b.total_level || a.name.localeCompare(b.name))
