@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 export function SearchResults({ text, search }: { text?: string | null; search: string }) {
 	if (!text?.trim()) return <></>;
-	if (!search) return <>{text}</>;
+	if (!search || search.length < 2) return <>{text}</>;
 	const items = text.split(new RegExp(search.trim(), "i"));
 	const joined: (string | ReactNode)[] = [];
 	items.forEach((item, i) => {

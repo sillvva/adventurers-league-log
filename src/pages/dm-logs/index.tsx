@@ -1,4 +1,5 @@
 import { Items } from "$src/components/items";
+import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { concatenate } from "$src/utils/misc";
@@ -44,8 +45,9 @@ const Characters: NextPageWithLayout = () => {
 			? logs.map(log => ({
 					logId: log.id,
 					logName: log.name,
-					magicItems: log.magic_items_gained.map(item => item.name).join(", "),
-					storyAwards: log.story_awards_gained.map(item => item.name).join(", ")
+					characterName: log.character?.name || "",
+					magicItems: [...log.magic_items_gained.map(item => item.name), ...log.magic_items_lost.map(item => item.name)].join(", "),
+					storyAwards: [...log.story_awards_gained.map(item => item.name), ...log.story_awards_lost.map(item => item.name)].join(", ")
 			  }))
 			: [];
 	}, [logs]);
@@ -57,12 +59,12 @@ const Characters: NextPageWithLayout = () => {
 
 	const results = useMemo(() => {
 		if (logs && indexed.length) {
-			if (search.length) {
+			if (search.length > 1) {
 				const results = minisearch.search(search);
 				return logs
 					.filter(log => results.find(result => result.id === log.id))
 					.map(log => ({ ...log, score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime() }))
-					.sort((a, b) => (b.score > a.score ? 1 : -1));
+					.sort((a, b) => (a.date > b.date ? 1 : -1));
 			} else {
 				return logs.sort((a, b) => (b.date < a.date ? 1 : -1));
 			}
@@ -143,14 +145,14 @@ const Characters: NextPageWithLayout = () => {
 												<p
 													className="whitespace-pre-wrap font-semibold text-accent-content"
 													onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
-													{log.name}
+													<SearchResults text={log.name} search={search} />
 												</p>
 												<p className="text-netural-content text-xs font-normal">
 													{(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
 												</p>
 												{log.character && (
 													<p className="text-sm font-normal">
-														<span className="font-semibold">Character:</span> {log.character.name}
+														<span className="font-semibold">Character:</span> <SearchResults text={log.character.name} search={search} />
 													</p>
 												)}
 												<div className="table-cell font-normal print:hidden sm:hidden">
@@ -189,8 +191,7 @@ const Characters: NextPageWithLayout = () => {
 														</p>
 													)}
 													<div>
-														<Items title="Magic Items" items={log.magic_items_gained} />
-														<p className="text-sm line-through">{log.magic_items_lost.map(mi => mi.name).join(" | ")}</p>
+														<Items title="Magic Items" items={log.magic_items_gained} search={search} />
 													</div>
 												</div>
 											</th>
@@ -241,27 +242,20 @@ const Characters: NextPageWithLayout = () => {
 														<span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
 													</p>
 												)}
-												{(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
+												{log.magic_items_gained.length > 0 && (
 													<div>
-														<Items title="Magic Items" items={log.magic_items_gained} />
-														<p className="whitespace-pre-wrap text-sm line-through">
-															{log.magic_items_lost.map(mi => mi.name).join(" | ")}
-														</p>
+														<Items title="Magic Items" items={log.magic_items_gained} search={search} />
 													</div>
 												)}
 											</td>
 											<td
 												className={concatenate(
 													"hidden align-top print:!hidden md:table-cell",
-													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-														"print:border-b-0"
+													(log.description?.trim() || log.story_awards_gained.length > 0) && "print:border-b-0"
 												)}>
-												{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
+												{log.story_awards_gained.length > 0 && (
 													<div>
-														<Items items={log.story_awards_gained} />
-														<p className="whitespace-pre-wrap text-sm line-through">
-															{log.story_awards_lost.map(mi => mi.name).join(" | ")}
-														</p>
+														<Items items={log.story_awards_gained} search={search} />
 													</div>
 												)}
 											</td>
@@ -287,7 +281,7 @@ const Characters: NextPageWithLayout = () => {
 													<p className="text-sm">
 														<span className="font-semibold">Notes:</span> {log.description}
 													</p>
-													{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
+													{log.story_awards_gained.length > 0 && (
 														<div>
 															{log.story_awards_gained.map(mi => (
 																<p key={mi.id} className="text-sm">
@@ -298,7 +292,6 @@ const Characters: NextPageWithLayout = () => {
 																	{mi.description}
 																</p>
 															))}
-															<p className="text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
 														</div>
 													)}
 												</td>

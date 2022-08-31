@@ -138,7 +138,7 @@ const Characters: NextPageWithLayout = () => {
 
 	const results = useMemo(() => {
 		if (logData.length) {
-			if (search.length) {
+			if (search.length > 1) {
 				const results = minisearch.search(search);
 				return logData
 					.filter(log => results.find(result => result.id === log.id))
@@ -148,7 +148,7 @@ const Characters: NextPageWithLayout = () => {
 					}))
 					.sort((a, b) => (a.date > b.date ? 1 : -1));
 			} else {
-				return logData.sort((a, b) => (b.date < a.date ? 1 : -1));
+				return logData.sort((a, b) => (a.date > b.date ? 1 : -1));
 			}
 		} else {
 			return [];
