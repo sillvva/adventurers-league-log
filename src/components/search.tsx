@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export function SearchResults({ text, search }: { text?: string | null; search: string }) {
 	if (!text?.trim()) return <></>;
