@@ -86,7 +86,7 @@ const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 	return (
 		<>
 			<Head>
-				<title>Edit Character - {character.name}</title>
+				<title>{`Edit Character - ${character.name}`}</title>
 			</Head>
 
 			<div className="breadcrumbs mb-4 text-sm">

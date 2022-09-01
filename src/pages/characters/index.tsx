@@ -95,7 +95,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 
 	return (
 		<>
-			<Head>{session.user ? <title>{session.user.name}&apos;s Characters</title> : <title>Characters</title>}</Head>
+			<Head>{session.user ? <title>{`${session.user.name}'s Characters`}</title> : <title>Characters</title>}</Head>
 
 			<div className="flex flex-col gap-4">
 				<div className="flex gap-4">
