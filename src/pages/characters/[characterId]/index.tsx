@@ -180,11 +180,11 @@ const Characters: NextPageWithLayout = () => {
 							<Icon path={mdiHome} className="w-4" />
 						</li>
 						<li>
-							<Link href="/characters" className="">
+							<Link href="/characters" className="text-secondary">
 								Characters
 							</Link>
 						</li>
-						<li className="overflow-hidden text-ellipsis whitespace-nowrap text-secondary dark:drop-shadow-md">{character.name}</li>
+						<li className="overflow-hidden text-ellipsis whitespace-nowrap dark:drop-shadow-md">{character.name}</li>
 					</ul>
 				</div>
 				{myCharacter && (

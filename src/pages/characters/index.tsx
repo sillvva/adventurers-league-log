@@ -104,7 +104,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 							<li>
 								<Icon path={mdiHome} className="w-4" />
 							</li>
-							<li className="text-secondary dark:drop-shadow-md">Characters</li>
+							<li className="dark:drop-shadow-md">Characters</li>
 						</ul>
 					</div>
 					<div className="flex-1" />
