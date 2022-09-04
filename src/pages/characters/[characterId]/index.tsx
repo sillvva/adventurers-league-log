@@ -340,7 +340,7 @@ const Characters: NextPageWithLayout = () => {
 												<SearchResults text={log.name} search={search} />
 											</p>
 											<p className="text-netural-content text-xs font-normal">
-												{(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
+												{new Date(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
 											</p>
 											{log.dm && log.type === "game" && log.dm.uid !== character.user.id && (
 												<p className="text-sm font-normal">
