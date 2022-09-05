@@ -9,6 +9,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiPlus, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
+import { GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -58,7 +59,9 @@ const minisearch = new MiniSearch({
 	}
 });
 
-const Characters: NextPageWithLayout = () => {
+type PageProps = Awaited<ReturnType<typeof getServerSideProps>>["props"];
+
+const Characters: NextPageWithLayout<PageProps> = props => {
 	const session = useSession();
 	const router = useRouter();
 	const [parent1] = useAutoAnimate<HTMLDivElement>();
@@ -155,12 +158,28 @@ const Characters: NextPageWithLayout = () => {
 		}
 	}, [search, logData]);
 
+	let description = `${props.character.race} ${props.character.class}`;
+	if (!description.trim()) description = "An online log sheet made for Adventurers League characters";
+	const header = (
+		<Head>
+			<title>{props.character.name}</title>
+			<meta property="og:type" content="website" />
+			<meta property="og:url" content="https://ddal.dekok.app/" />
+			<meta property="og:title" content={props.character.name} />
+			<meta property="og:description" content={description} />
+			<meta property="og:image" content={props.character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
+			<meta property="twitter:card" content="summary_large_image" />
+			<meta property="twitter:url" content="https://ddal.dekok.app/" />
+			<meta property="twitter:title" content={props.character.name} />
+			<meta property="twitter:description" content={description} />
+			<meta property="twitter:image" content={props.character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
+		</Head>
+	);
+
 	if (!character)
 		return (
 			<>
-				<Head>
-					<title>Character</title>
-				</Head>
+				{header}
 				<div className="flex h-96 w-full items-center justify-center">
 					<div className="radial-progress animate-spin text-secondary" style={{ "--value": 20 } as CSSProperties} />
 				</div>
@@ -169,9 +188,7 @@ const Characters: NextPageWithLayout = () => {
 
 	return (
 		<>
-			<Head>
-				<title>{character.name}</title>
-			</Head>
+			{header}
 
 			<div className="flex gap-4 print:hidden">
 				<div className="breadcrumbs mb-4 flex-1 text-sm">
@@ -542,3 +559,28 @@ Characters.getLayout = page => {
 };
 
 export default Characters;
+
+import { prisma } from "$src/server/db/client";
+
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
+	const character = await prisma.character.findFirst({
+		where: {
+			id: characterId
+		},
+		select: {
+			name: true,
+			image_url: true,
+			race: true,
+			class: true
+		}
+	});
+
+	return {
+		props: {
+			character: {
+				...character
+			}
+		}
+	};
+};

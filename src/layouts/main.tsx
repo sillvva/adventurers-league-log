@@ -33,6 +33,7 @@ const Layout = (props: PropsWithChildren) => {
 		<>
 			<Head>
 				<link rel="icon" type="image/x-icon" href="/favicon.png" />
+				<meta name="description" content="An online log sheet made for Adventurers League characters" />
 			</Head>
 			<NextNProgress color="#6518e7" height={3} options={{ showSpinner: false }} />
 			<Image
