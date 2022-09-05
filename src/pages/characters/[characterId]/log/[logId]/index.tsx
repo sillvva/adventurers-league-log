@@ -3,7 +3,7 @@ import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
-import { getOne } from "$src/server/router/routers/characters";
+import { getLogs, getOne } from "$src/server/router/routers/characters";
 import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, formatDate } from "$src/utils/misc";
@@ -801,6 +801,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	let session = await unstable_getServerSession(context.req, context.res, authOptions);
 	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
 	const character = await getOne(prisma, characterId);
+	const logs = await getLogs(prisma, characterId);
 
 	return {
 		...(!session
@@ -812,7 +813,8 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 			session,
 			character: {
 				...character,
-				logs: character.logs.map(log => ({
+				...logs,
+				logs: logs.logs.map(log => ({
 					...log,
 					date: log.date.toISOString(),
 					created_at: log.created_at.toISOString(),

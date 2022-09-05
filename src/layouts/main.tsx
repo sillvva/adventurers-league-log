@@ -94,7 +94,7 @@ const Layout = (props: PropsWithChildren) => {
 											<label tabIndex={0} className="flex cursor-pointer">
 												<div className="hidden items-center px-4 text-accent-content print:flex sm:flex">{session.data.user.name}</div>
 												<div className="avatar">
-													<div className="relative w-12 overflow-hidden rounded-full ring ring-primary ring-offset-2 ring-offset-base-100">
+													<div className="relative w-11 overflow-hidden rounded-full ring ring-primary ring-offset-2 ring-offset-base-100">
 														<Image
 															src={session.data.user.image || ""}
 															alt={session.data.user.name as string}
