@@ -87,6 +87,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 	const [dmKeySel, setDMKeySel] = useState<number>(0);
 	const [season, setSeason] = useState<1 | 8 | 9>(selectedLog?.experience ? 1 : selectedLog?.acp ? 8 : 9);
 	const [type, setType] = useState<LogType>(selectedLog.type || "game");
+	const [saving, setSaving] = useState(false);
 	const [dmSearch, setDmSearch] = useState("");
 	const [magicItemsGained, setMagicItemsGained] = useState(
 		selectedLog.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
@@ -116,7 +117,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 	const mutation = trpc.useMutation(["_logs.save"], {
 		onSuccess(log) {
 			if (log) {
-				client.setQueryData(["characters.getOne", { characterId: params.characterId }], {
+				client.setQueryData(["characters.getLogs", { characterId: params.characterId }], {
 					...character,
 					logs: (params.logId === "new"
 						? [...character.logs, log].sort((a, b) => (a.date > b.date ? 1 : -1))
@@ -128,6 +129,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 		},
 		onError(err) {
 			setMutError(err.message);
+			setSaving(false);
 		}
 	});
 
@@ -172,6 +174,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 
 		const result = logSchema.safeParse(values);
 		if (result.success) {
+			setSaving(true);
 			// ⬇️ This object destructuring is necessary. Otherwise it breaks.
 			mutation.mutate({
 				...values,
@@ -274,7 +277,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 							<select
 								value={type}
 								onChange={e => setType(e.target.value as LogType)}
-								disabled={mutation.isLoading}
+								disabled={saving}
 								className="select select-bordered w-full">
 								<option value={"game"}>Game</option>
 								<option value={"nongame"}>Non-Game (Purchase, Trade, etc)</option>
@@ -290,7 +293,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 						</label>
 						<input
 							type="text"
-							{...register("name", { required: true, value: selectedLog.name, disabled: mutation.isLoading })}
+							{...register("name", { required: true, value: selectedLog.name, disabled: saving })}
 							className="input input-bordered w-full focus:border-primary"
 						/>
 						<label className="label">
@@ -306,7 +309,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 						</label>
 						<input
 							type="datetime-local"
-							{...register("date", { required: true, value: formatDate(selectedLog.date), disabled: mutation.isLoading })}
+							{...register("date", { required: true, value: formatDate(selectedLog.date), disabled: saving })}
 							className="input input-bordered w-full focus:border-primary"
 						/>
 						<label className="label">
@@ -336,7 +339,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 														{...register("dm.name", {
 															value: selectedLog.dm?.name || "",
 															onChange: e => setDmSearch(e.target.value),
-															disabled: mutation.isLoading
+															disabled: saving
 														})}
 														onKeyUp={e => {
 															const isSearching = dms && dms.length > 0 && dmSearch.trim();
@@ -398,7 +401,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 														{...register("dm.DCI", {
 															value: selectedLog.dm?.DCI || null,
 															onChange: e => setDmSearch(e.target.value),
-															disabled: mutation.isLoading
+															disabled: saving
 														})}
 														onKeyUp={e => {
 															const isSearching = dms && dms.length > 0 && dmSearch.trim();
@@ -455,7 +458,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 									<select
 										value={season}
 										onChange={e => setSeason(parseInt(e.target.value) as 1 | 8 | 9)}
-										disabled={mutation.isLoading}
+										disabled={saving}
 										className="select select-bordered w-full">
 										<option value={9}>Season 9+</option>
 										<option value={8}>Season 8</option>
@@ -469,7 +472,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 										</label>
 										<input
 											type="number"
-											{...register("experience", { value: selectedLog.experience, disabled: mutation.isLoading })}
+											{...register("experience", { value: selectedLog.experience, disabled: saving })}
 											className="input input-bordered w-full focus:border-primary"
 										/>
 										<label className="label">
@@ -490,7 +493,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 												value: selectedLog.level,
 												min: 0,
 												max: Math.max(selectedLog.level, character ? 20 - character.total_level : 19),
-												disabled: mutation.isLoading
+												disabled: saving
 											})}
 											className="input input-bordered w-full focus:border-primary"
 										/>
@@ -510,7 +513,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 										</label>
 										<input
 											type="number"
-											{...register("acp", { value: selectedLog.acp, disabled: mutation.isLoading })}
+											{...register("acp", { value: selectedLog.acp, disabled: saving })}
 											className="input input-bordered w-full focus:border-primary"
 										/>
 										<label className="label">
@@ -524,7 +527,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 									</label>
 									<input
 										type="number"
-										{...register("tcp", { value: selectedLog.tcp, disabled: mutation.isLoading })}
+										{...register("tcp", { value: selectedLog.tcp, disabled: saving })}
 										className="input input-bordered w-full focus:border-primary"
 									/>
 									<label className="label">
@@ -539,7 +542,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 							</label>
 							<input
 								type="number"
-								{...register("gold", { value: selectedLog.gold, disabled: mutation.isLoading })}
+								{...register("gold", { value: selectedLog.gold, disabled: saving })}
 								className="input input-bordered w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -552,7 +555,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 							</label>
 							<input
 								type="number"
-								{...register("dtd", { value: selectedLog.dtd, disabled: mutation.isLoading })}
+								{...register("dtd", { value: selectedLog.dtd, disabled: saving })}
 								className="input input-bordered w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -565,7 +568,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 							<span className="label-text">Notes</span>
 						</label>
 						<AutoResizeTextArea
-							{...register("description", { value: selectedLog.description || "", disabled: mutation.isLoading })}
+							{...register("description", { value: selectedLog.description || "", disabled: saving })}
 							className="textarea textarea-bordered w-full focus:border-primary"
 						/>
 						<label className="label">
@@ -578,7 +581,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 							type="button"
 							className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none"
 							onClick={addMagicItem}
-							disabled={mutation.isLoading}>
+							disabled={saving}>
 							Add Magic Item
 						</button>
 						{!selectedLog.is_dm_log && magicItems.filter(item => !magicItemsLost.includes(item.id)).length > 0 && (
@@ -586,7 +589,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 								type="button"
 								className="btn btn-sm min-w-fit flex-1 sm:flex-none"
 								onClick={addLostMagicItem}
-								disabled={mutation.isLoading}>
+								disabled={saving}>
 								Drop Magic Item
 							</button>
 						)}
@@ -596,7 +599,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 									type="button"
 									className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none"
 									onClick={addStoryAward}
-									disabled={mutation.isLoading}>
+									disabled={saving}>
 									Add Story Award
 								</button>
 								{!selectedLog.is_dm_log && storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
@@ -604,7 +607,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 										type="button"
 										className="btn btn-sm min-w-fit flex-1 sm:flex-none"
 										onClick={addLostStoryAward}
-										disabled={mutation.isLoading}>
+										disabled={saving}>
 										Drop Story Award
 									</button>
 								)}
@@ -627,7 +630,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 												onChange={e => {
 													setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
 												}}
-												disabled={mutation.isLoading}
+												disabled={saving}
 												className="input input-bordered w-full focus:border-primary"
 											/>
 											<label className="label">
@@ -648,7 +651,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 													magicItemsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item))
 												);
 											}}
-											disabled={mutation.isLoading}
+											disabled={saving}
 											className="textarea textarea-bordered w-full focus:border-primary"
 											style={{ resize: "none" }}
 											value={item.description}
@@ -675,7 +678,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 												onChange={e => {
 													setMagicItemsLost(magicItemsLost.map((item, i) => (i === index ? e.target.value : item)));
 												}}
-												disabled={mutation.isLoading}
+												disabled={saving}
 												className="select select-bordered w-full">
 												{magicItems.map(item => (
 													<option key={item.id} value={item.id}>
@@ -712,7 +715,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 														storyAwardsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item))
 													);
 												}}
-												disabled={mutation.isLoading}
+												disabled={saving}
 												className="input input-bordered w-full focus:border-primary"
 												style={{ resize: "none" }}
 											/>
@@ -734,7 +737,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 													storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item))
 												);
 											}}
-											disabled={mutation.isLoading}
+											disabled={saving}
 											className="textarea textarea-bordered w-full focus:border-primary"
 											value={item.description}
 										/>
@@ -781,7 +784,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 						))}
 					</div>
 					<div className="col-span-12 text-center">
-						<button type="submit" className={concatenate("btn btn-primary", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
+						<button type="submit" className={concatenate("btn btn-primary", saving && "loading")} disabled={saving}>
 							Save Log
 						</button>
 					</div>
