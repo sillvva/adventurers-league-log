@@ -86,7 +86,7 @@ const Characters: NextPageWithLayout = () => {
 							<li>
 								<Icon path={mdiHome} className="w-4" />
 							</li>
-							<li className="text-secondary dark:drop-shadow-md">DM Logs</li>
+							<li className="dark:drop-shadow-md">DM Logs</li>
 						</ul>
 					</div>
 					{logs && logs.length > 0 && (

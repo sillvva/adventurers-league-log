@@ -95,7 +95,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 
 	return (
 		<>
-			<Head>{session.user ? <title>{session.user.name}&apos;s Characters</title> : <title>Characters</title>}</Head>
+			<Head>{session.user ? <title>{`${session.user.name}'s Characters`}</title> : <title>Characters</title>}</Head>
 
 			<div className="flex flex-col gap-4">
 				<div className="flex gap-4">
@@ -104,7 +104,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 							<li>
 								<Icon path={mdiHome} className="w-4" />
 							</li>
-							<li className="text-secondary dark:drop-shadow-md">Characters</li>
+							<li className="dark:drop-shadow-md">Characters</li>
 						</ul>
 					</div>
 					<div className="flex-1" />

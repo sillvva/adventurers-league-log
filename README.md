@@ -1,6 +1,6 @@
 # Project is Live
 
-## Visit the web app [here](https://ddal.dekok.app/).
+Visit the web app [here](https://ddal.dekok.app/).
 
 # Create T3 App
 

@@ -207,14 +207,14 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 						<Icon path={mdiHome} className="w-4" />
 					</li>
 					<li>
-						<Link href="/dm-logs" className="">
+						<Link href="/dm-logs" className="text-secondary">
 							DM Logs
 						</Link>
 					</li>
 					{selectedLog.name ? (
-						<li className="overflow-hidden text-ellipsis whitespace-nowrap text-secondary dark:drop-shadow-md">{selectedLog.name}</li>
+						<li className="overflow-hidden text-ellipsis whitespace-nowrap dark:drop-shadow-md">{selectedLog.name}</li>
 					) : (
-						<li className="text-secondary dark:drop-shadow-md">New Log</li>
+						<li className="dark:drop-shadow-md">New Log</li>
 					)}
 				</ul>
 			</div>

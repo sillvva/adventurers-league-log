@@ -236,19 +236,19 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 						<Icon path={mdiHome} className="w-4" />
 					</li>
 					<li>
-						<Link href="/characters" className="">
+						<Link href="/characters" className="text-secondary">
 							Characters
 						</Link>
 					</li>
 					<li>
-						<Link href={`/characters/${params.characterId}`} className="">
+						<Link href={`/characters/${params.characterId}`} className="text-secondary">
 							{character?.name}
 						</Link>
 					</li>
 					{selectedLog.name ? (
-						<li className="overflow-hidden text-ellipsis whitespace-nowrap text-secondary dark:drop-shadow-md">{selectedLog.name}</li>
+						<li className="overflow-hidden text-ellipsis whitespace-nowrap dark:drop-shadow-md">{selectedLog.name}</li>
 					) : (
-						<li className="text-secondary dark:drop-shadow-md">New Log</li>
+						<li className="dark:drop-shadow-md">New Log</li>
 					)}
 				</ul>
 			</div>
