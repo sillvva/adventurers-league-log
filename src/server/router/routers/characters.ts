@@ -19,34 +19,48 @@ export const charactersRouter = createRouter()
 		async resolve({ input, ctx }) {
 			return await getOne(ctx.prisma, input.characterId);
 		}
+	})
+	.query("getLogs", {
+		input: z.object({
+			characterId: z.string()
+		}),
+		async resolve({ input, ctx }) {
+			return await getLogs(ctx.prisma, input.characterId);
+		}
 	});
 
 export async function getOne(prisma: PrismaClient, characterId: string) {
 	const character = await prisma.character.findFirstOrThrow({
 		include: {
-			user: true,
-			logs: {
-				include: {
-					dm: true,
-					magic_items_gained: true,
-					magic_items_lost: true,
-					story_awards_gained: true,
-					story_awards_lost: true
-				},
-				orderBy: {
-					date: "asc"
-				}
-			}
+			user: true
 		},
 		where: { id: characterId }
 	});
 
-	const levels = getLevels(character.logs);
+	return character;
+}
+
+export async function getLogs(prisma: PrismaClient, characterId: string) {
+	const logs = await prisma.log.findMany({
+		include: {
+			dm: true,
+			magic_items_gained: true,
+			magic_items_lost: true,
+			story_awards_gained: true,
+			story_awards_lost: true
+		},
+		orderBy: {
+			date: "asc"
+		},
+		where: { characterId: characterId }
+	});
+
+	const levels = getLevels(logs);
 
 	const total_level = levels.total;
-	const total_gold = character.logs.reduce((acc, log) => acc + log.gold, 0);
-	const total_dtd = character.logs.reduce((acc, log) => acc + log.dtd, 0);
-	const magic_items = character.logs.reduce((acc, log) => {
+	const total_gold = logs.reduce((acc, log) => acc + log.gold, 0);
+	const total_dtd = logs.reduce((acc, log) => acc + log.dtd, 0);
+	const magic_items = logs.reduce((acc, log) => {
 		acc.push(...log.magic_items_gained);
 		log.magic_items_lost.forEach(magicItem => {
 			acc.splice(
@@ -56,7 +70,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
 		});
 		return acc;
 	}, [] as MagicItem[]);
-	const story_awards = character.logs.reduce((acc, log) => {
+	const story_awards = logs.reduce((acc, log) => {
 		acc.push(...log.story_awards_gained);
 		log.story_awards_lost.forEach(storyAward => {
 			acc.splice(
@@ -68,7 +82,6 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
 	}, [] as StoryAward[]);
 
 	return {
-		...character,
 		total_level,
 		total_gold,
 		total_dtd,
@@ -76,7 +89,7 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
 		story_awards,
 		log_levels: levels.log_levels,
 		tier: total_level >= 17 ? 4 : total_level >= 11 ? 3 : total_level >= 5 ? 2 : 1,
-		logs: character.logs.map(log => ({ ...log, saving: false }))
+		logs: logs.map(log => ({ ...log, saving: false }))
 	};
 }
 
