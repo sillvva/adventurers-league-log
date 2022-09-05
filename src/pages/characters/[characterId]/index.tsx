@@ -91,7 +91,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
 	const utils = trpc.useContext();
 	const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
 		onSuccess() {
-			utils.invalidateQueries(["characters.getOne", { characterId: params.characterId }]);
+			utils.invalidateQueries(["characters.getLogs", { characterId: params.characterId }]);
 		}
 	});
 
