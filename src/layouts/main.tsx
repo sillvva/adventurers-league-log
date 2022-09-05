@@ -33,17 +33,18 @@ const Layout = (props: PropsWithChildren) => {
 		<>
 			<Head>
 				<link rel="icon" type="image/x-icon" href="/favicon.png" />
+				<meta property="og:type" content="website" />
+				<meta property="og:url" content={`https://ddal.dekok.app${router.asPath}`} />
+				<meta property="twitter:card" content="summary_large_image" />
+				<meta property="twitter:url" content={`https://ddal.dekok.app${router.asPath}`} />
 				{!["/characters/[characterId]"].includes(router.route) && (
 					<>
+						<meta name="title" content="Adventurers League Log" />
 						<meta name="description" content="An online log sheet made for Adventurers League characters" />
-						<meta property="og:type" content="website" />
-						<meta property="og:url" content="https://ddal.dekok.app/" />
-						<meta property="og:title" content={"Adventurers League Log"} />
+						<meta property="og:title" content="Adventurers League Log" />
 						<meta property="og:description" content={"An online log sheet made for Adventurers League characters"} />
 						<meta property="og:image" content={"https://ddal.dekok.app/images/barovia-gate.jpg"} />
-						<meta property="twitter:card" content="summary_large_image" />
-						<meta property="twitter:url" content="https://ddal.dekok.app/" />
-						<meta property="twitter:title" content={"Adventurers League Log"} />
+						<meta property="twitter:title" content="Adventurers League Log" />
 						<meta property="twitter:description" content={"An online log sheet made for Adventurers League characters"} />
 						<meta property="twitter:image" content={"https://ddal.dekok.app/images/barovia-gate.jpg"} />
 					</>

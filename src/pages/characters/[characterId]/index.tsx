@@ -163,13 +163,11 @@ const Characters: NextPageWithLayout<PageProps> = props => {
 	const header = (
 		<Head>
 			<title>{props.character.name}</title>
-			<meta property="og:type" content="website" />
-			<meta property="og:url" content="https://ddal.dekok.app/" />
+			<meta name="title" content={props.character.name} />
+			<meta name="description" content={description} />
 			<meta property="og:title" content={props.character.name} />
 			<meta property="og:description" content={description} />
 			<meta property="og:image" content={props.character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
-			<meta property="twitter:card" content="summary_large_image" />
-			<meta property="twitter:url" content="https://ddal.dekok.app/" />
 			<meta property="twitter:title" content={props.character.name} />
 			<meta property="twitter:description" content={description} />
 			<meta property="twitter:image" content={props.character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
