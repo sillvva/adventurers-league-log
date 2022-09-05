@@ -162,13 +162,13 @@ const Characters: NextPageWithLayout<PageProps> = props => {
 	if (!description.trim()) description = "An online log sheet made for Adventurers League characters";
 	const header = (
 		<Head>
-			<title>{props.character.name}</title>
-			<meta name="title" content={props.character.name} />
+			<title>{`${props.character.name} - Adventurers League Log Sheet`}</title>
+			<meta name="title" content={`${props.character.name} - Adventurers League Log Sheet`} />
 			<meta name="description" content={description} />
-			<meta property="og:title" content={props.character.name} />
+			<meta property="og:title" content={`${props.character.name} - Adventurers League Log Sheet`} />
 			<meta property="og:description" content={description} />
 			<meta property="og:image" content={props.character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
-			<meta property="twitter:title" content={props.character.name} />
+			<meta property="twitter:title" content={`${props.character.name} - Adventurers League Log Sheet`} />
 			<meta property="twitter:description" content={description} />
 			<meta property="twitter:image" content={props.character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
 		</Head>
