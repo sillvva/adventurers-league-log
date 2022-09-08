@@ -31,11 +31,10 @@ const Home: NextPage = () => {
 
 			<Image
 				src={background}
-				priority
 				alt="Background"
-				width={1280}
-				height={1080}
-				className="!fixed z-0 min-h-screen min-w-full object-cover object-center opacity-40 dark:opacity-20 print:hidden"
+				priority
+				fill
+				className="z-0 object-cover object-center opacity-40 dark:opacity-20 print:hidden"
 			/>
 			<main ref={main} className="container relative mx-auto flex min-h-screen flex-col items-center justify-center p-4">
 				{loaded && (

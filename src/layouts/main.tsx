@@ -53,10 +53,9 @@ const Layout = (props: PropsWithChildren) => {
 			<NextNProgress color="#6518e7" height={3} options={{ showSpinner: false }} />
 			<Image
 				src={background}
-				priority
 				alt="Background"
-				width={1280}
-				height={1080}
+				priority
+				fill
 				className="!fixed z-0 min-h-screen min-w-full object-cover object-center opacity-25 dark:opacity-20 print:hidden"
 			/>
 			<div className="flex min-h-screen flex-col">
