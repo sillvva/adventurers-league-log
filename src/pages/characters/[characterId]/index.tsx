@@ -80,7 +80,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
 		})
 	);
 
-	const { data: logs } = trpc.useQuery(["characters.getLogs", { characterId: params.characterId }], {
+	const { data: logs, isLoading: logsLoading } = trpc.useQuery(["characters.getLogs", { characterId: params.characterId }], {
 		refetchOnWindowFocus: false,
 		refetchOnMount: false
 	});
@@ -137,7 +137,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
 	}, [descriptions]);
 
 	useEffect(() => {
-		setDescriptions(localStorage.getItem("descriptions") === "true");
+		setDescriptions(localStorage.getItem("descriptions") !== "false");
 	}, []);
 
 	const results = useMemo(() => {
@@ -175,7 +175,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
 				<meta property="twitter:description" content={description} />
 				<meta property="twitter:image" content={character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
 			</Head>
-			
+
 			<div className="flex gap-4 print:hidden">
 				<div className="breadcrumbs mb-4 flex-1 text-sm">
 					<ul>
@@ -190,26 +190,24 @@ const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
 						<li className="overflow-hidden text-ellipsis whitespace-nowrap dark:drop-shadow-md">{character.name}</li>
 					</ul>
 				</div>
-				<div className="dropdown-end dropdown">
-					<label tabIndex={1} className="btn btn-sm">
-						<Icon path={mdiDotsHorizontal} size={1} />
-					</label>
-					<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
-						{myCharacter && (
+				{myCharacter && (
+					<div className="dropdown-end dropdown">
+						<label tabIndex={1} className="btn btn-sm">
+							<Icon path={mdiDotsHorizontal} size={1} />
+						</label>
+						<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
 							<li>
 								<Link href={`/characters/${params.characterId}/edit`}>Edit</Link>
 							</li>
-						)}
-						<li>
-							<a
-								download={`${slugify(character.name)}.json`}
-								href={`/api/exports/characters/${params.characterId}`}
-								target="_blank"
-								rel="noreferrer noopener">
-								Export
-							</a>
-						</li>
-						{myCharacter && (
+							<li>
+								<a
+									download={`${slugify(character.name)}.json`}
+									href={`/api/exports/characters/${params.characterId}`}
+									target="_blank"
+									rel="noreferrer noopener">
+									Export
+								</a>
+							</li>
 							<li>
 								<a
 									className="bg-red-600 text-white"
@@ -223,9 +221,9 @@ const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
 									Delete
 								</a>
 							</li>
-						)}
-					</ul>
-				</div>
+						</ul>
+					</div>
+				)}
 			</div>
 
 			<section className="flex">
@@ -286,7 +284,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
 								<span className="hidden sm:inline">New Log</span>
 								<Icon path={mdiPlus} size={1} className="inline sm:hidden" />
 							</Link>
-						) : (
+						) : character && !logsLoading ? null : (
 							<span className="btn btn-sm">Loading...</span>
 						)}
 						{logs && (
