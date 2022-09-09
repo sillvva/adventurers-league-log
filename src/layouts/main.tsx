@@ -131,7 +131,7 @@ const Layout = (props: PropsWithChildren) => {
 								) : (
 									<>
 										<button
-											className="flex h-12 items-center gap-2 rounded-lg bg-neutral/50 p-2 text-neutral-content transition-colors hover:bg-neutral hover:text-accent-content"
+											className="flex h-12 items-center gap-2 rounded-lg bg-base-200/50 p-2 text-base-content transition-colors hover:bg-base-300"
 											onClick={() =>
 												signIn("google", {
 													callbackUrl: `${router.basePath}/characters`
