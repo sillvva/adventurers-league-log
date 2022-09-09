@@ -8,7 +8,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
-import { GetServerSideProps } from "next";
+import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
@@ -17,6 +17,25 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { components } from "../characters/[characterId]";
+
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const session = await unstable_getServerSession(context.req, context.res, authOptions);
+
+	if (!session) {
+		return {
+			redirect: {
+				destination: "/",
+				permanent: false
+			}
+		};
+	}
+
+	return {
+		props: {
+			session
+		}
+	};
+};
 
 const minisearch = new MiniSearch({
 	fields: ["logName", "characterName", "magicItems", "storyAwards"],
@@ -325,22 +344,3 @@ Characters.getLayout = page => {
 };
 
 export default Characters;
-
-export const getServerSideProps: GetServerSideProps = async context => {
-	const session = await unstable_getServerSession(context.req, context.res, authOptions);
-
-	if (!session) {
-		return {
-			redirect: {
-				destination: "/",
-				permanent: false
-			}
-		};
-	}
-
-	return {
-		props: {
-			session
-		}
-	};
-};

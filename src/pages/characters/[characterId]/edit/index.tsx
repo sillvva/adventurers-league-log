@@ -7,8 +7,7 @@ import { trpc } from "$src/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mdiHome } from "@mdi/js";
 import Icon from "@mdi/react";
-import type { GetServerSideProps } from "next";
-import type { Session } from "next-auth";
+import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
@@ -18,9 +17,26 @@ import { useQueryClient } from "react-query";
 import { z } from "zod";
 import { newCharacterSchema } from "../../new";
 
-interface PageProps {
-	session: Session;
-}
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const session = await unstable_getServerSession(context.req, context.res, authOptions);
+
+	if (!session) {
+		return {
+			redirect: {
+				destination: "/",
+				permanent: false
+			}
+		};
+	}
+
+	return {
+		props: {
+			session
+		}
+	};
+};
+
+type PageProps = Exclude<Awaited<ReturnType<typeof getServerSideProps>>["props"], undefined>;
 
 export const editCharacterSchema = z.object({
 	id: z.string(),
@@ -222,22 +238,3 @@ EditCharacter.getLayout = page => {
 };
 
 export default EditCharacter;
-
-export const getServerSideProps: GetServerSideProps = async context => {
-	const session = await unstable_getServerSession(context.req, context.res, authOptions);
-
-	if (!session) {
-		return {
-			redirect: {
-				destination: "/",
-				permanent: false
-			}
-		};
-	}
-
-	return {
-		props: {
-			session
-		}
-	};
-};

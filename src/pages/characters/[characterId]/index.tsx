@@ -10,7 +10,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiPlus, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
-import { GetServerSidePropsContext } from "next";
+import type { GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -59,6 +59,33 @@ const minisearch = new MiniSearch({
 		prefix: true
 	}
 });
+
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
+	const character = await prisma.character.findFirst({
+		where: {
+			id: characterId
+		},
+		select: {
+			id: true,
+			name: true,
+			campaign: true,
+			character_sheet_url: true,
+			image_url: true,
+			race: true,
+			class: true,
+			user: true
+		}
+	});
+
+	if (!character) return { redirect: { destination: "/characters", permanent: false } };
+
+	return {
+		props: {
+			character
+		}
+	};
+};
 
 type PageProps = Exclude<Awaited<ReturnType<typeof getServerSideProps>>["props"], undefined>;
 
@@ -563,30 +590,3 @@ Characters.getLayout = page => {
 };
 
 export default Characters;
-
-export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
-	const character = await prisma.character.findFirst({
-		where: {
-			id: characterId
-		},
-		select: {
-			id: true,
-			name: true,
-			campaign: true,
-			character_sheet_url: true,
-			image_url: true,
-			race: true,
-			class: true,
-			user: true
-		}
-	});
-
-	if (!character) return { redirect: { destination: "/characters", permanent: false } };
-
-	return {
-		props: {
-			character
-		}
-	};
-};

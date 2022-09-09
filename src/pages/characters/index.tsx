@@ -6,14 +6,34 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPlus } from "@mdi/js";
 import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
-import type { GetServerSideProps } from "next";
-import type { Session } from "next-auth";
+import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import type { NextPageWithLayout } from "../_app";
+
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const session = await unstable_getServerSession(context.req, context.res, authOptions);
+
+	if (!session) {
+		return {
+			redirect: {
+				destination: "/",
+				permanent: false
+			}
+		};
+	}
+
+	return {
+		props: {
+			session
+		}
+	};
+};
+
+type PageProps = Exclude<Awaited<ReturnType<typeof getServerSideProps>>["props"], undefined>;
 
 const minisearch = new MiniSearch({
 	fields: ["characterName", "campaign", "race", "class", "magicItems", "tier", "level"],
@@ -23,10 +43,6 @@ const minisearch = new MiniSearch({
 		prefix: true
 	}
 });
-
-interface PageProps {
-	session: Session;
-}
 
 const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 	const router = useRouter();
@@ -193,8 +209,7 @@ const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
 												</div>
 												<div className="whitespace-pre-wrap text-xs sm:text-sm">
 													<span className="inline sm:hidden">Level {character.total_level}</span>
-													<SearchResults text={character.race} search={search} />{" "}
-													<SearchResults text={character.class} search={search} />
+													<SearchResults text={character.race} search={search} /> <SearchResults text={character.class} search={search} />
 												</div>
 												<div className="mb-2 block text-xs sm:hidden">
 													<p>
@@ -230,22 +245,3 @@ Characters.getLayout = page => {
 };
 
 export default Characters;
-
-export const getServerSideProps: GetServerSideProps = async context => {
-	const session = await unstable_getServerSession(context.req, context.res, authOptions);
-
-	if (!session) {
-		return {
-			redirect: {
-				destination: "/",
-				permanent: false
-			}
-		};
-	}
-
-	return {
-		props: {
-			session
-		}
-	};
-};
