@@ -18,6 +18,13 @@ export default defineNextConfig({
     newNextLinkBehavior: true
 	},
   images: {
-    domains: ["lh1.googleusercontent.com", "lh2.googleusercontent.com", "lh3.googleusercontent.com", "lh4.googleusercontent.com"]
+    remotePatterns: [
+      {
+        // The `src` property hostname must end with `.googleusercontent.com`,
+        // otherwise the API will respond with 400 Bad Request.
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+      },
+    ],
   },
 });
