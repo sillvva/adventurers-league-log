@@ -1,6 +1,7 @@
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
+import { newCharacterSchema } from "$src/types/zod-schema";
 import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,15 +36,6 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 };
 
 type PageProps = Exclude<Awaited<ReturnType<typeof getServerSideProps>>["props"], undefined>;
-
-export const newCharacterSchema = z.object({
-  name: z.string().min(1),
-  campaign: z.string().min(1),
-  race: z.string().optional(),
-  class: z.string().optional(),
-  character_sheet_url: z.union([z.literal(""), z.string().url()]),
-  image_url: z.union([z.literal(""), z.string().url()])
-});
 
 const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
   const router = useRouter();

@@ -1,5 +1,4 @@
-import { newCharacterSchema } from "$src/pages/characters/new";
-import { editCharacterSchema } from "$src/pages/characters/[characterId]/edit";
+import { editCharacterSchema, newCharacterSchema } from "$src/types/zod-schema";
 import { z } from "zod";
 import { createProtectedRouter } from "../protected-router";
 
