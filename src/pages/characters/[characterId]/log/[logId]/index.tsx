@@ -120,10 +120,9 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 			if (log) {
 				client.setQueryData(["characters.getLogs", { characterId: params.characterId }], {
 					...character,
-					logs: (params.logId === "new"
-						? [...character.logs, log].sort((a, b) => (a.date > b.date ? 1 : -1))
-						: character.logs.map(l => (l.id === log.id ? log : l))
-					).sort((a, b) => (a.date > b.date ? 1 : -1))
+					logs: (params.logId === "new" ? [...character.logs, log] : character.logs.map(l => (l.id === log.id ? log : l))).sort((a, b) =>
+						new Date(a.date).toISOString() > new Date(b.date).toISOString() ? 1 : -1
+					)
 				});
 			}
 			router.push(`/characters/${params.characterId}`);
@@ -151,7 +150,11 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 			if (!values.date) errors.push(setError("date", { message: "Required" }));
 			else values.date = new Date(values.date.replace("T", " ")).toISOString();
 
-			if (values.type === "game" && !values.dm.name && !values.dm.id) errors.push(setError("dm.name", { message: "Required" }));
+			if (values.type === "game" && !values.dm.name && !values.dm.id) {
+				if (!confirm("Are you sure you want to save this log without a DM? Your name will be used as a placeholder.")) {
+					errors.push(setError("dm.name", { message: "Required" }));
+				}
+			}
 
 			if (!values.dm || !values.dm.name) values.dm = { id: "", name: session?.user?.name || "", DCI: null, uid: session?.user?.id || "" };
 			values.dm.DCI = (values.dm.DCI || "").replace(/[^\d]+/g, "").trim() || null;
@@ -578,19 +581,11 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 						</label>
 					</div>
 					<div className="col-span-12 flex flex-wrap gap-4">
-						<button
-							type="button"
-							className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none"
-							onClick={addMagicItem}
-							disabled={saving}>
+						<button type="button" className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none" onClick={addMagicItem} disabled={saving}>
 							Add Magic Item
 						</button>
 						{!selectedLog.is_dm_log && magicItems.filter(item => !magicItemsLost.includes(item.id)).length > 0 && (
-							<button
-								type="button"
-								className="btn btn-sm min-w-fit flex-1 sm:flex-none"
-								onClick={addLostMagicItem}
-								disabled={saving}>
+							<button type="button" className="btn btn-sm min-w-fit flex-1 sm:flex-none" onClick={addLostMagicItem} disabled={saving}>
 								Drop Magic Item
 							</button>
 						)}
@@ -604,11 +599,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 									Add Story Award
 								</button>
 								{!selectedLog.is_dm_log && storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
-									<button
-										type="button"
-										className="btn btn-sm min-w-fit flex-1 sm:flex-none"
-										onClick={addLostStoryAward}
-										disabled={saving}>
+									<button type="button" className="btn btn-sm min-w-fit flex-1 sm:flex-none" onClick={addLostStoryAward} disabled={saving}>
 										Drop Story Award
 									</button>
 								)}

@@ -40,13 +40,20 @@ export const protectedCharactersRouter = createProtectedRouter()
     async resolve({ ctx }) {
       return await ctx.prisma.dungeonMaster.findMany({
         where: {
-          logs: {
-            every: {
-              character: {
-                userId: ctx.session.user.id
+          OR: [
+            {
+              logs: {
+                every: {
+                  character: {
+                    userId: ctx.session.user.id
+                  }
+                }
               }
+            },
+            {
+              uid: ctx.session.user.id
             }
-          }
+          ]
         }
       });
     }
