@@ -6,8 +6,9 @@ import { prisma } from "$src/server/db/client";
 import { getLogs, getOne } from "$src/server/router/routers/characters";
 import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
+import { getLogsSummary } from "$src/utils/logs";
 import { concatenate, formatDate } from "$src/utils/misc";
-import { trpc } from "$src/utils/trpc";
+import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -118,12 +119,15 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 	const mutation = trpc.useMutation(["_logs.save"], {
 		onSuccess(log) {
 			if (log) {
-				client.setQueryData(["characters.getLogs", { characterId: params.characterId }], {
-					...character,
-					logs: (params.logId === "new" ? [...character.logs, log] : character.logs.map(l => (l.id === log.id ? log : l))).sort((a, b) =>
-						new Date(a.date).toISOString() > new Date(b.date).toISOString() ? 1 : -1
-					)
-				});
+				let logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>(["characters.getLogs", { characterId: params.characterId }]);
+				if (logData) {
+					logData.logs.splice(logData.logs.findIndex(l => l.id === log.id), params.logId === "new" ? 0 : 1, log);
+					logData = getLogsSummary(logData.logs);
+				}
+				else {
+					logData = getLogsSummary([log])
+				}
+				client.setQueryData(["characters.getLogs", { characterId: params.characterId }], logData);
 			}
 			router.push(`/characters/${params.characterId}`);
 		},

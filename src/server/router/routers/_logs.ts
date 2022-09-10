@@ -222,7 +222,7 @@ export const protectedLogsRouter = createProtectedRouter()
 				}
 			});
 
-			return ctx.prisma.log.findFirst({
+			const updated = await ctx.prisma.log.findFirst({
 				where: {
 					id: log.id
 				},
@@ -234,6 +234,11 @@ export const protectedLogsRouter = createProtectedRouter()
 					story_awards_lost: true
 				}
 			});
+
+			return updated && {
+				...updated,
+				saving: true
+			};
 		}
 	})
 	.mutation("delete", {

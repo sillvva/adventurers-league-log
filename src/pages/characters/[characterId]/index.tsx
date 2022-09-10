@@ -177,9 +177,9 @@ const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
 						...log,
 						score: results.find(result => result.id === log.id)?.score || 0 - log.date.getTime()
 					}))
-					.sort((a, b) => (a.date > b.date ? 1 : -1));
+					.sort((a, b) => a.date.getTime() - b.date.getTime());
 			} else {
-				return logData.sort((a, b) => (a.date > b.date ? 1 : -1));
+				return logData.sort((a, b) => a.date.getTime() - b.date.getTime());
 			}
 		} else {
 			return [];
