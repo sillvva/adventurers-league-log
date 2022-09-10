@@ -20,6 +20,64 @@ import { FormEventHandler, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const session = await unstable_getServerSession(context.req, context.res, authOptions);
+
+	type SSRChar = {
+		created_at: string;
+		id: string;
+		name: string;
+		race: string | null;
+		class: string | null;
+		campaign: string | null;
+		image_url: string | null;
+		character_sheet_url: string | null;
+		userId: string;
+	};
+
+	if (!session)
+		return {
+			props: { session: null, log: null, characters: [] as SSRChar[] },
+			redirect: {
+				destination: "/",
+				permanent: false
+			}
+		};
+
+	const characters = await prisma.character.findMany({
+		where: {
+			user: { id: session.user?.id }
+		}
+	});
+
+	const log = await prisma.log.findFirst({
+		where: { id: typeof context.query.logId === "string" ? context.query.logId : "", is_dm_log: true },
+		include: { dm: true, magic_items_gained: true, magic_items_lost: true, story_awards_gained: true, story_awards_lost: true }
+	});
+
+	if (context.query.logId !== "new" && (!log || log.dm?.uid !== session.user?.id))
+		return {
+			props: { session, log: null, characters: [] as SSRChar[] },
+			redirect: {
+				destination: "/dm-logs",
+				permanent: false
+			}
+		};
+
+	return {
+		props: {
+			session,
+			log: log && {
+				...log,
+				date: log.date.toISOString(),
+				created_at: log.created_at.toISOString(),
+				applied_date: log.applied_date === null ? null : log.applied_date.toISOString()
+			},
+			characters: characters.map(character => ({ ...character, created_at: character.created_at.toISOString() })) as SSRChar[]
+		}
+	};
+};
+
 type PageProps = Awaited<ReturnType<typeof getServerSideProps>>["props"];
 
 const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) => {
@@ -569,61 +627,3 @@ EditLog.getLayout = page => {
 };
 
 export default EditLog;
-
-export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-	const session = await unstable_getServerSession(context.req, context.res, authOptions);
-
-	type SSRChar = {
-		created_at: string;
-		id: string;
-		name: string;
-		race: string | null;
-		class: string | null;
-		campaign: string | null;
-		image_url: string | null;
-		character_sheet_url: string | null;
-		userId: string;
-	};
-
-	if (!session)
-		return {
-			props: { session: null, log: null, characters: [] as SSRChar[] },
-			redirect: {
-				destination: "/",
-				permanent: false
-			}
-		};
-
-	const characters = await prisma.character.findMany({
-		where: {
-			user: { id: session.user?.id }
-		}
-	});
-
-	const log = await prisma.log.findFirst({
-		where: { id: typeof context.query.logId === "string" ? context.query.logId : "", is_dm_log: true },
-		include: { dm: true, magic_items_gained: true, magic_items_lost: true, story_awards_gained: true, story_awards_lost: true }
-	});
-
-	if (context.query.logId !== "new" && (!log || log.dm?.uid !== session.user?.id))
-		return {
-			props: { session, log: null, characters: [] as SSRChar[] },
-			redirect: {
-				destination: "/dm-logs",
-				permanent: false
-			}
-		};
-
-	return {
-		props: {
-			session,
-			log: log && {
-				...log,
-				date: log.date.toISOString(),
-				created_at: log.created_at.toISOString(),
-				applied_date: log.applied_date === null ? null : log.applied_date.toISOString()
-			},
-			characters: characters.map(character => ({ ...character, created_at: character.created_at.toISOString() }))
-		}
-	};
-};

@@ -1,6 +1,7 @@
 // src/pages/_app.tsx
 import { withTRPC } from "@trpc/next";
 import type { NextPage } from "next";
+import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import type { AppProps } from "next/app";
@@ -13,11 +14,15 @@ export type NextPageWithLayout<P = {}> = NextPage<P> & {
   getLayout?: (page: ReactElement, props: P) => ReactNode;
 };
 
-type AppPropsWithLayout = AppProps & {
-  Component: NextPageWithLayout;
+type AppPropsWithLayout<P> = AppProps<P> & {
+  Component: NextPageWithLayout<P>;
 };
 
-const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
+type PageProps = {
+  session?: Session | null;
+}
+
+const MyApp = ({ Component, pageProps }: AppPropsWithLayout<PageProps>) => {
   const getLayout = Component.getLayout ?? (page => page);
   return (
     <ThemeProvider>

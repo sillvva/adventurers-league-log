@@ -1,5 +1,4 @@
-import { newCharacterSchema } from "$src/pages/characters/new";
-import { editCharacterSchema } from "$src/pages/characters/[characterId]/edit";
+import { editCharacterSchema, newCharacterSchema } from "$src/types/zod-schema";
 import { z } from "zod";
 import { createProtectedRouter } from "../protected-router";
 
@@ -41,13 +40,20 @@ export const protectedCharactersRouter = createProtectedRouter()
     async resolve({ ctx }) {
       return await ctx.prisma.dungeonMaster.findMany({
         where: {
-          logs: {
-            every: {
-              character: {
-                userId: ctx.session.user.id
+          OR: [
+            {
+              logs: {
+                every: {
+                  character: {
+                    userId: ctx.session.user.id
+                  }
+                }
               }
+            },
+            {
+              uid: ctx.session.user.id
             }
-          }
+          ]
         }
       });
     }

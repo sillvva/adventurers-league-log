@@ -6,8 +6,9 @@ import { prisma } from "$src/server/db/client";
 import { getLogs, getOne } from "$src/server/router/routers/characters";
 import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
+import { getLogsSummary } from "$src/utils/logs";
 import { concatenate, formatDate } from "$src/utils/misc";
-import { trpc } from "$src/utils/trpc";
+import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -17,7 +18,8 @@ import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FormEventHandler, useMemo, useState } from "react";
+import type { FormEventHandler } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 import { z } from "zod";
@@ -117,13 +119,15 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 	const mutation = trpc.useMutation(["_logs.save"], {
 		onSuccess(log) {
 			if (log) {
-				client.setQueryData(["characters.getLogs", { characterId: params.characterId }], {
-					...character,
-					logs: (params.logId === "new"
-						? [...character.logs, log].sort((a, b) => (a.date > b.date ? 1 : -1))
-						: character.logs.map(l => (l.id === log.id ? log : l))
-					).sort((a, b) => (a.date > b.date ? 1 : -1))
-				});
+				let logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>(["characters.getLogs", { characterId: params.characterId }]);
+				if (logData) {
+					logData.logs.splice(logData.logs.findIndex(l => l.id === log.id), params.logId === "new" ? 0 : 1, log);
+					logData = getLogsSummary(logData.logs);
+				}
+				else {
+					logData = getLogsSummary([log])
+				}
+				client.setQueryData(["characters.getLogs", { characterId: params.characterId }], logData);
 			}
 			router.push(`/characters/${params.characterId}`);
 		},
@@ -150,7 +154,11 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 			if (!values.date) errors.push(setError("date", { message: "Required" }));
 			else values.date = new Date(values.date.replace("T", " ")).toISOString();
 
-			if (values.type === "game" && !values.dm.name && !values.dm.id) errors.push(setError("dm.name", { message: "Required" }));
+			if (values.type === "game" && !values.dm.name && !values.dm.id) {
+				if (!confirm("Are you sure you want to save this log without a DM? Your name will be used as a placeholder.")) {
+					errors.push(setError("dm.name", { message: "Required" }));
+				}
+			}
 
 			if (!values.dm || !values.dm.name) values.dm = { id: "", name: session?.user?.name || "", DCI: null, uid: session?.user?.id || "" };
 			values.dm.DCI = (values.dm.DCI || "").replace(/[^\d]+/g, "").trim() || null;
@@ -577,19 +585,11 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 						</label>
 					</div>
 					<div className="col-span-12 flex flex-wrap gap-4">
-						<button
-							type="button"
-							className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none"
-							onClick={addMagicItem}
-							disabled={saving}>
+						<button type="button" className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none" onClick={addMagicItem} disabled={saving}>
 							Add Magic Item
 						</button>
 						{!selectedLog.is_dm_log && magicItems.filter(item => !magicItemsLost.includes(item.id)).length > 0 && (
-							<button
-								type="button"
-								className="btn btn-sm min-w-fit flex-1 sm:flex-none"
-								onClick={addLostMagicItem}
-								disabled={saving}>
+							<button type="button" className="btn btn-sm min-w-fit flex-1 sm:flex-none" onClick={addLostMagicItem} disabled={saving}>
 								Drop Magic Item
 							</button>
 						)}
@@ -603,11 +603,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 									Add Story Award
 								</button>
 								{!selectedLog.is_dm_log && storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
-									<button
-										type="button"
-										className="btn btn-sm min-w-fit flex-1 sm:flex-none"
-										onClick={addLostStoryAward}
-										disabled={saving}>
+									<button type="button" className="btn btn-sm min-w-fit flex-1 sm:flex-none" onClick={addLostStoryAward} disabled={saving}>
 										Drop Story Award
 									</button>
 								)}

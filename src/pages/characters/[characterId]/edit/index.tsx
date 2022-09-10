@@ -1,14 +1,14 @@
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
+import { newCharacterSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mdiHome } from "@mdi/js";
 import Icon from "@mdi/react";
-import type { GetServerSideProps } from "next";
-import type { Session } from "next-auth";
+import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
@@ -16,21 +16,27 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 import { z } from "zod";
-import { newCharacterSchema } from "../../new";
 
-interface PageProps {
-	session: Session;
-}
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const session = await unstable_getServerSession(context.req, context.res, authOptions);
 
-export const editCharacterSchema = z.object({
-	id: z.string(),
-	name: z.string().min(1),
-	campaign: z.string().min(1),
-	race: z.string().optional(),
-	class: z.string().optional(),
-	character_sheet_url: z.union([z.literal(""), z.string().url()]),
-	image_url: z.union([z.literal(""), z.string().url()])
-});
+	if (!session) {
+		return {
+			redirect: {
+				destination: "/",
+				permanent: false
+			}
+		};
+	}
+
+	return {
+		props: {
+			session
+		}
+	};
+};
+
+type PageProps = Exclude<Awaited<ReturnType<typeof getServerSideProps>>["props"], undefined>;
 
 const EditCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
 	const router = useRouter();
@@ -222,22 +228,3 @@ EditCharacter.getLayout = page => {
 };
 
 export default EditCharacter;
-
-export const getServerSideProps: GetServerSideProps = async context => {
-	const session = await unstable_getServerSession(context.req, context.res, authOptions);
-
-	if (!session) {
-		return {
-			redirect: {
-				destination: "/",
-				permanent: false
-			}
-		};
-	}
-
-	return {
-		props: {
-			session
-		}
-	};
-};

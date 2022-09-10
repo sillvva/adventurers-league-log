@@ -53,10 +53,9 @@ const Layout = (props: PropsWithChildren) => {
 			<NextNProgress color="#6518e7" height={3} options={{ showSpinner: false }} />
 			<Image
 				src={background}
-				priority
 				alt="Background"
-				width={1280}
-				height={1080}
+				priority
+				fill
 				className="!fixed z-0 min-h-screen min-w-full object-cover object-center opacity-25 dark:opacity-20 print:hidden"
 			/>
 			<div className="flex min-h-screen flex-col">
@@ -132,7 +131,7 @@ const Layout = (props: PropsWithChildren) => {
 								) : (
 									<>
 										<button
-											className="flex h-12 items-center gap-2 rounded-lg bg-neutral/50 p-2 text-neutral-content transition-colors hover:bg-neutral hover:text-accent-content"
+											className="flex h-12 items-center gap-2 rounded-lg bg-base-200/50 p-2 text-base-content transition-colors hover:bg-base-300"
 											onClick={() =>
 												signIn("google", {
 													callbackUrl: `${router.basePath}/characters`

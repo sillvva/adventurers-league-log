@@ -46,3 +46,18 @@ export const logSchema = z.object({
 		.default([]),
 	story_awards_lost: z.array(z.string().min(1)).default([])
 });
+
+export const newCharacterSchema = z.object({
+  name: z.string().min(1),
+  campaign: z.string().min(1),
+  race: z.string().optional(),
+  class: z.string().optional(),
+  character_sheet_url: z.union([z.literal(""), z.string().url()]),
+  image_url: z.union([z.literal(""), z.string().url()])
+});
+
+export const editCharacterSchema = z
+	.object({
+		id: z.string()
+	})
+	.merge(newCharacterSchema);
