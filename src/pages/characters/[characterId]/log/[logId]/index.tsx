@@ -119,15 +119,11 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 	const mutation = trpc.useMutation(["_logs.save"], {
 		onSuccess(log) {
 			if (log) {
-				let logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>(["characters.getLogs", { characterId: params.characterId }]);
+				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>(["characters.getLogs", { characterId: log.characterId }]);
 				if (logData) {
 					logData.logs.splice(logData.logs.findIndex(l => l.id === log.id), params.logId === "new" ? 0 : 1, log);
-					logData = getLogsSummary(logData.logs);
+					client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
 				}
-				else {
-					logData = getLogsSummary([log])
-				}
-				client.setQueryData(["characters.getLogs", { characterId: params.characterId }], logData);
 			}
 			router.push(`/characters/${params.characterId}`);
 		},

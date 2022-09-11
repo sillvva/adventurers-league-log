@@ -5,8 +5,9 @@ import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
+import { getLogsSummary } from "$src/utils/logs";
 import { concatenate, formatDate } from "$src/utils/misc";
-import { trpc } from "$src/utils/trpc";
+import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -18,6 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEventHandler, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "react-query";
 import { z } from "zod";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
@@ -166,8 +168,16 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 		setValue("characterName", character?.name || "");
 	};
 
+	const client = useQueryClient();
 	const mutation = trpc.useMutation(["_logs.save"], {
-		onSuccess() {
+		onSuccess(log) {
+			if (log) {
+				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>(["characters.getLogs", { characterId: log.characterId }]);
+				if (logData) {
+					logData.logs.splice(logData.logs.findIndex(l => l.id === log.id), params.logId === "new" ? 0 : 1, log);
+					client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
+				}
+			}
 			router.push(`/dm-logs`);
 		},
 		onError(err) {
