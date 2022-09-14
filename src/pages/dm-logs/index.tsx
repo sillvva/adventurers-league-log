@@ -52,7 +52,9 @@ const Characters: NextPageWithLayout = () => {
 	const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
 
 	const utils = trpc.useContext();
-	const { data: logs } = trpc.useQuery(["_logs.dm-logs"]);
+	const { data: logs } = trpc.useQuery(["_logs.dm-logs"], {
+		refetchOnWindowFocus: false
+	});
 	const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
 		onSuccess() {
 			utils.invalidateQueries(["_logs.dm-logs"]);

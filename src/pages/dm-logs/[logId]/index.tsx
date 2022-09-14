@@ -171,12 +171,14 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 	const client = useQueryClient();
 	const mutation = trpc.useMutation(["_logs.save"], {
 		onSuccess(log) {
-			if (log) {
+			if (log && log.characterId) {
+				let logs = [log];
 				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>(["characters.getLogs", { characterId: log.characterId }]);
 				if (logData) {
 					logData.logs.splice(logData.logs.findIndex(l => l.id === log.id), params.logId === "new" ? 0 : 1, log);
-					client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
+					logs = logData.logs;
 				}
+				client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logs));
 			}
 			router.push(`/dm-logs`);
 		},
