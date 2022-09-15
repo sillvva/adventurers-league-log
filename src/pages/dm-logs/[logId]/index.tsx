@@ -11,7 +11,8 @@ import { inferQueryOutput, trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
-import type { LogType } from "@prisma/client";
+import type { Character, LogType } from "@prisma/client";
+import { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
@@ -25,17 +26,7 @@ import { z } from "zod";
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	const session = await unstable_getServerSession(context.req, context.res, authOptions);
 
-	type SSRChar = {
-		created_at: string;
-		id: string;
-		name: string;
-		race: string | null;
-		class: string | null;
-		campaign: string | null;
-		image_url: string | null;
-		character_sheet_url: string | null;
-		userId: string;
-	};
+	type SSRChar = Character & { created_at: string };
 
 	if (!session)
 		return {
@@ -80,9 +71,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
-type PageProps = Awaited<ReturnType<typeof getServerSideProps>>["props"];
-
-const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) => {
+const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session, log, characters }) => {
 	const router = useRouter();
 	const { data: params } = useQueryString(
 		z.object({
@@ -141,7 +130,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 
 	const [parent1] = useAutoAnimate<HTMLDivElement>();
 	const [parent2] = useAutoAnimate<HTMLDivElement>();
-	const [charSel, setCharSel] = useState<PageProps["characters"]>([]);
+	const [charSel, setCharSel] = useState<typeof characters>([]);
 	const [season, setSeason] = useState<1 | 8 | 9>(selectedLog?.experience ? 1 : selectedLog?.acp ? 8 : 9);
 	const [magicItemsGained, setMagicItemsGained] = useState(
 		selectedLog.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
@@ -154,7 +143,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 	const getCharSel = (value: string | null) => {
 		if (!value) setCharId(null);
 
-		const chars: PageProps["characters"] = [];
+		const chars: InferPropsFromServerSideFunction<typeof getServerSideProps>["characters"] = [];
 		characters.forEach(character => {
 			const match = character.name.toLowerCase().includes((value || "undefined").toLocaleLowerCase());
 			if (match) chars.push(character);
@@ -163,7 +152,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 		setCharSel(chars);
 	};
 
-	const setCharId = (character: PageProps["characters"][number] | null) => {
+	const setCharId = (character: typeof characters[number] | null) => {
 		setValue("characterId", character?.id || "");
 		setValue("characterName", character?.name || "");
 	};
@@ -173,9 +162,16 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 		onSuccess(log) {
 			if (log && log.characterId) {
 				let logs = [log];
-				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>(["characters.getLogs", { characterId: log.characterId }]);
+				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>([
+					"characters.getLogs",
+					{ characterId: log.characterId }
+				]);
 				if (logData) {
-					logData.logs.splice(logData.logs.findIndex(l => l.id === log.id), params.logId === "new" ? 0 : 1, log);
+					logData.logs.splice(
+						logData.logs.findIndex(l => l.id === log.id),
+						params.logId === "new" ? 0 : 1,
+						log
+					);
 					logs = logData.logs;
 				}
 				client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logs));
@@ -238,14 +234,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ session, log, characters }) =>
 		if (result.success) {
 			mutation.mutate(values);
 		} else {
-			type IssueFields = "date" | "applied_date" | "name" | "description" | "characterId" | "experience" | "acp" | "tcp" | "level" | "gold";
 			result.error.issues.forEach(issue => {
-				if (
-					["date", "applied_date", "name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"].includes(
-						issue.path.join(".")
-					)
-				) {
-					setError(issue.path.join(".") as IssueFields, {
+				const issueFields = ["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"] as const;
+				if (issueFields.find(i => i == issue.path.join("."))) {
+					setError(issue.path.join(".") as typeof issueFields[number], {
 						message: issue.message
 					});
 				}
