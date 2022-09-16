@@ -305,6 +305,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 			<form onSubmit={handleSubmit}>
 				<input type="hidden" {...register("characterId", { value: params.characterId })} />
 				<input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
+				<input type="hidden" {...register("is_dm_log", { value: selectedLog.is_dm_log })} />
 				<div className="grid grid-cols-12 gap-4">
 					{!selectedLog.is_dm_log && (
 						<div className="form-control col-span-12 sm:col-span-4">
