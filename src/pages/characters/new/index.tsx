@@ -7,6 +7,7 @@ import { trpc } from "$src/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mdiHome } from "@mdi/js";
 import Icon from "@mdi/react";
+import type { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
@@ -35,9 +36,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
   };
 };
 
-type PageProps = Exclude<Awaited<ReturnType<typeof getServerSideProps>>["props"], undefined>;
-
-const NewCharacter: NextPageWithLayout<PageProps> = ({ session }) => {
+const NewCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session }) => {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const {

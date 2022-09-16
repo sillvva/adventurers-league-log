@@ -9,6 +9,7 @@ import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiPlus, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
+import type { InferPropsFromServerSideFunction } from "ddal";
 import MiniSearch from "minisearch";
 import type { GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
@@ -87,9 +88,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
-type PageProps = Exclude<Awaited<ReturnType<typeof getServerSideProps>>["props"], undefined>;
-
-const Characters: NextPageWithLayout<PageProps> = ({ character }) => {
+const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character }) => {
 	const session = useSession();
 	const router = useRouter();
 	const [parent1] = useAutoAnimate<HTMLDivElement>();

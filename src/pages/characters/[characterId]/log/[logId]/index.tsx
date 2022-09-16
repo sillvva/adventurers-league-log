@@ -13,6 +13,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import type { DungeonMaster, LogType, MagicItem } from "@prisma/client";
+import type { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
@@ -24,9 +25,36 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 import { z } from "zod";
 
-type PageProps = Awaited<ReturnType<typeof getServerSideProps>>["props"];
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	let session = await unstable_getServerSession(context.req, context.res, authOptions);
+	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
+	const character = await getOne(prisma, characterId);
+	const logs = await getLogs(prisma, characterId);
 
-const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
+	return {
+		...(!session
+			? { redirect: { destination: "/", permanent: false } }
+			: character.userId !== session.user?.id
+			? { redirect: { destination: `/characters/${characterId}`, permanent: false } }
+			: null),
+		props: {
+			session,
+			character: {
+				...character,
+				...logs,
+				logs: logs.logs.map(log => ({
+					...log,
+					date: log.date.toISOString(),
+					created_at: log.created_at.toISOString(),
+					applied_date: log.applied_date === null ? null : log.applied_date.toISOString()
+				})),
+				created_at: character.created_at.toISOString()
+			}
+		}
+	};
+};
+
+const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character, session }) => {
 	const router = useRouter();
 	const { data: params } = useQueryString(
 		z.object({
@@ -119,11 +147,20 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 	const mutation = trpc.useMutation(["_logs.save"], {
 		onSuccess(log) {
 			if (log) {
-				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>(["characters.getLogs", { characterId: log.characterId }]);
+				let logs = [log];
+				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>([
+					"characters.getLogs",
+					{ characterId: log.characterId }
+				]);
 				if (logData) {
-					logData.logs.splice(logData.logs.findIndex(l => l.id === log.id), params.logId === "new" ? 0 : 1, log);
-					client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
+					logData.logs.splice(
+						logData.logs.findIndex(l => l.id === log.id),
+						params.logId === "new" ? 0 : 1,
+						log
+					);
+					logs = logData.logs;
 				}
+				client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logs));
 			}
 			router.push(`/characters/${params.characterId}`);
 		},
@@ -187,14 +224,10 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 				}
 			});
 		} else {
-			type IssueFields = "date" | "name" | "dm.name" | "description" | "characterId" | "experience" | "acp" | "tcp" | "level" | "gold";
 			result.error.issues.forEach(issue => {
-				if (
-					["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"].includes(
-						issue.path.join(".")
-					)
-				) {
-					setError(issue.path.join(".") as IssueFields, {
+				const issueFields = ["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"] as const;
+				if (issueFields.find(i => i == issue.path.join("."))) {
+					setError(issue.path.join(".") as typeof issueFields[number], {
 						message: issue.message
 					});
 				}
@@ -272,6 +305,7 @@ const EditLog: NextPageWithLayout<PageProps> = ({ character, session }) => {
 			<form onSubmit={handleSubmit}>
 				<input type="hidden" {...register("characterId", { value: params.characterId })} />
 				<input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
+				<input type="hidden" {...register("is_dm_log", { value: selectedLog.is_dm_log })} />
 				<div className="grid grid-cols-12 gap-4">
 					{!selectedLog.is_dm_log && (
 						<div className="form-control col-span-12 sm:col-span-4">
@@ -792,37 +826,8 @@ EditLog.getLayout = page => {
 
 export default EditLog;
 
-export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-	let session = await unstable_getServerSession(context.req, context.res, authOptions);
-	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
-	const character = await getOne(prisma, characterId);
-	const logs = await getLogs(prisma, characterId);
-
-	return {
-		...(!session
-			? { redirect: { destination: "/", permanent: false } }
-			: character.userId !== session.user?.id
-			? { redirect: { destination: `/characters/${characterId}`, permanent: false } }
-			: null),
-		props: {
-			session,
-			character: {
-				...character,
-				...logs,
-				logs: logs.logs.map(log => ({
-					...log,
-					date: log.date.toISOString(),
-					created_at: log.created_at.toISOString(),
-					applied_date: log.applied_date === null ? null : log.applied_date.toISOString()
-				})),
-				created_at: character.created_at.toISOString()
-			}
-		}
-	};
-};
-
 export const getMagicItems = (
-	character: PageProps["character"],
+	character: InferPropsFromServerSideFunction<typeof getServerSideProps>["character"],
 	options?: {
 		lastLogId?: string;
 		excludeDropped?: boolean;
@@ -851,7 +856,7 @@ export const getMagicItems = (
 };
 
 export const getStoryAwards = (
-	character: PageProps["character"],
+	character: InferPropsFromServerSideFunction<typeof getServerSideProps>["character"],
 	options?: {
 		lastLogId?: string;
 		excludeDropped?: boolean;

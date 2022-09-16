@@ -5,6 +5,7 @@ import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPlus } from "@mdi/js";
 import Icon from "@mdi/react";
+import type { InferPropsFromServerSideFunction } from "ddal";
 import MiniSearch from "minisearch";
 import type { GetServerSidePropsContext } from "next";
 import { unstable_getServerSession } from "next-auth";
@@ -33,8 +34,6 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
-type PageProps = Exclude<Awaited<ReturnType<typeof getServerSideProps>>["props"], undefined>;
-
 const minisearch = new MiniSearch({
 	fields: ["characterName", "campaign", "race", "class", "magicItems", "tier", "level"],
 	idField: "characterId",
@@ -44,7 +43,7 @@ const minisearch = new MiniSearch({
 	}
 });
 
-const Characters: NextPageWithLayout<PageProps> = ({ session }) => {
+const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session }) => {
 	const router = useRouter();
 	const [parent] = useAutoAnimate<HTMLTableSectionElement>();
 	const [search, setSearch] = useState("");
