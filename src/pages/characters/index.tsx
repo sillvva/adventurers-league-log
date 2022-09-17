@@ -12,7 +12,7 @@ import { unstable_getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { NextPageWithLayout } from "../_app";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
@@ -108,6 +108,17 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 		}
 	}, [indexed, search, characters]);
 
+	const [magicItems, setMagicItems] = useState(false);
+
+	const toggleMagicItems = useCallback(() => {
+		localStorage.setItem("magicItems", magicItems ? "false" : "true");
+		setMagicItems(!magicItems);
+	}, [magicItems]);
+
+	useEffect(() => {
+		setMagicItems(localStorage.getItem("magicItems") === "true");
+	}, []);
+
 	return (
 		<>
 			<Head>{session.user ? <title>{`${session.user.name}'s Characters`}</title> : <title>Characters</title>}</Head>
@@ -129,7 +140,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 							<Icon path={mdiPlus} className="inline w-4 sm:hidden" />
 						</Link>
 					)}
-					<div className="dropdown-end dropdown">
+					<div className="dropdown dropdown-end">
 						<label tabIndex={1} className="btn btn-sm">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
@@ -150,6 +161,12 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						onChange={e => setSearch(e.target.value)}
 						className="input input-bordered input-sm w-full max-w-xs"
 					/>
+					<div className="form-control">
+						<label className="label cursor-pointer py-1">
+							<span className="label-text hidden pr-4 sm:inline">Items</span>
+							<input type="checkbox" className="toggle toggle-primary" checked={magicItems} onChange={toggleMagicItems} />
+						</label>
+					</div>
 				</div>
 
 				<div className="w-full overflow-x-auto rounded-lg">
@@ -215,7 +232,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 														<SearchResults text={character.campaign} search={search} />
 													</p>
 												</div>
-												{character.match.includes("magicItems") && (
+												{(character.match.includes("magicItems") || magicItems) && (
 													<div className=" mb-2 whitespace-pre-wrap">
 														<p className="font-semibold">Magic Items:</p>
 														<SearchResults text={character.magic_items.map(item => item.name).join(" | ")} search={search} />
