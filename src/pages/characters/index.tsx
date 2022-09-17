@@ -157,7 +157,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 				<div className="flex gap-4">
 					<input
 						type="text"
-						placeholder="Search"
+						placeholder="Search by name, race, class, items, etc."
 						onChange={e => setSearch(e.target.value)}
 						className="input input-bordered input-sm w-full max-w-xs"
 					/>
