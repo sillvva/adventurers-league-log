@@ -154,29 +154,86 @@ const Characters: NextPageWithLayout = () => {
 								</tr>
 							</thead>
 							<tbody ref={parent1}>
-								{results.map(log => (
-									<Fragment key={log.id}>
-										<tr>
-											<th
-												className={concatenate(
-													"!static align-top",
-													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-														"print:border-b-0"
-												)}>
-												<p
-													className="whitespace-pre-wrap font-semibold text-accent-content"
-													onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
-													<SearchResults text={log.name} search={search} />
-												</p>
-												<p className="text-netural-content text-xs font-normal">
-													{(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
-												</p>
-												{log.character && (
-													<p className="text-sm font-normal">
-														<span className="font-semibold">Character:</span> <SearchResults text={log.character.name} search={search} />
+								{!logs || logs.length == 0 ? (
+									<tr>
+										<td colSpan={5} className="py-20 text-center">
+											<p className="mb-4">You have no DM logs.</p>
+											<p>
+												<Link href="/dm-logs/new" className="btn btn-primary">
+													Create one now
+												</Link>
+											</p>
+										</td>
+									</tr>
+								) : (
+									results.map(log => (
+										<Fragment key={log.id}>
+											<tr>
+												<th
+													className={concatenate(
+														"!static align-top",
+														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
+															"print:border-b-0"
+													)}>
+													<p
+														className="whitespace-pre-wrap font-semibold text-accent-content"
+														onClick={() => log.description && setModal({ name: log.name, description: log.description, date: log.date })}>
+														<SearchResults text={log.name} search={search} />
 													</p>
-												)}
-												<div className="table-cell font-normal print:hidden sm:hidden">
+													<p className="text-netural-content text-xs font-normal">
+														{(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
+													</p>
+													{log.character && (
+														<p className="text-sm font-normal">
+															<span className="font-semibold">Character:</span> <SearchResults text={log.character.name} search={search} />
+														</p>
+													)}
+													<div className="table-cell font-normal print:hidden sm:hidden">
+														{log.type === "game" && (
+															<>
+																{log.experience > 0 && (
+																	<p>
+																		<span className="font-semibold">Experience:</span> {log.experience}
+																	</p>
+																)}
+																{log.acp > 0 && (
+																	<p>
+																		<span className="font-semibold">ACP:</span> {log.acp}
+																	</p>
+																)}
+																{log.level > 0 && (
+																	<p>
+																		<span className="font-semibold">Level:</span> {log.level}
+																	</p>
+																)}
+															</>
+														)}
+														{log.dtd !== 0 && (
+															<p>
+																<span className="font-semibold">Downtime Days:</span> {log.dtd}
+															</p>
+														)}
+														{log.tcp !== 0 && (
+															<p>
+																<span className="font-semibold">TCP:</span> {log.tcp}
+															</p>
+														)}
+														{log.gold !== 0 && (
+															<p>
+																<span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
+															</p>
+														)}
+														<div>
+															<Items title="Magic Items" items={log.magic_items_gained} search={search} />
+														</div>
+													</div>
+												</th>
+												<td
+													className={concatenate(
+														"hidden align-top print:table-cell sm:table-cell",
+														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
+															"print:border-b-0"
+													)}>
 													{log.type === "game" && (
 														<>
 															{log.experience > 0 && (
@@ -194,13 +251,20 @@ const Characters: NextPageWithLayout = () => {
 																	<span className="font-semibold">Level:</span> {log.level}
 																</p>
 															)}
+															{log.dtd !== 0 && (
+																<p>
+																	<span className="text-sm font-semibold">Downtime Days:</span> {log.dtd}
+																</p>
+															)}
 														</>
 													)}
-													{log.dtd !== 0 && (
-														<p>
-															<span className="font-semibold">Downtime Days:</span> {log.dtd}
-														</p>
-													)}
+												</td>
+												<td
+													className={concatenate(
+														"hidden align-top print:table-cell sm:table-cell",
+														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
+															"print:border-b-0"
+													)}>
 													{log.tcp !== 0 && (
 														<p>
 															<span className="font-semibold">TCP:</span> {log.tcp}
@@ -211,115 +275,64 @@ const Characters: NextPageWithLayout = () => {
 															<span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
 														</p>
 													)}
-													<div>
-														<Items title="Magic Items" items={log.magic_items_gained} search={search} />
-													</div>
-												</div>
-											</th>
-											<td
-												className={concatenate(
-													"hidden align-top print:table-cell sm:table-cell",
-													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-														"print:border-b-0"
-												)}>
-												{log.type === "game" && (
-													<>
-														{log.experience > 0 && (
-															<p>
-																<span className="font-semibold">Experience:</span> {log.experience}
-															</p>
-														)}
-														{log.acp > 0 && (
-															<p>
-																<span className="font-semibold">ACP:</span> {log.acp}
-															</p>
-														)}
-														{log.level > 0 && (
-															<p>
-																<span className="font-semibold">Level:</span> {log.level}
-															</p>
-														)}
-														{log.dtd !== 0 && (
-															<p>
-																<span className="text-sm font-semibold">Downtime Days:</span> {log.dtd}
-															</p>
-														)}
-													</>
-												)}
-											</td>
-											<td
-												className={concatenate(
-													"hidden align-top print:table-cell sm:table-cell",
-													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-														"print:border-b-0"
-												)}>
-												{log.tcp !== 0 && (
-													<p>
-														<span className="font-semibold">TCP:</span> {log.tcp}
-													</p>
-												)}
-												{log.gold !== 0 && (
-													<p>
-														<span className="font-semibold">Gold:</span> {log.gold.toLocaleString("en-US")}
-													</p>
-												)}
-												{log.magic_items_gained.length > 0 && (
-													<div>
-														<Items title="Magic Items" items={log.magic_items_gained} search={search} />
-													</div>
-												)}
-											</td>
-											<td
-												className={concatenate(
-													"hidden align-top print:!hidden md:table-cell",
-													(log.description?.trim() || log.story_awards_gained.length > 0) && "print:border-b-0"
-												)}>
-												{log.story_awards_gained.length > 0 && (
-													<div>
-														<Items items={log.story_awards_gained} search={search} />
-													</div>
-												)}
-											</td>
-											<td className="w-8 print:hidden">
-												<div className="flex flex-col justify-center gap-2">
-													<Link href={`/dm-logs/${log.id}`} className="btn btn-primary btn-sm">
-														<Icon path={mdiPencil} size={0.8} />
-													</Link>
-													<button
-														className="btn btn-sm"
-														onClick={async () => {
-															if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
-															deleteLogMutation.mutate({ logId: log.id });
-														}}>
-														<Icon path={mdiTrashCan} size={0.8} />
-													</button>
-												</div>
-											</td>
-										</tr>
-										{(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
-											<tr className="hidden print:table-row">
-												<td colSpan={3} className="pt-0">
-													<p className="text-sm">
-														<span className="font-semibold">Notes:</span> {log.description}
-													</p>
-													{log.story_awards_gained.length > 0 && (
+													{log.magic_items_gained.length > 0 && (
 														<div>
-															{log.story_awards_gained.map(mi => (
-																<p key={mi.id} className="text-sm">
-																	<span className="font-semibold">
-																		{mi.name}
-																		{mi.description ? ":" : ""}
-																	</span>{" "}
-																	{mi.description}
-																</p>
-															))}
+															<Items title="Magic Items" items={log.magic_items_gained} search={search} />
 														</div>
 													)}
 												</td>
+												<td
+													className={concatenate(
+														"hidden align-top print:!hidden md:table-cell",
+														(log.description?.trim() || log.story_awards_gained.length > 0) && "print:border-b-0"
+													)}>
+													{log.story_awards_gained.length > 0 && (
+														<div>
+															<Items items={log.story_awards_gained} search={search} />
+														</div>
+													)}
+												</td>
+												<td className="w-8 print:hidden">
+													<div className="flex flex-col justify-center gap-2">
+														<Link href={`/dm-logs/${log.id}`} className="btn btn-primary btn-sm">
+															<Icon path={mdiPencil} size={0.8} />
+														</Link>
+														<button
+															className="btn btn-sm"
+															onClick={async () => {
+																if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
+																deleteLogMutation.mutate({ logId: log.id });
+															}}>
+															<Icon path={mdiTrashCan} size={0.8} />
+														</button>
+													</div>
+												</td>
 											</tr>
-										)}
-									</Fragment>
-								))}
+											{(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
+												<tr className="hidden print:table-row">
+													<td colSpan={3} className="pt-0">
+														<p className="text-sm">
+															<span className="font-semibold">Notes:</span> {log.description}
+														</p>
+														{log.story_awards_gained.length > 0 && (
+															<div>
+																{log.story_awards_gained.map(mi => (
+																	<p key={mi.id} className="text-sm">
+																		<span className="font-semibold">
+																			{mi.name}
+																			{mi.description ? ":" : ""}
+																		</span>{" "}
+																		{mi.description}
+																	</p>
+																))}
+															</div>
+														)}
+													</td>
+												</tr>
+											)}
+										</Fragment>
+									))
+								)}
 							</tbody>
 						</table>
 					</div>
