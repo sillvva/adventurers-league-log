@@ -10,6 +10,8 @@ export const getLogsSummary = (
 		story_awards_lost: StoryAward[];
 	})[]
 ) => {
+	logs = logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+	
 	const levels = getLevels(logs);
 
 	const total_level = levels.total;
