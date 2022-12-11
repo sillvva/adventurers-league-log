@@ -18,23 +18,15 @@ export const getLogsSummary = (
 	const total_gold = logs.reduce((acc, log) => acc + log.gold, 0);
 	const total_dtd = logs.reduce((acc, log) => acc + log.dtd, 0);
 	const magic_items = logs.reduce((acc, log) => {
-		acc.push(...log.magic_items_gained);
-		log.magic_items_lost.forEach(magicItem => {
-			acc.splice(
-				acc.findIndex(a => a.id === magicItem.id),
-				1
-			);
-		});
+		acc.push(...log.magic_items_gained.filter(magicItem => {
+			return !magicItem.logLostId;
+		}));
 		return acc;
 	}, [] as MagicItem[]);
 	const story_awards = logs.reduce((acc, log) => {
-		acc.push(...log.story_awards_gained);
-		log.story_awards_lost.forEach(storyAward => {
-			acc.splice(
-				acc.findIndex(a => a.id === storyAward.id),
-				1
-			);
-		});
+		acc.push(...log.story_awards_gained.filter(storyAward => {
+			return !storyAward.logLostId;
+		}));
 		return acc;
 	}, [] as StoryAward[]);
 

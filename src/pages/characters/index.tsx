@@ -65,13 +65,8 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						level: `L${character.total_level}`,
 						magicItems: character.logs
 							.reduce((acc, log) => {
-								if (!log.magic_items_gained.length) return acc;
-								const itemNames = [...acc, ...log.magic_items_gained.map(item => item.name)];
-								log.magic_items_lost.forEach(item => {
-									const index = itemNames.indexOf(item.name);
-									if (index > -1) itemNames.splice(index, 1);
-								});
-								return itemNames;
+								acc.push(...log.magic_items_gained.filter(magicItem => !magicItem.logLostId).map(magicItem => magicItem.name));
+								return acc;
 							}, [] as string[])
 							.join(", ")
 				  }))
