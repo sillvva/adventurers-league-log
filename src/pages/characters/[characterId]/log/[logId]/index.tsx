@@ -145,10 +145,9 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 
 	const client = useQueryClient();
 	const mutation = trpc.useMutation(["_logs.save"], {
-		onSuccess(log) {
-			if (log) {
-				let logs = [log];
-				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>([
+		async onSuccess(log) {
+			if (log?.characterId) {
+				let logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>([
 					"characters.getLogs",
 					{ characterId: log.characterId }
 				]);
@@ -158,9 +157,9 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						params.logId === "new" ? 0 : 1,
 						log
 					);
-					logs = logData.logs;
+					client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
 				}
-				client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logs));
+				else client.invalidateQueries(["characters.getLogs", { characterId: log.characterId }]);
 			}
 			router.push(`/characters/${params.characterId}`);
 		},
