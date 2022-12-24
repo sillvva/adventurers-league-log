@@ -33,12 +33,27 @@ export const charactersRouter = createRouter()
 export async function getOne(prisma: PrismaClient, characterId: string) {
 	const character = await prisma.character.findFirstOrThrow({
 		include: {
-			user: true
+			user: true,
+			logs: {
+				include: {
+					dm: true,
+					magic_items_gained: true,
+					magic_items_lost: true,
+					story_awards_gained: true,
+					story_awards_lost: true
+				},
+				orderBy: {
+					date: "asc"
+				}
+			}
 		},
 		where: { id: characterId }
 	});
 
-	return character;
+	return {
+		...character,
+		...getLogsSummary(character.logs || [])
+	};
 }
 
 export async function getLogs(prisma: PrismaClient, characterId: string) {
