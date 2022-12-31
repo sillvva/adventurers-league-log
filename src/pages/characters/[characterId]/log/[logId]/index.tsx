@@ -147,7 +147,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	const mutation = trpc.useMutation(["_logs.save"], {
 		async onSuccess(log) {
 			if (log?.characterId) {
-				let logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>([
+				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>([
 					"characters.getLogs",
 					{ characterId: log.characterId }
 				]);
