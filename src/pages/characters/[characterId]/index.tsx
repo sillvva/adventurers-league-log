@@ -194,10 +194,12 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 				<title>{`${character.name} - Adventurers League Log Sheet`}</title>
 				<meta name="title" content={`${character.name} - Adventurers League Log Sheet`} />
 				<meta name="description" content={description} />
-				<meta property="og:title" content={`${character.name} - Adventurers League Log Sheet`} />
+				<meta property="og:title" content={character.name} />
+				<meta property="og:site_name" content="Adventurers League Log Sheet" />
 				<meta property="og:description" content={description} />
 				<meta property="og:image" content={character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
-				<meta property="twitter:title" content={`${character.name} - Adventurers League Log Sheet`} />
+				<meta property="twitter:title" content={character.name} />
+				<meta property="twitter:site" content="Adventurers League Log Sheet" />
 				<meta property="twitter:description" content={description} />
 				<meta property="twitter:image" content={character.image_url || "https://ddal.dekok.app/images/barovia-gate.jpg"} />
 			</Head>

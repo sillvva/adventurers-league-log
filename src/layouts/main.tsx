@@ -42,9 +42,11 @@ const Layout = (props: PropsWithChildren) => {
 						<meta name="title" content="Adventurers League Log" />
 						<meta name="description" content="An online log sheet made for Adventurers League characters" />
 						<meta property="og:title" content="Adventurers League Log" />
+						<meta property="og:site_name" content="Adventurers League Log" />
 						<meta property="og:description" content={"An online log sheet made for Adventurers League characters"} />
 						<meta property="og:image" content={"https://ddal.dekok.app/images/barovia-gate.jpg"} />
 						<meta property="twitter:title" content="Adventurers League Log" />
+						<meta property="twitter:site" content="Adventurers League Log" />
 						<meta property="twitter:description" content={"An online log sheet made for Adventurers League characters"} />
 						<meta property="twitter:image" content={"https://ddal.dekok.app/images/barovia-gate.jpg"} />
 					</>
