@@ -15,7 +15,7 @@ import Icon from "@mdi/react";
 import type { DungeonMaster, LogType, MagicItem } from "@prisma/client";
 import type { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
-import { unstable_getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -26,7 +26,7 @@ import { useQueryClient } from "react-query";
 import { z } from "zod";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-	let session = await unstable_getServerSession(context.req, context.res, authOptions);
+	let session = await getServerSession(context.req, context.res, authOptions);
 	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
 	const character = await getOne(prisma, characterId);
 	const logs = await getLogs(prisma, characterId);

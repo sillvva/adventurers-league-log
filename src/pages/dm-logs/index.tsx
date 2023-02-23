@@ -9,7 +9,7 @@ import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
 import type { GetServerSidePropsContext } from "next";
-import { unstable_getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
@@ -19,7 +19,7 @@ import { authOptions } from "../api/auth/[...nextauth]";
 import { components } from "../characters/[characterId]";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-	const session = await unstable_getServerSession(context.req, context.res, authOptions);
+	const session = await getServerSession(context.req, context.res, authOptions);
 
 	if (!session) {
 		return {
