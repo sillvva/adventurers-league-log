@@ -141,7 +141,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						</label>
 						<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
 							<li>
-								<a download={`dm.json`} href={`/api/exports/characters/all`} target="_blank" rel="noreferrer noopener">
+								<a download={`characters.json`} href={`/api/exports/characters/all`} target="_blank" rel="noreferrer noopener">
 									Export
 								</a>
 							</li>
