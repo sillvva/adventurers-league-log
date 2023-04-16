@@ -2,7 +2,7 @@ import { authOptions as nextAuthOptions } from "$src/pages/api/auth/[...nextauth
 import { prisma } from "$src/server/db/client";
 import { parseError } from "$src/utils/misc";
 import type { NextApiHandler } from "next";
-import { unstable_getServerSession as getServerSession } from "next-auth";
+import { getServerSession as getServerSession } from "next-auth";
 
 const handler: NextApiHandler = async function (req, res) {
   const session = await getServerSession(req, res, nextAuthOptions);

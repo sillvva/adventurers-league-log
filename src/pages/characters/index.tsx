@@ -8,7 +8,7 @@ import Icon from "@mdi/react";
 import type { InferPropsFromServerSideFunction } from "ddal";
 import MiniSearch from "minisearch";
 import type { GetServerSidePropsContext } from "next";
-import { unstable_getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -16,7 +16,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { NextPageWithLayout } from "../_app";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-	const session = await unstable_getServerSession(context.req, context.res, authOptions);
+	const session = await getServerSession(context.req, context.res, authOptions);
 
 	if (!session) {
 		return {
@@ -141,7 +141,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						</label>
 						<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
 							<li>
-								<a download={`dm.json`} href={`/api/exports/characters/all`} target="_blank" rel="noreferrer noopener">
+								<a download={`characters.json`} href={`/api/exports/characters/all`} target="_blank" rel="noreferrer noopener">
 									Export
 								</a>
 							</li>

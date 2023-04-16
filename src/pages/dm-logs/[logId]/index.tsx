@@ -14,7 +14,7 @@ import Icon from "@mdi/react";
 import type { Character, LogType } from "@prisma/client";
 import { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
-import { unstable_getServerSession } from "next-auth";
+import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -24,7 +24,7 @@ import { useQueryClient } from "react-query";
 import { z } from "zod";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-	const session = await unstable_getServerSession(context.req, context.res, authOptions);
+	const session = await getServerSession(context.req, context.res, authOptions);
 
 	type SSRChar = Character & { created_at: string };
 
