@@ -246,7 +246,6 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	const storyAwards = character
 		? getStoryAwards(character, { excludeDropped: true, lastLogId: params.logId === "new" ? "" : params.logId })
 		: [];
-
 	const addMagicItem = () => setMagicItemsGained([...magicItemsGained, { id: "", name: "", description: "" }]);
 	const removeMagicItem = (index: number) => setMagicItemsGained(magicItemsGained.filter((_, i) => i !== index));
 	const addLostMagicItem = () => setMagicItemsLost([...magicItemsLost, magicItems[0]?.id || ""]);
@@ -315,7 +314,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								value={type}
 								onChange={e => setType(e.target.value as LogType)}
 								disabled={saving}
-								className="select select-bordered w-full">
+								className="select-bordered select w-full">
 								<option value={"game"}>Game</option>
 								<option value={"nongame"}>Non-Game (Purchase, Trade, etc)</option>
 							</select>
@@ -331,7 +330,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						<input
 							type="text"
 							{...register("name", { required: true, value: selectedLog.name, disabled: saving })}
-							className="input input-bordered w-full focus:border-primary"
+							className="input-bordered input w-full focus:border-primary"
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.name?.message}</span>
@@ -347,7 +346,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						<input
 							type="datetime-local"
 							{...register("date", { required: true, value: formatDate(selectedLog.date), disabled: saving })}
-							className="input input-bordered w-full focus:border-primary"
+							className="input-bordered input w-full focus:border-primary"
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.date?.message}</span>
@@ -402,7 +401,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 															}
 														}}
 														onBlur={e => setDMKeySel(-1)}
-														className="input input-bordered w-full focus:border-primary"
+														className="input-bordered input w-full focus:border-primary"
 													/>
 												</label>
 												{dms &&
@@ -464,7 +463,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 															}
 														}}
 														onBlur={e => setDMKeySel(-1)}
-														className="input input-bordered w-full focus:border-primary"
+														className="input-bordered input w-full focus:border-primary"
 													/>
 												</label>
 												{dms && dms.length > 0 && dmSearch.trim() && (
@@ -496,7 +495,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										value={season}
 										onChange={e => setSeason(parseInt(e.target.value) as 1 | 8 | 9)}
 										disabled={saving}
-										className="select select-bordered w-full">
+										className="select-bordered select w-full">
 										<option value={9}>Season 9+</option>
 										<option value={8}>Season 8</option>
 										<option value={1}>Season 1-7</option>
@@ -510,7 +509,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										<input
 											type="number"
 											{...register("experience", { value: selectedLog.experience, disabled: saving })}
-											className="input input-bordered w-full focus:border-primary"
+											className="input-bordered input w-full focus:border-primary"
 										/>
 										<label className="label">
 											<span className="label-text-alt text-error">{errors.experience?.message}</span>
@@ -532,7 +531,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												max: Math.max(selectedLog.level, character ? 20 - character.total_level : 19),
 												disabled: saving
 											})}
-											className="input input-bordered w-full focus:border-primary"
+											className="input-bordered input w-full focus:border-primary"
 										/>
 										<label className="label">
 											<span className="label-text-alt text-error">{errors.level?.message}</span>
@@ -551,7 +550,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										<input
 											type="number"
 											{...register("acp", { value: selectedLog.acp, disabled: saving })}
-											className="input input-bordered w-full focus:border-primary"
+											className="input-bordered input w-full focus:border-primary"
 										/>
 										<label className="label">
 											<span className="label-text-alt text-error">{errors.acp?.message}</span>
@@ -565,7 +564,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									<input
 										type="number"
 										{...register("tcp", { value: selectedLog.tcp, disabled: saving })}
-										className="input input-bordered w-full focus:border-primary"
+										className="input-bordered input w-full focus:border-primary"
 									/>
 									<label className="label">
 										<span className="label-text-alt text-error">{errors.tcp?.message}</span>
@@ -580,7 +579,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<input
 								type="number"
 								{...register("gold", { value: selectedLog.gold, disabled: saving })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.gold?.message}</span>
@@ -593,7 +592,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<input
 								type="number"
 								{...register("dtd", { value: selectedLog.dtd, disabled: saving })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.dtd?.message}</span>
@@ -606,7 +605,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						</label>
 						<AutoResizeTextArea
 							{...register("description", { value: selectedLog.description || "", disabled: saving })}
-							className="textarea textarea-bordered w-full focus:border-primary"
+							className="textarea-bordered textarea w-full focus:border-primary"
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.description?.message}</span>
@@ -614,11 +613,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						</label>
 					</div>
 					<div className="col-span-12 flex flex-wrap gap-4">
-						<button type="button" className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none" onClick={addMagicItem} disabled={saving}>
+						<button type="button" className="btn-primary btn-sm btn min-w-fit flex-1 sm:flex-none" onClick={addMagicItem} disabled={saving}>
 							Add Magic Item
 						</button>
 						{!selectedLog.is_dm_log && magicItems.filter(item => !magicItemsLost.includes(item.id)).length > 0 && (
-							<button type="button" className="btn btn-sm min-w-fit flex-1 sm:flex-none" onClick={addLostMagicItem} disabled={saving}>
+							<button type="button" className="btn-sm btn min-w-fit flex-1 sm:flex-none" onClick={addLostMagicItem} disabled={saving}>
 								Drop Magic Item
 							</button>
 						)}
@@ -626,13 +625,13 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<>
 								<button
 									type="button"
-									className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none"
+									className="btn-primary btn-sm btn min-w-fit flex-1 sm:flex-none"
 									onClick={addStoryAward}
 									disabled={saving}>
 									Add Story Award
 								</button>
 								{!selectedLog.is_dm_log && storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
-									<button type="button" className="btn btn-sm min-w-fit flex-1 sm:flex-none" onClick={addLostStoryAward} disabled={saving}>
+									<button type="button" className="btn-sm btn min-w-fit flex-1 sm:flex-none" onClick={addLostStoryAward} disabled={saving}>
 										Drop Story Award
 									</button>
 								)}
@@ -656,7 +655,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 													setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
 												}}
 												disabled={saving}
-												className="input input-bordered w-full focus:border-primary"
+												className="input-bordered input w-full focus:border-primary"
 											/>
 											<label className="label">
 												<span className="label-text-alt text-error">{(errors.magic_items_gained || [])[index]?.name?.message}</span>
@@ -677,7 +676,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												);
 											}}
 											disabled={saving}
-											className="textarea textarea-bordered w-full focus:border-primary"
+											className="textarea-bordered textarea w-full focus:border-primary"
 											style={{ resize: "none" }}
 											value={item.description}
 										/>
@@ -704,8 +703,8 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 													setMagicItemsLost(magicItemsLost.map((item, i) => (i === index ? e.target.value : item)));
 												}}
 												disabled={saving}
-												className="select select-bordered w-full">
-												{magicItems.map(item => (
+												className="select-bordered select w-full">
+												{[...selectedLog.magic_items_lost.filter(i => i.id === id), ...magicItems].map(item => (
 													<option key={item.id} value={item.id}>
 														{item.name}
 													</option>
@@ -741,7 +740,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 													);
 												}}
 												disabled={saving}
-												className="input input-bordered w-full focus:border-primary"
+												className="input-bordered input w-full focus:border-primary"
 												style={{ resize: "none" }}
 											/>
 											<label className="label">
@@ -763,7 +762,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												);
 											}}
 											disabled={saving}
-											className="textarea textarea-bordered w-full focus:border-primary"
+											className="textarea-bordered textarea w-full focus:border-primary"
 											value={item.description}
 										/>
 										<label className="label">
@@ -788,8 +787,8 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												onChange={e => {
 													setStoryAwardsLost(storyAwardsLost.map((item, i) => (i === index ? e.target.value : item)));
 												}}
-												className="select select-bordered w-full">
-												{storyAwards.map(item => (
+												className="select-bordered select w-full">
+												{[...selectedLog.story_awards_lost.filter(i => i.id === id), ...storyAwards].map(item => (
 													<option key={item.id} value={item.id}>
 														{item.name}
 													</option>
@@ -809,7 +808,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						))}
 					</div>
 					<div className="col-span-12 text-center">
-						<button type="submit" className={concatenate("btn btn-primary", saving && "loading")} disabled={saving}>
+						<button type="submit" className={concatenate("btn-primary btn", saving && "loading")} disabled={saving}>
 							Save Log
 						</button>
 					</div>
