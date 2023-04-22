@@ -477,9 +477,9 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												{(log.magic_items_gained.length > 0 || log.magic_items_lost.length > 0) && (
 													<div>
 														<Items title="Magic Items" items={log.magic_items_gained} search={search} />
-														<p className="whitespace-pre-wrap text-sm line-through">
+														<div className="whitespace-pre-wrap text-sm line-through">
 															<SearchResults text={log.magic_items_lost.map(mi => mi.name).join(" | ")} search={search} />
-														</p>
+														</div>
 													</div>
 												)}
 											</td>
@@ -493,9 +493,9 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 													<div>
 														<Items items={log.story_awards_gained} search={search} />
-														<p className="whitespace-pre-wrap text-sm line-through">
+														<div className="whitespace-pre-wrap text-sm line-through">
 															<SearchResults text={log.story_awards_lost.map(mi => mi.name).join(" | ")} search={search} />
-														</p>
+														</div>
 													</div>
 												)}
 											</td>
@@ -541,7 +541,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 														<div>
 															{log.story_awards_gained.map(mi => (
-																<p key={mi.id} className="whitespace-pre-wrap text-sm">
+																<div key={mi.id} className="whitespace-pre-wrap text-sm">
 																	<span className="pr-2 font-semibold print:block">
 																		{mi.name}
 																		{mi.description ? ":" : ""}
@@ -549,7 +549,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 																	<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
 																		{mi.description || ""}
 																	</ReactMarkdown>
-																</p>
+																</div>
 															))}
 															<p className="whitespace-pre-wrap text-sm line-through">
 																{log.story_awards_lost.map(mi => mi.name).join(" | ")}
