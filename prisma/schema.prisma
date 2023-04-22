@@ -1,11 +1,11 @@
 generator client {
     provider        = "prisma-client-js"
-    previewFeatures = ["referentialIntegrity"]
+    previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
     provider             = "mysql"
-    referentialIntegrity = "prisma"
+    relationMode         = "prisma"
     url                  = env("DATABASE_URL")
 }
 
@@ -25,6 +25,7 @@ model Account {
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -33,6 +34,8 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model User {
@@ -66,6 +69,8 @@ model Character {
     userId              String
     logs                Log[]
     created_at          DateTime @default(now())
+
+    @@index([userId])
 }
 
 model Log {
@@ -91,6 +96,9 @@ model Log {
     character           Character?     @relation(fields: [characterId], references: [id])
     characterId         String?
     created_at          DateTime       @default(now())
+
+    @@index([dungeonMasterId])
+    @@index([characterId])
 }
 
 enum LogType {
@@ -114,6 +122,9 @@ model MagicItem {
     logGainedId  String?
     logLost      Log?    @relation("magic_items_lost", fields: [logLostId], references: [id])
     logLostId    String?
+
+    @@index([logGainedId])
+    @@index([logLostId])
 }
 
 model StoryAward {
@@ -124,4 +135,7 @@ model StoryAward {
     logGainedId  String?
     logLost      Log?     @relation("story_awards_lost", fields: [logLostId], references: [id])
     logLostId    String?
+
+    @@index([logGainedId])
+    @@index([logLostId])
 }
