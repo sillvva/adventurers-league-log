@@ -253,10 +253,10 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	};
 
 	const magicItems = character
-		? getMagicItems(character, { excludeDropped: true, lastLogId: params.logId === "new" ? "" : params.logId })
+		? getMagicItems(character, { excludeDropped: true, lastLogId: params.logId === "new" ? "" : params.logId }).sort((a, b) => a.name.localeCompare(b.name))
 		: [];
 	const storyAwards = character
-		? getStoryAwards(character, { excludeDropped: true, lastLogId: params.logId === "new" ? "" : params.logId })
+		? getStoryAwards(character, { excludeDropped: true, lastLogId: params.logId === "new" ? "" : params.logId }).sort((a, b) => a.name.localeCompare(b.name))
 		: [];
 	const addMagicItem = () => setMagicItemsGained([...magicItemsGained, { id: "", name: "", description: "" }]);
 	const removeMagicItem = (index: number) => setMagicItemsGained(magicItemsGained.filter((_, i) => i !== index));
