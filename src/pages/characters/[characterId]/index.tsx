@@ -281,7 +281,15 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						</p>
 					</div>
 					<div className="flex flex-1 flex-wrap gap-4 print:flex-nowrap sm:flex-nowrap sm:gap-4 md:gap-6">
-						<div className="flex basis-full flex-col gap-2 print:basis-1/3 sm:basis-1/3 sm:gap-4 lg:basis-1/3">
+						<div className="flex basis-full flex-col gap-2 print:basis-1/3 sm:gap-4 md:basis-52">
+							{character.image_url && (
+								<div className="relative flex-col items-end justify-center hidden print:hidden md:flex">
+									<a href={character.image_url} target="_blank" rel="noreferrer noopener" className="mx-auto mask mask-squircle w-full h-52 bg-primary">
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img src={character.image_url} className="object-cover object-top transition-all hover:scale-110" alt={character.name} />
+									</a>
+								</div>
+							)}
 							<div className="flex">
 								<h4 className="font-semibold">Level</h4>
 								<div className="flex-1 text-right">{logs?.total_level}</div>
@@ -299,7 +307,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								<div className="flex-1 text-right">{logs?.total_dtd}</div>
 							</div>
 						</div>
-						<div className="divider hidden sm:flex before:bg-neutral-content/50 after:bg-neutral-content/50 sm:divider-horizontal"></div>
+						<div className="divider hidden print:flex sm:flex before:bg-neutral-content/50 after:bg-neutral-content/50 sm:divider-horizontal"></div>
 						<div className="flex flex-1 basis-full flex-col print:basis-2/3 sm:basis-2/3 lg:basis-2/3">
 							{logs && (
 								<div className="flex flex-col gap-4" ref={parent1}>
@@ -338,14 +346,6 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						)}
 					</div>
 				</div>
-				{character.image_url && (
-					<div className="relative ml-8 hidden max-h-80 w-56 flex-col items-end justify-center print:hidden print:w-40 md:flex">
-						<a href={character.image_url} target="_blank" rel="noreferrer noopener">
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img src={character.image_url} className="max-h-80 object-contain object-top" alt={character.name} />
-						</a>
-					</div>
-				)}
 			</section>
 			{logs ? (
 				<section className="mt-6">

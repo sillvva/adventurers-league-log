@@ -27,10 +27,10 @@ export function Items({
 				{title && (
 					<h4 className="flex font-semibold" onClick={collapsible ? () => setCollapsed(!collapsed) : () => {}}>
 						<span className="flex-1">{title}</span>
-						{collapsible && <Icon path={collapsed ? mdiChevronDown : mdiChevronUp} className="ml-2 w-4 justify-self-end inline md:hidden" />}
+						{collapsible && <Icon path={collapsed ? mdiChevronDown : mdiChevronUp} className="ml-2 w-4 justify-self-end inline md:hidden print:hidden" />}
 					</h4>
 				)}
-				<p className={concatenate("divide-x whitespace-pre-wrap text-sm print:text-xs", collapsed ? 'hidden md:block' : '')}>
+				<p className={concatenate("divide-x whitespace-pre-wrap text-sm print:text-xs", collapsed ? 'hidden md:block print:block' : '')}>
 					{items.length
 						? items.map(mi => (
 								<span
