@@ -157,24 +157,30 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		setValue("characterName", character?.name || "");
 	};
 
-	const client = useQueryClient();
+	const utils = trpc.useContext();
 	const mutation = trpc.useMutation(["_logs.save"], {
-		onSuccess(log) {
+		async onSuccess(log) {
 			if (log && log.characterId) {
-				let logs = [log];
-				const logData = client.getQueryData<inferQueryOutput<"characters.getLogs">>([
-					"characters.getLogs",
-					{ characterId: log.characterId }
-				]);
+				const logData = utils.getQueryData(["characters.getLogs", { characterId: log.characterId }]);
 				if (logData) {
 					logData.logs.splice(
 						logData.logs.findIndex(l => l.id === log.id),
 						params.logId === "new" ? 0 : 1,
 						log
 					);
-					logs = logData.logs;
-				}
-				client.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logs));
+					logData.logs = logData.logs.map(l => {
+						l.magic_items_gained = l.magic_items_gained.map(mi => {
+							if (log.magic_items_lost.find(mil => mil.id === mi.id)) mi.logLostId = log.id;
+							return mi;
+						});
+						l.story_awards_gained = l.story_awards_gained.map(sa => {
+							if (log.story_awards_lost.find(sal => sal.id === sa.id)) sa.logLostId = log.id;
+							return sa;
+						});
+						return l;
+					});
+					utils.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
+				} else await utils.invalidateQueries(["characters.getLogs", { characterId: log.characterId }]);
 			}
 			router.push(`/dm-logs`);
 		},

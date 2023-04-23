@@ -147,10 +147,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	const mutation = trpc.useMutation(["_logs.save"], {
 		async onSuccess(log) {
 			if (log?.characterId) {
-				const logData = utils.getQueryData([
-					"characters.getLogs",
-					{ characterId: log.characterId }
-				]);
+				const logData = utils.getQueryData(["characters.getLogs", { characterId: log.characterId }]);
 				if (logData) {
 					logData.logs.splice(
 						logData.logs.findIndex(l => l.id === log.id),
@@ -169,9 +166,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						return l;
 					});
 					utils.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
-				}
-				else 
-				await utils.invalidateQueries(["characters.getLogs", { characterId: log.characterId }]);
+				} else await utils.invalidateQueries(["characters.getLogs", { characterId: log.characterId }]);
 			}
 			router.push(`/characters/${params.characterId}`);
 		},
