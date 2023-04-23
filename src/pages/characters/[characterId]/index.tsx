@@ -45,11 +45,14 @@ export const components: Partial<Omit<NormalComponents, keyof SpecialComponents>
 	},
 	a({ children, href }) {
 		return (
-			<a href={href} className="text-secondary" target="_blank" rel="noreferrer noopener">
+			<a href={href} className="text-secondary text-ellipsis overflow-hidden" target="_blank" rel="noreferrer noopener">
 				{children}
 			</a>
 		);
-	}
+	},
+	p({ children }) {
+		return <p className="mb-2 text-ellipsis overflow-hidden">{children}</p>;
+	},
 };
 
 const minisearch = new MiniSearch({
@@ -278,7 +281,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						</p>
 					</div>
 					<div className="flex flex-1 flex-wrap gap-4 print:flex-nowrap sm:flex-nowrap sm:gap-4 md:gap-6">
-						<div className="flex basis-1/2 flex-col gap-2 print:basis-1/3 sm:basis-1/3 sm:gap-4 lg:basis-1/3">
+						<div className="flex basis-full flex-col gap-2 print:basis-1/3 sm:basis-1/3 sm:gap-4 lg:basis-1/3">
 							<div className="flex">
 								<h4 className="font-semibold">Level</h4>
 								<div className="flex-1 text-right">{logs?.total_level}</div>
@@ -296,12 +299,12 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								<div className="flex-1 text-right">{logs?.total_dtd}</div>
 							</div>
 						</div>
-						<div className="divider before:bg-neutral-content/50 after:bg-neutral-content/50 sm:divider-horizontal"></div>
+						<div className="divider hidden sm:flex before:bg-neutral-content/50 after:bg-neutral-content/50 sm:divider-horizontal"></div>
 						<div className="flex flex-1 basis-full flex-col print:basis-2/3 sm:basis-2/3 lg:basis-2/3">
 							{logs && (
 								<div className="flex flex-col gap-4" ref={parent1}>
-									<Items title="Story Awards" items={logs.story_awards} />
-									<Items title="Magic Items" items={logs.magic_items} formatting />
+									<Items title="Story Awards" items={logs.story_awards} collapsible />
+									<Items title="Magic Items" items={logs.magic_items} collapsible formatting />
 								</div>
 							)}
 						</div>
@@ -380,7 +383,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													}>
 													<SearchResults text={log.name} search={search} />
 												</p>
-												<p className="text-netural-content text-xs font-normal">
+												<p className="text-netural-content text-xs font-normal mb-2">
 													{new Date(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
 												</p>
 												{log.dm && log.type === "game" && log.dm.uid !== character.user.id && (
@@ -423,7 +426,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													)}
 													<div>
 														<Items title="Magic Items" items={log.magic_items_gained} search={search} />
-														<p className="text-sm line-through">
+														<p className="whitespace-pre-wrap text-sm line-through">
 															<SearchResults text={log.magic_items_lost.map(mi => mi.name).join(" | ")} search={search} />
 														</p>
 													</div>
@@ -531,7 +534,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												<td
 													colSpan={100}
 													className={concatenate(
-														"whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs",
+														"whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs max-w-[calc(100vw_-_50px)]",
 														log.saving && "bg-neutral-focus"
 													)}>
 													<h4 className="text-base font-semibold">Notes:</h4>

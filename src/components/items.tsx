@@ -1,4 +1,6 @@
 import { concatenate } from "$src/utils/misc";
+import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
+import Icon from "@mdi/react";
 import type { MagicItem, StoryAward } from "@prisma/client";
 import { useState } from "react";
 import { SearchResults } from "./search";
@@ -7,19 +9,28 @@ export function Items({
 	items,
 	title,
 	formatting,
-	search
+	search,
+	collapsible
 }: {
 	title?: string;
 	items: (MagicItem | StoryAward)[];
 	formatting?: boolean;
 	search?: string;
+	collapsible?: boolean;
 }) {
 	const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
+	const [collapsed, setCollapsed] = useState(collapsible);
+
 	return (
 		<>
 			<div className="flex flex-1 flex-col">
-				{title && <h4 className="font-semibold">{title}</h4>}
-				<p className="divide-x whitespace-pre-wrap text-sm print:text-xs">
+				{title && (
+					<h4 className="flex font-semibold" onClick={collapsible ? () => setCollapsed(!collapsed) : () => {}}>
+						<span className="flex-1">{title}</span>
+						{collapsible && <Icon path={collapsed ? mdiChevronDown : mdiChevronUp} className="ml-2 w-4 justify-self-end inline md:hidden" />}
+					</h4>
+				)}
+				<p className={concatenate("divide-x whitespace-pre-wrap text-sm print:text-xs", collapsed ? 'hidden md:block' : '')}>
 					{items.length
 						? items.map(mi => (
 								<span
@@ -35,7 +46,7 @@ export function Items({
 									)}
 									{mi.description && "*"}
 								</span>
-						  ))
+							))
 						: "None"}
 				</p>
 			</div>
