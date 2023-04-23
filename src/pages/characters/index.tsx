@@ -219,7 +219,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													<SearchResults text={character.name} search={search} />
 												</div>
 												<div className="whitespace-pre-wrap text-xs sm:text-sm">
-													<span className="inline sm:hidden">Level {character.total_level}</span>
+													<span className="inline sm:hidden pr-1">Level {character.total_level}</span>
 													<SearchResults text={character.race} search={search} /> <SearchResults text={character.class} search={search} />
 												</div>
 												<div className="mb-2 block text-xs sm:hidden">

@@ -45,11 +45,14 @@ export const components: Partial<Omit<NormalComponents, keyof SpecialComponents>
 	},
 	a({ children, href }) {
 		return (
-			<a href={href} className="text-secondary" target="_blank" rel="noreferrer noopener">
+			<a href={href} className="text-secondary text-ellipsis overflow-hidden" target="_blank" rel="noreferrer noopener">
 				{children}
 			</a>
 		);
-	}
+	},
+	p({ children }) {
+		return <p className="mb-2 text-ellipsis overflow-hidden">{children}</p>;
+	},
 };
 
 const minisearch = new MiniSearch({
@@ -423,7 +426,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													)}
 													<div>
 														<Items title="Magic Items" items={log.magic_items_gained} search={search} />
-														<p className="text-sm line-through">
+														<p className="whitespace-pre-wrap text-sm line-through">
 															<SearchResults text={log.magic_items_lost.map(mi => mi.name).join(" | ")} search={search} />
 														</p>
 													</div>
@@ -531,7 +534,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												<td
 													colSpan={100}
 													className={concatenate(
-														"whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs",
+														"whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs max-w-[calc(100vw_-_50px)]",
 														log.saving && "bg-neutral-focus"
 													)}>
 													<h4 className="text-base font-semibold">Notes:</h4>
