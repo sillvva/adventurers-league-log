@@ -8,7 +8,7 @@ import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
 import { getLogsSummary } from "$src/utils/logs";
 import { concatenate, formatDate } from "$src/utils/misc";
-import { inferQueryOutput, trpc } from "$src/utils/trpc";
+import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -22,7 +22,6 @@ import { useRouter } from "next/router";
 import type { FormEventHandler } from "react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "react-query";
 import { z } from "zod";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
