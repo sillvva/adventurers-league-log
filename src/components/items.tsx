@@ -23,7 +23,7 @@ export function Items({
 
 	return (
 		<>
-			<div className="flex flex-1 flex-col">
+			<div className={concatenate("flex-1 flex-col", collapsible && !items.length ? "hidden md:flex" : "flex")}>
 				{title && (
 					<h4 className="flex font-semibold" onClick={collapsible ? () => setCollapsed(!collapsed) : () => {}}>
 						<span className="flex-1">{title}</span>

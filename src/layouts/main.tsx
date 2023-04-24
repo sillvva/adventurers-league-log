@@ -22,8 +22,6 @@ const Layout = (props: PropsWithChildren) => {
 		const mm = matchMedia("(prefers-color-scheme: dark)");
 		const listener = () => setTheme(mm.matches ? "dark" : "light");
 
-		console.log(theme);
-
 		if (!theme || theme == "system") listener();
 		mm.addEventListener("change", listener);
 		return () => mm.removeEventListener("change", listener);
@@ -53,14 +51,14 @@ const Layout = (props: PropsWithChildren) => {
 				)}
 			</Head>
 			<NextNProgress color="#6518e7" height={3} options={{ showSpinner: false }} />
-			<Image
-				src={background}
-				alt="Background"
-				priority
-				fill
-				className="!fixed z-0 min-h-screen min-w-full object-cover object-center opacity-25 dark:opacity-20 print:hidden"
-			/>
-			<div className="flex min-h-screen flex-col">
+			<div className="flex min-h-screen flex-col relative">
+				<Image
+					src={background}
+					alt="Background"
+					priority
+					fill
+					className="!fixed z-0 min-h-screen min-w-full object-cover object-center opacity-25 dark:opacity-20 print:hidden"
+				/>
 				<header className="relative z-20 w-full border-b-[1px] border-slate-500">
 					<nav className="container mx-auto flex max-w-5xl gap-2 p-4">
 						<button className="flex py-3 pr-4 print:hidden md:hidden" onClick={() => setDrawer(true)}>
