@@ -126,7 +126,7 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 							<input
 								type="text"
 								{...register("name", { required: true, value: character.name, disabled: mutation.isLoading })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.name?.message}</span>
@@ -144,7 +144,7 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 							<input
 								type="text"
 								{...register("campaign", { required: true, value: character.campaign || "", disabled: mutation.isLoading })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.campaign?.message}</span>
@@ -159,7 +159,7 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 							<input
 								type="text"
 								{...register("race", { value: character.race || "", disabled: mutation.isLoading })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.race?.message}</span>
@@ -174,7 +174,7 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 							<input
 								type="text"
 								{...register("class", { value: character.class || "", disabled: mutation.isLoading })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.class?.message}</span>
@@ -189,7 +189,7 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 							<input
 								type="text"
 								{...register("character_sheet_url", { value: character.character_sheet_url || "", disabled: mutation.isLoading })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.character_sheet_url?.message}</span>
@@ -204,7 +204,7 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 							<input
 								type="text"
 								{...register("image_url", { value: character.image_url || "", disabled: mutation.isLoading })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.image_url?.message}</span>
@@ -212,7 +212,7 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 						</div>
 					</div>
 					<div className="m-4 basis-full text-center">
-						<button type="submit" className={concatenate("btn btn-primary", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
+						<button type="submit" className={concatenate("btn-primary btn", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
 							Update
 						</button>
 					</div>

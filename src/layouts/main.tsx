@@ -51,7 +51,7 @@ const Layout = (props: PropsWithChildren) => {
 				)}
 			</Head>
 			<NextNProgress color="#6518e7" height={3} options={{ showSpinner: false }} />
-			<div className="flex min-h-screen flex-col relative">
+			<div className="relative flex min-h-screen flex-col">
 				<Image
 					src={background}
 					alt="Background"
@@ -89,7 +89,7 @@ const Layout = (props: PropsWithChildren) => {
 								</a>
 								{session.data?.user ? (
 									<>
-										<div className="dropdown-end dropdown">
+										<div className="dropdown dropdown-end">
 											<label tabIndex={0} className="flex cursor-pointer">
 												<div className="hidden items-center px-4 text-accent-content print:flex sm:flex">{session.data.user.name}</div>
 												<div className="avatar">
@@ -237,15 +237,7 @@ type NProgress = {
 	nonce?: string;
 };
 
-function NextNProgress({
-	color = "#29D",
-	startPosition = 0.3,
-	stopDelayMs = 200,
-	height = 3,
-	showOnShallow = true,
-	options,
-	nonce
-}: NProgress) {
+function NextNProgress({ color = "#29D", startPosition = 0.3, stopDelayMs = 200, height = 3, showOnShallow = true, options, nonce }: NProgress) {
 	useEffect(() => {
 		let timer: NodeJS.Timeout | null = null;
 

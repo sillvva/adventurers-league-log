@@ -45,14 +45,14 @@ export const components: Partial<Omit<NormalComponents, keyof SpecialComponents>
 	},
 	a({ children, href }) {
 		return (
-			<a href={href} className="text-secondary text-ellipsis overflow-hidden" target="_blank" rel="noreferrer noopener">
+			<a href={href} className="overflow-hidden text-ellipsis text-secondary" target="_blank" rel="noreferrer noopener">
 				{children}
 			</a>
 		);
 	},
 	p({ children }) {
-		return <p className="mb-2 text-ellipsis overflow-hidden">{children}</p>;
-	},
+		return <p className="mb-2 overflow-hidden text-ellipsis">{children}</p>;
+	}
 };
 
 const minisearch = new MiniSearch({

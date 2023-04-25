@@ -130,13 +130,13 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 					</div>
 					<div className="flex-1" />
 					{characters && characters.length > 0 && (
-						<Link href="/characters/new" className="btn btn-primary btn-sm">
+						<Link href="/characters/new" className="btn-primary btn-sm btn">
 							<span className="hidden sm:inline">New Character</span>
 							<Icon path={mdiPlus} className="inline w-4 sm:hidden" />
 						</Link>
 					)}
 					<div className="dropdown dropdown-end">
-						<label tabIndex={1} className="btn btn-sm">
+						<label tabIndex={1} className="btn-sm btn">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
 						<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
@@ -154,12 +154,12 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						type="text"
 						placeholder="Search by name, race, class, items, etc."
 						onChange={e => setSearch(e.target.value)}
-						className="input input-bordered input-sm w-full max-w-xs"
+						className="input-bordered input input-sm w-full max-w-xs"
 					/>
 					<div className="form-control">
 						<label className="label cursor-pointer py-1">
 							<span className="label-text hidden pr-4 sm:inline">Items</span>
-							<input type="checkbox" className="toggle toggle-primary" checked={magicItems} onChange={toggleMagicItems} />
+							<input type="checkbox" className="toggle-primary toggle" checked={magicItems} onChange={toggleMagicItems} />
 						</label>
 					</div>
 				</div>
@@ -187,7 +187,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 									<td colSpan={5} className="py-20 text-center">
 										<p className="mb-4">You have no log sheets.</p>
 										<p>
-											<Link href="/characters/new" className="btn btn-primary">
+											<Link href="/characters/new" className="btn-primary btn">
 												Create one now
 											</Link>
 										</p>
@@ -195,10 +195,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								</tr>
 							) : (
 								results.map(character => (
-									<tr
-										key={character.id}
-										className="img-grow hover cursor-pointer"
-										onClick={() => router.push(`/characters/${character.id}`)}>
+									<tr key={character.id} className="img-grow hover cursor-pointer" onClick={() => router.push(`/characters/${character.id}`)}>
 										<td className="w-12 pr-0 transition-colors sm:pr-2">
 											<div className="avatar">
 												<div className="mask mask-squircle h-12 w-12 bg-primary">
@@ -219,7 +216,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													<SearchResults text={character.name} search={search} />
 												</div>
 												<div className="whitespace-pre-wrap text-xs sm:text-sm">
-													<span className="inline sm:hidden pr-1">Level {character.total_level}</span>
+													<span className="inline pr-1 sm:hidden">Level {character.total_level}</span>
 													<SearchResults text={character.race} search={search} /> <SearchResults text={character.class} search={search} />
 												</div>
 												<div className="mb-2 block text-xs sm:hidden">

@@ -3,7 +3,7 @@ import type { DungeonMaster, Log, MagicItem, StoryAward } from "@prisma/client";
 
 export const getLogsSummary = (
 	logs: (Log & {
-    dm: DungeonMaster | null;
+		dm: DungeonMaster | null;
 		magic_items_gained: MagicItem[];
 		magic_items_lost: MagicItem[];
 		story_awards_gained: StoryAward[];
@@ -11,22 +11,26 @@ export const getLogsSummary = (
 	})[]
 ) => {
 	logs = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-	
+
 	const levels = getLevels(logs);
 
 	const total_level = levels.total;
 	const total_gold = logs.reduce((acc, log) => acc + log.gold, 0);
 	const total_dtd = logs.reduce((acc, log) => acc + log.dtd, 0);
 	const magic_items = logs.reduce((acc, log) => {
-		acc.push(...log.magic_items_gained.filter(magicItem => {
-			return !magicItem.logLostId;
-		}));
+		acc.push(
+			...log.magic_items_gained.filter(magicItem => {
+				return !magicItem.logLostId;
+			})
+		);
 		return acc;
 	}, [] as MagicItem[]);
 	const story_awards = logs.reduce((acc, log) => {
-		acc.push(...log.story_awards_gained.filter(storyAward => {
-			return !storyAward.logLostId;
-		}));
+		acc.push(
+			...log.story_awards_gained.filter(storyAward => {
+				return !storyAward.logLostId;
+			})
+		);
 		return acc;
 	}, [] as StoryAward[]);
 
