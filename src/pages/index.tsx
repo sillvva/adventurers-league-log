@@ -38,13 +38,7 @@ const Home: NextPage = () => {
 				<link rel="icon" type="image/x-icon" href="/favicon.png" />
 			</Head>
 
-			<Image
-				src={background}
-				alt="Background"
-				priority
-				fill
-				className="z-0 object-cover object-center opacity-40 dark:opacity-20 print:hidden"
-			/>
+			<Image src={background} alt="Background" priority fill className="z-0 object-cover object-center opacity-40 dark:opacity-20 print:hidden" />
 			<main ref={main} className="container relative mx-auto flex min-h-screen flex-col items-center justify-center p-4">
 				<h1 className="mb-20 text-center font-draconis text-4xl text-base-content dark:text-white lg:text-6xl">
 					Adventurers League

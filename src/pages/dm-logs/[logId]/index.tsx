@@ -151,7 +151,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		setCharSel(chars);
 	};
 
-	const setCharId = (character: typeof characters[number] | null) => {
+	const setCharId = (character: (typeof characters)[number] | null) => {
 		setValue("characterId", character?.id || "");
 		setValue("characterName", character?.name || "");
 	};
@@ -242,7 +242,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 			result.error.issues.forEach(issue => {
 				const issueFields = ["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"] as const;
 				if (issueFields.find(i => i == issue.path.join("."))) {
-					setError(issue.path.join(".") as typeof issueFields[number], {
+					setError(issue.path.join(".") as (typeof issueFields)[number], {
 						message: issue.message
 					});
 				}
@@ -308,7 +308,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						<input
 							type="text"
 							{...register("name", { required: true, value: selectedLog.name, disabled: mutation.isLoading })}
-							className="input input-bordered w-full focus:border-primary"
+							className="input-bordered input w-full focus:border-primary"
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.name?.message}</span>
@@ -324,7 +324,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						<input
 							type="datetime-local"
 							{...register("date", { required: true, value: formatDate(selectedLog.date), disabled: mutation.isLoading })}
-							className="input input-bordered w-full focus:border-primary"
+							className="input-bordered input w-full focus:border-primary"
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.date?.message}</span>
@@ -344,7 +344,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										onChange: e => getCharSel(e.target.value),
 										disabled: mutation.isLoading
 									})}
-									className="input input-bordered w-full focus:border-primary"
+									className="input-bordered input w-full focus:border-primary"
 								/>
 							</label>
 							{charSel.length > 0 && (
@@ -372,7 +372,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								value: selectedLog.applied_date === null ? null : formatDate(selectedLog.applied_date),
 								disabled: mutation.isLoading
 							})}
-							className="input input-bordered w-full focus:border-primary"
+							className="input-bordered input w-full focus:border-primary"
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.applied_date?.message}</span>
@@ -387,7 +387,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								value={season}
 								onChange={e => setSeason(parseInt(e.target.value) as 1 | 8 | 9)}
 								disabled={mutation.isLoading}
-								className="select select-bordered w-full">
+								className="select-bordered select w-full">
 								<option value={9}>Season 9+</option>
 								<option value={8}>Season 8</option>
 								<option value={1}>Season 1-7</option>
@@ -401,7 +401,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								<input
 									type="number"
 									{...register("experience", { value: selectedLog.experience, disabled: mutation.isLoading })}
-									className="input input-bordered w-full focus:border-primary"
+									className="input-bordered input w-full focus:border-primary"
 								/>
 								<label className="label">
 									<span className="label-text-alt text-error">{errors.experience?.message}</span>
@@ -418,7 +418,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									min="0"
 									max="1"
 									{...register("level", { value: selectedLog.level, min: 0, max: 1, disabled: mutation.isLoading })}
-									className="input input-bordered w-full focus:border-primary"
+									className="input-bordered input w-full focus:border-primary"
 								/>
 								<label className="label">
 									<span className="label-text-alt text-error">{errors.level?.message}</span>
@@ -434,7 +434,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									<input
 										type="number"
 										{...register("acp", { value: selectedLog.acp, disabled: mutation.isLoading })}
-										className="input input-bordered w-full focus:border-primary"
+										className="input-bordered input w-full focus:border-primary"
 									/>
 									<label className="label">
 										<span className="label-text-alt text-error">{errors.acp?.message}</span>
@@ -447,7 +447,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									<input
 										type="number"
 										{...register("tcp", { value: selectedLog.tcp, disabled: mutation.isLoading })}
-										className="input input-bordered w-full focus:border-primary"
+										className="input-bordered input w-full focus:border-primary"
 									/>
 									<label className="label">
 										<span className="label-text-alt text-error">{errors.tcp?.message}</span>
@@ -462,7 +462,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<input
 								type="number"
 								{...register("gold", { value: selectedLog.gold, disabled: mutation.isLoading })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.gold?.message}</span>
@@ -475,7 +475,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<input
 								type="number"
 								{...register("dtd", { value: selectedLog.dtd, disabled: mutation.isLoading })}
-								className="input input-bordered w-full focus:border-primary"
+								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
 								<span className="label-text-alt text-error">{errors.dtd?.message}</span>
@@ -488,7 +488,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						</label>
 						<AutoResizeTextArea
 							{...register("description", { value: selectedLog.description || "", disabled: mutation.isLoading })}
-							className="textarea textarea-bordered w-full focus:border-primary"
+							className="textarea-bordered textarea w-full focus:border-primary"
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.description?.message}</span>
@@ -496,18 +496,10 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						</label>
 					</div>
 					<div className="col-span-12 flex flex-wrap gap-4">
-						<button
-							type="button"
-							className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none"
-							onClick={addMagicItem}
-							disabled={mutation.isLoading}>
+						<button type="button" className="btn-primary btn-sm btn min-w-fit flex-1 sm:flex-none" onClick={addMagicItem} disabled={mutation.isLoading}>
 							Add Magic Item
 						</button>
-						<button
-							type="button"
-							className="btn btn-primary btn-sm min-w-fit flex-1 sm:flex-none"
-							onClick={addStoryAward}
-							disabled={mutation.isLoading}>
+						<button type="button" className="btn-primary btn-sm btn min-w-fit flex-1 sm:flex-none" onClick={addStoryAward} disabled={mutation.isLoading}>
 							Add Story Award
 						</button>
 					</div>
@@ -528,17 +520,13 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 													setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
 												}}
 												disabled={mutation.isLoading}
-												className="input input-bordered w-full focus:border-primary"
+												className="input-bordered input w-full focus:border-primary"
 											/>
 											<label className="label">
 												<span className="label-text-alt text-error">{(errors.magic_items_gained || [])[index]?.name?.message}</span>
 											</label>
 										</div>
-										<button
-											type="button"
-											className="btn-danger btn mt-9"
-											onClick={() => removeMagicItem(index)}
-											disabled={mutation.isLoading}>
+										<button type="button" className="btn-danger btn mt-9" onClick={() => removeMagicItem(index)} disabled={mutation.isLoading}>
 											<Icon path={mdiTrashCan} size={1} />
 										</button>
 									</div>
@@ -548,12 +536,10 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 										<textarea
 											onChange={e => {
-												setMagicItemsGained(
-													magicItemsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item))
-												);
+												setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
 											}}
 											disabled={mutation.isLoading}
-											className="textarea textarea-bordered w-full focus:border-primary"
+											className="textarea-bordered textarea w-full focus:border-primary"
 											style={{ resize: "none" }}
 											value={item.description}
 										/>
@@ -578,22 +564,16 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												type="text"
 												value={item.name}
 												onChange={e => {
-													setStoryAwardsGained(
-														storyAwardsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item))
-													);
+													setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
 												}}
 												disabled={mutation.isLoading}
-												className="input input-bordered w-full focus:border-primary"
+												className="input-bordered input w-full focus:border-primary"
 											/>
 											<label className="label">
 												<span className="label-text-alt text-error">{(errors.story_awards_gained || [])[index]?.name?.message}</span>
 											</label>
 										</div>
-										<button
-											type="button"
-											className="btn-danger btn mt-9"
-											onClick={() => removeStoryAward(index)}
-											disabled={mutation.isLoading}>
+										<button type="button" className="btn-danger btn mt-9" onClick={() => removeStoryAward(index)} disabled={mutation.isLoading}>
 											<Icon path={mdiTrashCan} size={1} />
 										</button>
 									</div>
@@ -603,12 +583,10 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 										<textarea
 											onChange={e => {
-												setStoryAwardsGained(
-													storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item))
-												);
+												setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
 											}}
 											disabled={mutation.isLoading}
-											className="textarea textarea-bordered w-full focus:border-primary"
+											className="textarea-bordered textarea w-full focus:border-primary"
 											value={item.description}
 										/>
 										<label className="label">
@@ -621,7 +599,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						))}
 					</div>
 					<div className="col-span-12 text-center">
-						<button type="submit" className={concatenate("btn btn-primary", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
+						<button type="submit" className={concatenate("btn-primary btn", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
 							Save Log
 						</button>
 					</div>

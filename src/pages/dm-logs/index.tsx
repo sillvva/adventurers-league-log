@@ -112,13 +112,13 @@ const Characters: NextPageWithLayout = () => {
 					</div>
 					{logs && logs.length > 0 && (
 						<div className="flex flex-1 justify-end">
-							<Link href="/dm-logs/new" className="btn btn-primary btn-sm">
+							<Link href="/dm-logs/new" className="btn-primary btn-sm btn">
 								New Log
 							</Link>
 						</div>
 					)}
-					<div className="dropdown-end dropdown">
-						<label tabIndex={1} className="btn btn-sm">
+					<div className="dropdown dropdown-end">
+						<label tabIndex={1} className="btn-sm btn">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
 						<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
@@ -132,12 +132,7 @@ const Characters: NextPageWithLayout = () => {
 				</div>
 
 				<div className="flex gap-4">
-					<input
-						type="text"
-						placeholder="Search"
-						onChange={e => setSearch(e.target.value)}
-						className="input input-bordered input-sm w-full sm:max-w-xs"
-					/>
+					<input type="text" placeholder="Search" onChange={e => setSearch(e.target.value)} className="input-bordered input input-sm w-full sm:max-w-xs" />
 				</div>
 
 				<section>
@@ -159,7 +154,7 @@ const Characters: NextPageWithLayout = () => {
 										<td colSpan={5} className="py-20 text-center">
 											<p className="mb-4">You have no DM logs.</p>
 											<p>
-												<Link href="/dm-logs/new" className="btn btn-primary">
+												<Link href="/dm-logs/new" className="btn-primary btn">
 													Create one now
 												</Link>
 											</p>
@@ -172,8 +167,7 @@ const Characters: NextPageWithLayout = () => {
 												<th
 													className={concatenate(
 														"!static align-top",
-														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-															"print:border-b-0"
+														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
 													)}>
 													<p
 														className="whitespace-pre-wrap font-semibold text-accent-content"
@@ -231,8 +225,7 @@ const Characters: NextPageWithLayout = () => {
 												<td
 													className={concatenate(
 														"hidden align-top print:table-cell sm:table-cell",
-														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-															"print:border-b-0"
+														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
 													)}>
 													{log.type === "game" && (
 														<>
@@ -262,8 +255,7 @@ const Characters: NextPageWithLayout = () => {
 												<td
 													className={concatenate(
 														"hidden align-top print:table-cell sm:table-cell",
-														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-															"print:border-b-0"
+														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
 													)}>
 													{log.tcp !== 0 && (
 														<p>
@@ -294,11 +286,11 @@ const Characters: NextPageWithLayout = () => {
 												</td>
 												<td className="w-8 print:hidden">
 													<div className="flex flex-col justify-center gap-2">
-														<Link href={`/dm-logs/${log.id}`} className="btn btn-primary btn-sm">
+														<Link href={`/dm-logs/${log.id}`} className="btn-primary btn-sm btn">
 															<Icon path={mdiPencil} size={0.8} />
 														</Link>
 														<button
-															className="btn btn-sm"
+															className="btn-sm btn"
 															onClick={async () => {
 																if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
 																deleteLogMutation.mutate({ logId: log.id });

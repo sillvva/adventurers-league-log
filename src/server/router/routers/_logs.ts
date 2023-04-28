@@ -60,8 +60,7 @@ export const protectedLogsRouter = createProtectedRouter()
 					? new Date(input.applied_date)
 					: null
 				: new Date(input.date);
-			if (input.characterId && applied_date === null)
-				throw new TRPCError({ message: "Applied date is required", code: "INTERNAL_SERVER_ERROR" });
+			if (input.characterId && applied_date === null) throw new TRPCError({ message: "Applied date is required", code: "INTERNAL_SERVER_ERROR" });
 
 			if (input.characterId) {
 				const character = await ctx.prisma.character.findFirst({
@@ -235,10 +234,12 @@ export const protectedLogsRouter = createProtectedRouter()
 				}
 			});
 
-			return updated && {
-				...updated,
-				saving: true
-			};
+			return (
+				updated && {
+					...updated,
+					saving: true
+				}
+			);
 		}
 	})
 	.mutation("delete", {

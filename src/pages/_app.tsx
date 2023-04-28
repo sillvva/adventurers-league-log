@@ -11,54 +11,54 @@ import type { AppRouter } from "../server/router";
 import "../styles/globals.css";
 
 export type NextPageWithLayout<P = {}> = NextPage<P> & {
-  getLayout?: (page: ReactElement, props: P) => ReactNode;
+	getLayout?: (page: ReactElement, props: P) => ReactNode;
 };
 
 type AppPropsWithLayout<P> = AppProps<P> & {
-  Component: NextPageWithLayout<P>;
+	Component: NextPageWithLayout<P>;
 };
 
 type PageProps = {
-  session?: Session | null;
-}
+	session?: Session | null;
+};
 
 const MyApp = ({ Component, pageProps }: AppPropsWithLayout<PageProps>) => {
-  const getLayout = Component.getLayout ?? (page => page);
-  return (
-    <ThemeProvider>
-      <SessionProvider session={pageProps.session}>{getLayout(<Component {...pageProps} />, pageProps)}</SessionProvider>
-    </ThemeProvider>
-  );
+	const getLayout = Component.getLayout ?? (page => page);
+	return (
+		<ThemeProvider>
+			<SessionProvider session={pageProps.session}>{getLayout(<Component {...pageProps} />, pageProps)}</SessionProvider>
+		</ThemeProvider>
+	);
 };
 
 const getBaseUrl = () => {
-  if (typeof window !== "undefined") {
-    return "";
-  }
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+	if (typeof window !== "undefined") {
+		return "";
+	}
+	if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
 
-  return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
+	return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
 export default withTRPC<AppRouter>({
-  config({ ctx }) {
-    /**
-     * If you want to use SSR, you need to use the server's full URL
-     * @link https://trpc.io/docs/ssr
-     */
-    const url = `${getBaseUrl()}/api/trpc`;
+	config({ ctx }) {
+		/**
+		 * If you want to use SSR, you need to use the server's full URL
+		 * @link https://trpc.io/docs/ssr
+		 */
+		const url = `${getBaseUrl()}/api/trpc`;
 
-    return {
-      url,
-      transformer: superjson
-      /**
-       * @link https://react-query.tanstack.com/reference/QueryClient
-       */
-      // queryClientConfig: { defaultOptions: { queries: { staleTime: 60 } } },
-    };
-  },
-  /**
-   * @link https://trpc.io/docs/ssr
-   */
-  ssr: false
+		return {
+			url,
+			transformer: superjson
+			/**
+			 * @link https://react-query.tanstack.com/reference/QueryClient
+			 */
+			// queryClientConfig: { defaultOptions: { queries: { staleTime: 60 } } },
+		};
+	},
+	/**
+	 * @link https://trpc.io/docs/ssr
+	 */
+	ssr: false
 })(MyApp);

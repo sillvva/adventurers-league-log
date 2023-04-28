@@ -45,14 +45,14 @@ export const components: Partial<Omit<NormalComponents, keyof SpecialComponents>
 	},
 	a({ children, href }) {
 		return (
-			<a href={href} className="text-secondary text-ellipsis overflow-hidden" target="_blank" rel="noreferrer noopener">
+			<a href={href} className="overflow-hidden text-ellipsis text-secondary" target="_blank" rel="noreferrer noopener">
 				{children}
 			</a>
 		);
 	},
 	p({ children }) {
-		return <p className="mb-2 text-ellipsis overflow-hidden">{children}</p>;
-	},
+		return <p className="mb-2 overflow-hidden text-ellipsis">{children}</p>;
+	}
 };
 
 const minisearch = new MiniSearch({
@@ -222,38 +222,43 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 					</ul>
 				</div>
 				{myCharacter && (
-					<div className="dropdown-end dropdown">
-						<label tabIndex={1} className="btn btn-sm">
-							<Icon path={mdiDotsHorizontal} size={1} />
-						</label>
-						<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
-							<li>
-								<Link href={`/characters/${params.characterId}/edit`}>Edit</Link>
-							</li>
-							<li>
-								<a
-									download={`${slugify(character.name)}.json`}
-									href={`/api/exports/characters/${params.characterId}`}
-									target="_blank"
-									rel="noreferrer noopener">
-									Export
-								</a>
-							</li>
-							<li>
-								<a
-									className="bg-red-600 text-white"
-									onClick={() => {
-										if (confirm("Are you sure you want to delete this character? This action cannot be undone.")) {
-											deleteCharacterMutation.mutate({
-												id: params.characterId
-											});
-										}
-									}}>
-									Delete
-								</a>
-							</li>
-						</ul>
-					</div>
+					<>
+						<Link href={`/characters/${params.characterId}/edit`} className="btn-primary btn-sm btn hidden sm:flex">
+							Edit
+						</Link>
+						<div className="dropdown dropdown-end">
+							<label tabIndex={1} className="btn-sm btn">
+								<Icon path={mdiDotsHorizontal} size={1} />
+							</label>
+							<ul tabIndex={1} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
+								<li className="flex sm:hidden">
+									<Link href={`/characters/${params.characterId}/edit`}>Edit</Link>
+								</li>
+								<li>
+									<a
+										download={`${slugify(character.name)}.json`}
+										href={`/api/exports/characters/${params.characterId}`}
+										target="_blank"
+										rel="noreferrer noopener">
+										Export
+									</a>
+								</li>
+								<li>
+									<a
+										className="bg-red-600 text-white"
+										onClick={() => {
+											if (confirm("Are you sure you want to delete this character? This action cannot be undone.")) {
+												deleteCharacterMutation.mutate({
+													id: params.characterId
+												});
+											}
+										}}>
+										Delete
+									</a>
+								</li>
+							</ul>
+						</div>
+					</>
 				)}
 			</div>
 
@@ -283,10 +288,18 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 					<div className="flex flex-1 flex-wrap gap-4 print:flex-nowrap sm:flex-nowrap sm:gap-4 md:gap-6">
 						<div className="flex basis-full flex-col gap-2 print:basis-1/3 sm:gap-4 md:basis-52">
 							{character.image_url && (
-								<div className="relative flex-col items-end justify-center hidden print:hidden md:flex">
-									<a href={character.image_url} target="_blank" rel="noreferrer noopener" className="mx-auto mask mask-squircle w-full h-52 bg-primary">
+								<div className="relative hidden flex-col items-end justify-center print:hidden md:flex">
+									<a
+										href={character.image_url}
+										target="_blank"
+										rel="noreferrer noopener"
+										className="mask mask-squircle mx-auto h-52 w-full bg-primary">
 										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img src={character.image_url} className="object-cover object-top transition-all hover:scale-110" alt={character.name} />
+										<img
+											src={character.image_url}
+											className="object-cover object-top transition-all hover:scale-110"
+											alt={character.name}
+										/>
 									</a>
 								</div>
 							)}
@@ -307,7 +320,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								<div className="flex-1 text-right">{logs?.total_dtd}</div>
 							</div>
 						</div>
-						<div className="divider hidden print:flex sm:flex before:bg-neutral-content/50 after:bg-neutral-content/50 sm:divider-horizontal"></div>
+						<div className="divider hidden sm:divider-horizontal before:bg-neutral-content/50 after:bg-neutral-content/50 print:flex sm:flex"></div>
 						<div className="flex flex-1 basis-full flex-col print:basis-2/3 sm:basis-2/3 lg:basis-2/3">
 							{logs && (
 								<div className="flex flex-col gap-4" ref={parent1}>
@@ -319,12 +332,12 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 					</div>
 					<div className="flex gap-4 print:hidden">
 						{myCharacter ? (
-							<Link href={`/characters/${params.characterId}/log/new`} className="btn btn-primary btn-sm px-2 sm:px-3">
+							<Link href={`/characters/${params.characterId}/log/new`} className="btn-primary btn-sm btn px-2 sm:px-3">
 								<span className="hidden sm:inline">New Log</span>
 								<Icon path={mdiPlus} size={1} className="inline sm:hidden" />
 							</Link>
 						) : character && !logsLoading ? null : (
-							<span className="btn btn-sm">Loading...</span>
+							<span className="btn-sm btn">Loading...</span>
 						)}
 						{logs && (
 							<>
@@ -332,13 +345,13 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 									type="text"
 									placeholder="Search"
 									onChange={e => setSearch(e.target.value)}
-									className="input input-bordered input-sm w-full sm:max-w-xs"
+									className="input-bordered input input-sm w-full sm:max-w-xs"
 								/>
 								{myCharacter && (
 									<div className="form-control">
 										<label className="label cursor-pointer py-1">
 											<span className="label-text hidden pr-4 sm:inline">Notes</span>
-											<input type="checkbox" className="toggle toggle-primary" checked={descriptions} onChange={toggleDescriptions} />
+											<input type="checkbox" className="toggle-primary toggle" checked={descriptions} onChange={toggleDescriptions} />
 										</label>
 									</div>
 								)}
@@ -383,7 +396,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													}>
 													<SearchResults text={log.name} search={search} />
 												</p>
-												<p className="text-netural-content text-xs font-normal mb-2">
+												<p className="text-netural-content mb-2 text-xs font-normal">
 													{new Date(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
 												</p>
 												{log.dm && log.type === "game" && log.dm.uid !== character.user.id && (
@@ -513,11 +526,11 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													<div className="flex flex-col justify-center gap-2">
 														<Link
 															href={`/characters/${params.characterId}/log/${log.id}`}
-															className={concatenate("btn btn-primary btn-sm", log.saving && "btn-disabled")}>
+															className={concatenate("btn-primary btn-sm btn", log.saving && "btn-disabled")}>
 															<Icon path={mdiPencil} size={0.8} />
 														</Link>
 														<button
-															className="btn btn-sm"
+															className="btn-sm btn"
 															disabled={log.saving}
 															onClick={async () => {
 																if (!confirm(`Are you sure you want to delete ${log.name}? This action cannot be reversed.`)) return false;
@@ -534,7 +547,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												<td
 													colSpan={100}
 													className={concatenate(
-														"whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs max-w-[calc(100vw_-_50px)]",
+														"max-w-[calc(100vw_-_50px)] whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs",
 														log.saving && "bg-neutral-focus"
 													)}>
 													<h4 className="text-base font-semibold">Notes:</h4>

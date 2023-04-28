@@ -232,7 +232,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 			result.error.issues.forEach(issue => {
 				const issueFields = ["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"] as const;
 				if (issueFields.find(i => i == issue.path.join("."))) {
-					setError(issue.path.join(".") as typeof issueFields[number], {
+					setError(issue.path.join(".") as (typeof issueFields)[number], {
 						message: issue.message
 					});
 				}
@@ -316,11 +316,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<label className="label">
 								<span className="label-text">Log Type</span>
 							</label>
-							<select
-								value={type}
-								onChange={e => setType(e.target.value as LogType)}
-								disabled={saving}
-								className="select-bordered select w-full">
+							<select value={type} onChange={e => setType(e.target.value as LogType)} disabled={saving} className="select-bordered select w-full">
 								<option value={"game"}>Game</option>
 								<option value={"nongame"}>Non-Game (Purchase, Trade, etc)</option>
 							</select>
@@ -410,23 +406,20 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 														className="input-bordered input w-full focus:border-primary"
 													/>
 												</label>
-												{dms &&
-													dms.length > 0 &&
-													dmSearch.trim() &&
-													!(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name")) && (
-														<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
-															{dmNameMatches
-																.map((dm, i) => (
-																	<li key={dm.id} className={concatenate(dmKeySel === i && "bg-primary text-primary-content")}>
-																		<a onMouseDown={() => setDM(dm)}>
-																			{dm.name}
-																			{dm.DCI && ` (${dm.DCI})`}
-																		</a>
-																	</li>
-																))
-																.slice(0, 8)}
-														</ul>
-													)}
+												{dms && dms.length > 0 && dmSearch.trim() && !(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name")) && (
+													<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
+														{dmNameMatches
+															.map((dm, i) => (
+																<li key={dm.id} className={concatenate(dmKeySel === i && "bg-primary text-primary-content")}>
+																	<a onMouseDown={() => setDM(dm)}>
+																		{dm.name}
+																		{dm.DCI && ` (${dm.DCI})`}
+																	</a>
+																</li>
+															))
+															.slice(0, 8)}
+													</ul>
+												)}
 											</div>
 											<label className="label">
 												<span className="label-text-alt text-error">{errors.dm?.name?.message}</span>
@@ -629,11 +622,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						)}
 						{type === "game" && (
 							<>
-								<button
-									type="button"
-									className="btn-primary btn-sm btn min-w-fit flex-1 sm:flex-none"
-									onClick={addStoryAward}
-									disabled={saving}>
+								<button type="button" className="btn-primary btn-sm btn min-w-fit flex-1 sm:flex-none" onClick={addStoryAward} disabled={saving}>
 									Add Story Award
 								</button>
 								{!selectedLog.is_dm_log && storyAwards.filter(item => !storyAwardsLost.includes(item.id)).length > 0 && (
@@ -677,9 +666,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 										<textarea
 											onChange={e => {
-												setMagicItemsGained(
-													magicItemsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item))
-												);
+												setMagicItemsGained(magicItemsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
 											}}
 											disabled={saving}
 											className="textarea-bordered textarea w-full focus:border-primary"
@@ -741,9 +728,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												type="text"
 												value={item.name}
 												onChange={e => {
-													setStoryAwardsGained(
-														storyAwardsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item))
-													);
+													setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)));
 												}}
 												disabled={saving}
 												className="input-bordered input w-full focus:border-primary"
@@ -763,9 +748,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 										<textarea
 											onChange={e => {
-												setStoryAwardsGained(
-													storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item))
-												);
+												setStoryAwardsGained(storyAwardsGained.map((item, i) => (i === index ? { ...item, description: e.target.value } : item)));
 											}}
 											disabled={saving}
 											className="textarea-bordered textarea w-full focus:border-primary"

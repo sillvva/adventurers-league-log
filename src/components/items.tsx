@@ -23,14 +23,14 @@ export function Items({
 
 	return (
 		<>
-			<div className="flex flex-1 flex-col">
+			<div className={concatenate("flex-1 flex-col", collapsible && !items.length ? "hidden md:flex" : "flex")}>
 				{title && (
 					<h4 className="flex font-semibold" onClick={collapsible ? () => setCollapsed(!collapsed) : () => {}}>
 						<span className="flex-1">{title}</span>
-						{collapsible && <Icon path={collapsed ? mdiChevronDown : mdiChevronUp} className="ml-2 w-4 justify-self-end inline md:hidden print:hidden" />}
+						{collapsible && <Icon path={collapsed ? mdiChevronDown : mdiChevronUp} className="ml-2 inline w-4 justify-self-end print:hidden md:hidden" />}
 					</h4>
 				)}
-				<p className={concatenate("divide-x whitespace-pre-wrap text-sm print:text-xs", collapsed ? 'hidden md:block print:block' : '')}>
+				<p className={concatenate("divide-x whitespace-pre-wrap text-sm print:text-xs", collapsed ? "hidden print:block md:block" : "")}>
 					{items.length
 						? items.map(mi => (
 								<span
@@ -46,7 +46,7 @@ export function Items({
 									)}
 									{mi.description && "*"}
 								</span>
-							))
+						  ))
 						: "None"}
 				</p>
 			</div>
