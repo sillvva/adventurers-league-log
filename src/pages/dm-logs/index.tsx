@@ -52,7 +52,7 @@ const Characters: NextPageWithLayout = () => {
 	const [modal, setModal] = useState<{ name: string; description: string; date?: Date } | null>(null);
 
 	const utils = trpc.useContext();
-	const { data: logs } = trpc.useQuery(["_logs.dm-logs"], {
+	const { data: logs, isFetching } = trpc.useQuery(["_logs.dm-logs"], {
 		refetchOnWindowFocus: false
 	});
 	const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
@@ -150,16 +150,24 @@ const Characters: NextPageWithLayout = () => {
 							</thead>
 							<tbody ref={parent1}>
 								{!logs || logs.length == 0 ? (
-									<tr>
-										<td colSpan={5} className="py-20 text-center">
-											<p className="mb-4">You have no DM logs.</p>
-											<p>
-												<Link href="/dm-logs/new" className="btn-primary btn">
-													Create one now
-												</Link>
-											</p>
-										</td>
-									</tr>
+									isFetching ? (
+										<tr>
+											<td colSpan={5} className="py-20 text-center">
+												Loading...
+											</td>
+										</tr>
+									) : (
+										<tr>
+											<td colSpan={5} className="py-20 text-center">
+												<p className="mb-4">You have no DM logs.</p>
+												<p>
+													<Link href="/dm-logs/new" className="btn-primary btn">
+														Create one now
+													</Link>
+												</p>
+											</td>
+										</tr>
+									)
 								) : (
 									results.map(log => (
 										<Fragment key={log.id}>
