@@ -195,16 +195,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		clearErrors();
 
 		const values = getValues();
-
-		try {
-			values.type = type;
-			values.magic_items_gained = magicItemsGained;
-			values.magic_items_lost = magicItemsLost;
-			values.story_awards_gained = storyAwardsGained;
-			values.story_awards_lost = storyAwardsLost;
-		} catch (err) {
-			console.error(err);
-		}
+		values.type = type;
+		values.magic_items_gained = magicItemsGained;
+		values.magic_items_lost = magicItemsLost;
+		values.story_awards_gained = storyAwardsGained;
+		values.story_awards_lost = storyAwardsLost;
 
 		const result = logSchema.safeParse(values);
 		if (result.success) {

@@ -196,18 +196,14 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 
 	const onSubmit: SubmitHandler<z.infer<typeof logSchema>> = e => {
 		clearErrors();
-		const values = getValues();
 
-		try {
-			values.type = "game";
-			values.is_dm_log = true;
-			values.magic_items_gained = magicItemsGained;
-			values.magic_items_lost = [];
-			values.story_awards_gained = storyAwardsGained;
-			values.story_awards_lost = [];
-		} catch (err) {
-			console.error(err);
-		}
+		const values = getValues();
+		values.type = "game";
+		values.is_dm_log = true;
+		values.magic_items_gained = magicItemsGained;
+		values.magic_items_lost = [];
+		values.story_awards_gained = storyAwardsGained;
+		values.story_awards_lost = [];
 
 		const result = logSchema.safeParse(values);
 		if (result.success) {
