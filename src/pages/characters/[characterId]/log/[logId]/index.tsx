@@ -19,9 +19,9 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { FormEventHandler } from "react";
 import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
@@ -37,7 +37,6 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 			? { redirect: { destination: `/characters/${characterId}`, permanent: false } }
 			: null),
 		props: {
-			session,
 			character: {
 				...character,
 				...logs,
@@ -53,7 +52,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
-const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character, session }) => {
+const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character }) => {
 	const router = useRouter();
 	const { data: params } = useQueryString(
 		z.object({
@@ -68,8 +67,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		formState: { errors },
 		getValues,
 		setValue,
-		setError
-	} = useForm<z.infer<typeof logSchema>>();
+		setError,
+		handleSubmit
+	} = useForm<z.infer<typeof logSchema>>({
+		resolver: zodResolver(logSchema)
+	});
 
 	const selectedLog = useMemo(
 		() =>
@@ -175,48 +177,25 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		}
 	});
 
-	const handleSubmit: FormEventHandler<HTMLFormElement> = e => {
+	const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+
 		const activeName = document.activeElement?.getAttribute("name");
 		if (activeName === "dm.name" && !(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name"))) return;
 		if (activeName === "dm.DCI" && !(dmDCIMatches.length === 1 && dmDCIMatches[0]?.DCI === getValues("dm.DCI"))) return;
 
+		handleSubmit(onSubmit)(e);
+	};
+
+	const onSubmit: SubmitHandler<z.infer<typeof logSchema>> = e => {
 		clearErrors();
-		let errors = [];
 
 		const values = getValues();
-
-		try {
-			values.type = type;
-
-			if (!values.date) errors.push(setError("date", { message: "Required" }));
-			else values.date = new Date(values.date.replace("T", " ")).toISOString();
-
-			if (values.type === "game" && !values.dm.name && !values.dm.id) {
-				if (!confirm("Are you sure you want to save this log without a DM? Your name will be used as a placeholder.")) {
-					errors.push(setError("dm.name", { message: "Required" }));
-				}
-			}
-
-			if (!values.dm || !values.dm.name) values.dm = { id: "", name: session?.user?.name || "", DCI: null, uid: session?.user?.id || "" };
-			values.dm.DCI = (values.dm.DCI || "").replace(/[^\d]+/g, "").trim() || null;
-
-			if (values.experience) values.experience = parseInt(values.experience.toString());
-			if (values.acp) values.acp = parseInt(values.acp.toString());
-			if (values.tcp) values.tcp = parseInt(values.tcp.toString());
-			if (values.level) values.level = parseInt(values.level.toString());
-			if (values.gold) values.gold = parseInt(values.gold.toString());
-			if (values.dtd) values.dtd = parseInt(values.dtd.toString());
-
-			values.magic_items_gained = magicItemsGained;
-			values.magic_items_lost = magicItemsLost;
-			values.story_awards_gained = storyAwardsGained;
-			values.story_awards_lost = storyAwardsLost;
-		} catch (err) {
-			console.error(err);
-		}
-
-		if (errors.length) return;
+		values.type = type;
+		values.magic_items_gained = magicItemsGained;
+		values.magic_items_lost = magicItemsLost;
+		values.story_awards_gained = storyAwardsGained;
+		values.story_awards_lost = storyAwardsLost;
 
 		const result = logSchema.safeParse(values);
 		if (result.success) {
@@ -306,7 +285,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 				</div>
 			)}
 
-			<form onSubmit={handleSubmit}>
+			<form onSubmit={submitHandler}>
 				<input type="hidden" {...register("characterId", { value: params.characterId })} />
 				<input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
 				<input type="hidden" {...register("is_dm_log", { value: selectedLog.is_dm_log })} />
@@ -333,6 +312,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							type="text"
 							{...register("name", { required: true, value: selectedLog.name, disabled: saving })}
 							className="input-bordered input w-full focus:border-primary"
+							aria-invalid={errors.name ? "true" : "false"}
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.name?.message}</span>
@@ -347,8 +327,14 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						</label>
 						<input
 							type="datetime-local"
-							{...register("date", { required: true, value: formatDate(selectedLog.date), disabled: saving })}
+							{...register("date", {
+								required: true,
+								value: formatDate(selectedLog.date),
+								disabled: saving,
+								setValueAs: (v: string) => new Date(v || formatDate(selectedLog.date)).toISOString()
+							})}
 							className="input-bordered input w-full focus:border-primary"
+							aria-invalid={errors.date ? "true" : "false"}
 						/>
 						<label className="label">
 							<span className="label-text-alt text-error">{errors.date?.message}</span>
@@ -507,7 +493,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 										<input
 											type="number"
-											{...register("experience", { value: selectedLog.experience, disabled: saving })}
+											{...register("experience", { value: selectedLog.experience, disabled: saving, valueAsNumber: true })}
 											className="input-bordered input w-full focus:border-primary"
 										/>
 										<label className="label">
@@ -528,7 +514,8 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												value: selectedLog.level,
 												min: 0,
 												max: Math.max(selectedLog.level, character ? 20 - character.total_level : 19),
-												disabled: saving
+												disabled: saving,
+												valueAsNumber: true
 											})}
 											className="input-bordered input w-full focus:border-primary"
 										/>
@@ -548,7 +535,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 										<input
 											type="number"
-											{...register("acp", { value: selectedLog.acp, disabled: saving })}
+											{...register("acp", { value: selectedLog.acp, disabled: saving, valueAsNumber: true })}
 											className="input-bordered input w-full focus:border-primary"
 										/>
 										<label className="label">
@@ -562,7 +549,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									</label>
 									<input
 										type="number"
-										{...register("tcp", { value: selectedLog.tcp, disabled: saving })}
+										{...register("tcp", { value: selectedLog.tcp, disabled: saving, valueAsNumber: true })}
 										className="input-bordered input w-full focus:border-primary"
 									/>
 									<label className="label">
@@ -577,7 +564,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							</label>
 							<input
 								type="number"
-								{...register("gold", { value: selectedLog.gold, disabled: saving })}
+								{...register("gold", { value: selectedLog.gold, disabled: saving, valueAsNumber: true })}
 								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
@@ -590,7 +577,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							</label>
 							<input
 								type="number"
-								{...register("dtd", { value: selectedLog.dtd, disabled: saving })}
+								{...register("dtd", { value: selectedLog.dtd, disabled: saving, valueAsNumber: true })}
 								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">

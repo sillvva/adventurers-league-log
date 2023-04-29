@@ -44,7 +44,7 @@ export const parseError = (e: unknown) => {
 	return "Unknown error";
 };
 
-export const formatDate = (date: Date) => {
+export const formatDate = (date: Date | string) => {
 	return dayjs(date).format("YYYY-MM-DDTHH:mm");
 };
 
