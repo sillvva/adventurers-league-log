@@ -179,7 +179,10 @@ const Characters: NextPageWithLayout = () => {
 													</p>
 													{log.character && (
 														<p className="text-sm font-normal">
-															<span className="font-semibold">Character:</span> <SearchResults text={log.character.name} search={search} />
+															<span className="font-semibold">Character:</span>{" "}
+															<Link href={`/characters/${log.character.id}`} className="text-secondary">
+																<SearchResults text={log.character.name} search={search} />
+															</Link>
 														</p>
 													)}
 													<div className="table-cell font-normal print:hidden sm:hidden">
