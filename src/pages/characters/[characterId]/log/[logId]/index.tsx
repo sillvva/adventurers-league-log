@@ -19,7 +19,6 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { FormEventHandler } from "react";
 import { useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,9 +69,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		getValues,
 		setValue,
 		setError,
-		watch,
-		handleSubmit,
-		trigger
+		handleSubmit
 	} = useForm<z.infer<typeof logSchema>>({
 		resolver: zodResolver(logSchema)
 	});

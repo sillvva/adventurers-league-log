@@ -18,7 +18,7 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -135,6 +135,8 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 
 	const [parent1] = useAutoAnimate<HTMLDivElement>();
 	const [parent2] = useAutoAnimate<HTMLDivElement>();
+	const [charSearch, setCharSearch] = useState("");
+	const [charIndex, setCharIndex] = useState(0);
 	const [charSel, setCharSel] = useState<typeof characters>([]);
 	const [season, setSeason] = useState<1 | 8 | 9>(selectedLog?.experience ? 1 : selectedLog?.acp ? 8 : 9);
 	const [magicItemsGained, setMagicItemsGained] = useState(
@@ -145,17 +147,17 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	);
 	const [mutError, setMutError] = useState<string | null>(null);
 
-	const getCharSel = (value: string | null) => {
-		if (!value) setCharId(null);
+	useEffect(() => {
+		if (!charSearch.trim()) setCharId(null);
 
 		const chars: InferPropsFromServerSideFunction<typeof getServerSideProps>["characters"] = [];
 		characters.forEach(character => {
-			const match = character.name.toLowerCase().includes((value || "undefined").toLocaleLowerCase());
+			const match = character.name.toLowerCase().includes((charSearch || "undefined").toLocaleLowerCase());
 			if (match) chars.push(character);
 		});
 
 		setCharSel(chars);
-	};
+	}, [charSearch]);
 
 	const setCharId = (character: (typeof characters)[number] | null) => {
 		setValue("characterId", character?.id || "");
@@ -193,6 +195,15 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 			setMutError(err.message);
 		}
 	});
+
+	const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+
+		const activeName = document.activeElement?.getAttribute("name");
+		if (activeName === "characterName" && !(charSel.length === 1 && charSel[0]?.name === getValues("characterName"))) return;
+
+		handleSubmit(onSubmit)(e);
+	};
 
 	const onSubmit: SubmitHandler<z.infer<typeof logSchema>> = e => {
 		clearErrors();
@@ -265,7 +276,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 				</div>
 			)}
 
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<form onSubmit={submitHandler}>
 				<input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
 				<input type="hidden" {...register("dm.id", { value: "" })} />
 				<input type="hidden" {...register("dm.DCI", { value: null })} />
@@ -328,20 +339,46 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									{...register("characterName", {
 										value: characters.find(c => c.id === selectedLog.characterId)?.name || "",
 										onChange: e => {
+											setCharSearch(e.target.value);
 											setValue("characterId", "");
 											setValue("applied_date", null);
-											getCharSel(e.target.value);
 											trigger("applied_date");
 										},
 										disabled: mutation.isLoading
 									})}
 									className="input-bordered input w-full focus:border-primary"
+									onKeyUp={e => {
+										const isSearching = charSel.length > 0 && charSearch.trim();
+										if (!isSearching) return;
+										const isSelected = charSel.length === 1 && charSel[0]?.name === getValues("characterName");
+										if (e.code === "ArrowDown") {
+											if (isSelected) return;
+											setCharIndex(charIndex + 1);
+											if (charIndex >= charSel.length) setCharIndex(0);
+											return false;
+										}
+										if (e.code === "ArrowUp") {
+											if (isSelected) return;
+											setCharIndex(charIndex - 1);
+											if (charIndex < 0) setCharIndex(charSel.length - 1);
+											return false;
+										}
+										if (e.code === "Enter") {
+											if (isSelected) return;
+											setCharId(charSel[charIndex] || null);
+											setCharSearch(charSel[charIndex]?.name || "");
+											setValue("applied_date", "");
+											trigger("applied_date");
+											return false;
+										}
+									}}
+									onBlur={e => setCharIndex(-1)}
 								/>
 							</label>
-							{charSel.length > 0 && (
+							{charSel.length > 0 && charSearch.trim() && !(charSel.length === 1 && charSel[0]?.name === getValues("characterName")) && (
 								<ul className="dropdown-content menu rounded-lg bg-base-100 p-2 shadow">
-									{charSel.map(character => (
-										<li key={character.id}>
+									{charSel.map((character, i) => (
+										<li key={character.id} className={concatenate(charIndex === i && "bg-primary text-primary-content")}>
 											<a
 												onMouseDown={() => {
 													setCharId(character);
