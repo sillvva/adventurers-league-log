@@ -368,7 +368,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						<input
 							type="datetime-local"
 							{...register("applied_date", {
-								required: true,
+								required: !!selectedLog.characterId || !!getValues().characterName,
 								value: selectedLog.applied_date === null ? null : formatDate(selectedLog.applied_date),
 								disabled: mutation.isLoading
 							})}
