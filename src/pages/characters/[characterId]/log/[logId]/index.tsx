@@ -37,7 +37,6 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 			? { redirect: { destination: `/characters/${characterId}`, permanent: false } }
 			: null),
 		props: {
-			session,
 			character: {
 				...character,
 				...logs,
@@ -53,7 +52,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
-const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character, session }) => {
+const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character }) => {
 	const router = useRouter();
 	const { data: params } = useQueryString(
 		z.object({
