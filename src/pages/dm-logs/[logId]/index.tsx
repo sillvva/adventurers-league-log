@@ -147,17 +147,18 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	);
 	const [mutError, setMutError] = useState<string | null>(null);
 
-	useEffect(() => {
-		if (!charSearch.trim()) setCharId(null);
+	const updateCharSearch = (name: string) => {
+		if (!name.trim()) setCharId(null);
+		setCharSearch(name);
 
 		const chars: InferPropsFromServerSideFunction<typeof getServerSideProps>["characters"] = [];
 		characters.forEach(character => {
-			const match = character.name.toLowerCase().includes((charSearch || "undefined").toLocaleLowerCase());
+			const match = character.name.toLowerCase().includes((name || "undefined").toLocaleLowerCase());
 			if (match) chars.push(character);
 		});
 
 		setCharSel(chars);
-	}, [charSearch]);
+	};
 
 	const setCharId = (character: (typeof characters)[number] | null) => {
 		setValue("characterId", character?.id || "");
@@ -321,10 +322,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<span className="label-text-alt text-error">{errors.date?.message}</span>
 						</label>
 					</div>
-					<input
-						type="hidden"
-						{...register("characterId", { value: selectedLog.characterId || "", disabled: mutation.isLoading, required: !!watch().applied_date })}
-					/>
+					<input type="hidden" {...register("characterId", { value: selectedLog.characterId || "", required: !!watch().applied_date })} />
 					<div className="form-control col-span-12 sm:col-span-6 lg:col-span-3">
 						<label className="label">
 							<span className="label-text">
@@ -339,12 +337,13 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									{...register("characterName", {
 										value: characters.find(c => c.id === selectedLog.characterId)?.name || "",
 										onChange: e => {
-											setCharSearch(e.target.value);
+											updateCharSearch(e.target.value);
 											setValue("characterId", "");
 											setValue("applied_date", null);
 											trigger("applied_date");
 										},
-										disabled: mutation.isLoading
+										disabled: mutation.isLoading,
+										required: !!watch().applied_date
 									})}
 									className="input-bordered input w-full focus:border-primary"
 									onKeyUp={e => {
@@ -366,7 +365,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										if (e.code === "Enter") {
 											if (isSelected) return;
 											setCharId(charSel[charIndex] || null);
-											setCharSearch(charSel[charIndex]?.name || "");
+											updateCharSearch(charSel[charIndex]?.name || "");
 											setValue("applied_date", "");
 											trigger("applied_date");
 											return false;
@@ -406,6 +405,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						<input
 							type="datetime-local"
 							{...register("applied_date", {
+								value: selectedLog.applied_date ? formatDate(selectedLog.applied_date) : null,
 								required: !!watch().characterId,
 								setValueAs: (v: string) => (!watch().characterId ? null : formatDate(v) == "Invalid Date" ? "" : new Date(v).toISOString()),
 								disabled: mutation.isLoading
