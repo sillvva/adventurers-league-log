@@ -278,10 +278,10 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 
 			<form onSubmit={submitHandler}>
 				<input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
-				<input type="hidden" {...register("dm.id", { value: "" })} />
+				<input type="hidden" {...register("dm.id", { value: selectedLog.dm?.id || "" })} />
 				<input type="hidden" {...register("dm.DCI", { value: null })} />
-				<input type="hidden" {...register("dm.name", { value: "" })} />
-				<input type="hidden" {...register("dm.uid", { value: "" })} />
+				<input type="hidden" {...register("dm.name", { value: selectedLog.dm?.name || session?.user?.name || "" })} />
+				<input type="hidden" {...register("dm.uid", { value: selectedLog.dm?.uid || session?.user?.id || "" })} />
 				<div className="grid grid-cols-12 gap-4">
 					<div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
 						<label className="label">
