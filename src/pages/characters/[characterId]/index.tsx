@@ -121,6 +121,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 	const deleteLogMutation = trpc.useMutation(["_logs.delete"], {
 		onSuccess() {
 			utils.invalidateQueries(["characters.getLogs", { characterId: params.characterId }]);
+			utils.invalidateQueries(["_dms.getMany"]);
 		}
 	});
 
@@ -226,7 +227,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						<Link href={`/characters/${params.characterId}/edit`} className="btn-primary btn-sm btn hidden sm:flex">
 							Edit
 						</Link>
-						<div className="dropdown dropdown-end">
+						<div className="dropdown-end dropdown">
 							<label tabIndex={1} className="btn-sm btn">
 								<Icon path={mdiDotsHorizontal} size={1} />
 							</label>
@@ -274,11 +275,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 							{character.character_sheet_url && (
 								<span className="print:hidden">
 									{" - "}
-									<a
-										href={character.character_sheet_url}
-										target="_blank"
-										rel="noreferrer noopner"
-										className="font-semibold text-secondary dark:drop-shadow-sm">
+									<a href={character.character_sheet_url} target="_blank" rel="noreferrer noopner" className="font-semibold text-secondary dark:drop-shadow-sm">
 										Character Sheet
 									</a>
 								</span>
@@ -289,17 +286,9 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						<div className="flex basis-full flex-col gap-2 print:basis-1/3 sm:gap-4 md:basis-52">
 							{character.image_url && (
 								<div className="relative hidden flex-col items-end justify-center print:hidden md:flex">
-									<a
-										href={character.image_url}
-										target="_blank"
-										rel="noreferrer noopener"
-										className="mask mask-squircle mx-auto h-52 w-full bg-primary">
+									<a href={character.image_url} target="_blank" rel="noreferrer noopener" className="mask mask-squircle mx-auto h-52 w-full bg-primary">
 										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img
-											src={character.image_url}
-											className="object-cover object-top transition-all hover:scale-110"
-											alt={character.name}
-										/>
+										<img src={character.image_url} className="object-cover object-top transition-all hover:scale-110" alt={character.name} />
 									</a>
 								</div>
 							)}
@@ -381,8 +370,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												className={concatenate(
 													"!static align-top print:p-2",
 													log.saving && "bg-neutral-focus",
-													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-														"border-b-0"
+													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 												)}>
 												<p
 													className="whitespace-pre-wrap font-semibold text-accent-content"
@@ -449,8 +437,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												className={concatenate(
 													"hidden align-top print:table-cell print:p-2 sm:table-cell",
 													log.saving && "bg-neutral-focus",
-													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-														"border-b-0"
+													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 												)}>
 												{log.experience > 0 && (
 													<p>
@@ -477,8 +464,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												className={concatenate(
 													"hidden align-top print:table-cell print:p-2 sm:table-cell",
 													log.saving && "bg-neutral-focus",
-													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-														"border-b-0"
+													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 												)}>
 												{log.tcp !== 0 && (
 													<p>
@@ -503,8 +489,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												className={concatenate(
 													"hidden align-top print:!hidden md:table-cell",
 													log.saving && "bg-neutral-focus",
-													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-														"border-b-0"
+													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 												)}>
 												{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 													<div>
@@ -520,8 +505,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													className={concatenate(
 														"w-8 align-top print:hidden",
 														log.saving && "bg-neutral-focus",
-														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) &&
-															"border-b-0"
+														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
 													)}>
 													<div className="flex flex-col justify-center gap-2">
 														<Link
@@ -567,9 +551,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 																	</ReactMarkdown>
 																</div>
 															))}
-															<p className="whitespace-pre-wrap text-sm line-through">
-																{log.story_awards_lost.map(mi => mi.name).join(" | ")}
-															</p>
+															<p className="whitespace-pre-wrap text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
 														</div>
 													)}
 												</td>
