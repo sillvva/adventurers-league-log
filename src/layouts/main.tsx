@@ -74,6 +74,9 @@ const Layout = (props: PropsWithChildren) => {
 						<Link href="/dm-logs" className="hidden items-center p-2 md:flex">
 							DM Logs
 						</Link>
+						<Link href="/dms" className="hidden items-center p-2 md:flex">
+							DMs
+						</Link>
 						<div className="flex-1">&nbsp;</div>
 						{session.status !== "loading" && (
 							<>
@@ -89,7 +92,7 @@ const Layout = (props: PropsWithChildren) => {
 								</a>
 								{session.data?.user ? (
 									<>
-										<div className="dropdown dropdown-end">
+										<div className="dropdown-end dropdown">
 											<label tabIndex={0} className="flex cursor-pointer">
 												<div className="hidden items-center px-4 text-accent-content print:flex sm:flex">{session.data.user.name}</div>
 												<div className="avatar">
@@ -107,6 +110,9 @@ const Layout = (props: PropsWithChildren) => {
 											<ul tabIndex={0} className="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow">
 												<li className="sm:hidden">
 													<a>{session.data.user.name}</a>
+												</li>
+												<li className="sm:hidden">
+													<a href="/dms">DMs</a>
 												</li>
 												<li>
 													<a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener" className="items-center sm:hidden">
