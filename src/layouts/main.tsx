@@ -112,7 +112,7 @@ const Layout = (props: PropsWithChildren) => {
 													<a>{session.data.user.name}</a>
 												</li>
 												<li className="sm:hidden">
-													<a href="/dms">DMs</a>
+													<Link href="/dms">DMs</Link>
 												</li>
 												<li>
 													<a href="http://paypal.me/Sillvva" target="_blank" rel="noreferrer noopener" className="items-center sm:hidden">
