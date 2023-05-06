@@ -60,7 +60,7 @@ const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServ
 
 	const mutation = trpc.useMutation(["_dms.edit"], {
 		onSuccess(data) {
-			if (data) {
+			if (data && dm) {
 				client.setQueryData(["_dms.getOne", { id: params.dmId }], {
 					...dm,
 					...data

@@ -89,13 +89,13 @@ const DMs: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerS
 												<tr>
 													<td>{dm.name}</td>
 													<td>{dm.DCI}</td>
-													<td>{dm._count.logs}</td>
+													<td>{dm.logs.length}</td>
 													<td className="w-16 print:hidden">
 														<div className="flex flex-row justify-center gap-2">
 															<Link href={`/dms/${dm.id}`} className="btn-primary btn-sm btn">
 																<Icon path={mdiPencil} size={0.8} />
 															</Link>
-															{dm._count.logs == 0 && (
+															{dm.logs.length == 0 && (
 																<button
 																	className="btn-sm btn"
 																	onClick={async () => {
