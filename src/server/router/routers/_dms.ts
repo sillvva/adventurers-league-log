@@ -7,6 +7,19 @@ export const protectedDMsRouter = createProtectedRouter()
 	.mutation("edit", {
 		input: dungeonMasterSchema,
 		async resolve({ input, ctx }) {
+			const dm = await ctx.prisma.dungeonMaster.findUnique({
+				where: {
+					id: input.id
+				},
+				include: {
+					_count: {
+						select: {
+							logs: true
+						}
+					}
+				}
+			});
+			if (dm?.uid !== ctx.session.user.id) throw new Error("You do not have permission to edit this DM");
 			return await ctx.prisma.dungeonMaster.update({
 				where: { id: input.id },
 				data: {

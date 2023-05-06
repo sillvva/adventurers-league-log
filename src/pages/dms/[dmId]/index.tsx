@@ -72,6 +72,9 @@ const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServ
 				);
 				router.push(`/dms`);
 			}
+		},
+		onError(error) {
+			alert(error.message);
 		}
 	});
 
