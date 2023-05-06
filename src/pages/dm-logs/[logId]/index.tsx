@@ -346,26 +346,26 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										required: !!watch().applied_date
 									})}
 									className="input-bordered input w-full focus:border-primary"
-									onKeyUp={e => {
+									onKeyDown={e => {
 										const isSearching = charSel.length > 0 && charSearch.trim();
-										if (!isSearching) return;
+										if (!isSearching) return false;
 										const isSelected = charSel.length === 1 && charSel[0]?.name === getValues("characterName");
 										if (e.code === "ArrowDown") {
-											if (isSelected) return;
+											if (isSelected) return false;
 											setCharIndex(charIndex + 1);
 											if (charIndex >= charSel.length) setCharIndex(0);
 											return false;
 										}
 										if (e.code === "ArrowUp") {
-											if (isSelected) return;
+											if (isSelected) return false;
 											setCharIndex(charIndex - 1);
 											if (charIndex < 0) setCharIndex(charSel.length - 1);
 											return false;
 										}
-										if (e.code === "Enter") {
-											if (isSelected) return;
+										if (e.code === "Enter" || e.code === "Tab") {
+											if (isSelected) return false;
 											setCharId(charSel[charIndex] || null);
-											updateCharSearch(charSel[charIndex]?.name || "");
+											updateCharSearch("");
 											setValue("applied_date", "");
 											trigger("applied_date");
 											return false;

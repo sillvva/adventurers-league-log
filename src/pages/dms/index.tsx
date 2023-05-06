@@ -79,7 +79,7 @@ const DMs: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerS
 									)
 								) : (
 									dms
-										.sort((a, b) => (a.name > b.name ? 1 : -1))
+										.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
 										.filter(dm => dm.name != session?.user?.name)
 										.map(dm => (
 											<Fragment key={dm.id}>

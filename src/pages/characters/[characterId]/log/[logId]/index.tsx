@@ -365,7 +365,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 															onChange: e => setDmSearch(e.target.value),
 															disabled: saving
 														})}
-														onKeyUp={e => {
+														onKeyDown={e => {
 															const isSearching = dms && dms.length > 0 && dmSearch.trim();
 															if (!isSearching) return;
 															const isSelected = dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name");
@@ -381,10 +381,10 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 																if (dmKeySel < 0) setDMKeySel(dmNameMatches.length - 1);
 																return false;
 															}
-															if (e.code === "Enter") {
+															if (e.code === "Enter" || e.code === "Tab") {
 																if (isSelected) return;
 																setDM(dmNameMatches[dmKeySel] as DungeonMaster);
-																setDmSearch((dmNameMatches[dmKeySel] as DungeonMaster).name);
+																setDmSearch("");
 																return false;
 															}
 														}}
@@ -424,26 +424,28 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 															onChange: e => setDmSearch(e.target.value),
 															disabled: saving
 														})}
-														onKeyUp={e => {
+														min="0"
+														onKeyDown={e => {
 															const isSearching = dms && dms.length > 0 && dmSearch.trim();
-															if (!isSearching) return;
+															if (!isSearching) return false;
 															const isSelected = dmDCIMatches.length === 1 && dmDCIMatches[0]?.DCI === getValues("dm.DCI");
 															if (e.code === "ArrowDown") {
-																if (isSelected) return;
+																if (isSelected) return false;
 																setDMKeySel(dmKeySel + 1);
 																if (dmKeySel >= dmDCIMatches.length) setDMKeySel(0);
 																return false;
 															}
 															if (e.code === "ArrowUp") {
-																if (isSelected) return;
+																if (isSelected) return false;
 																setDMKeySel(dmKeySel - 1);
 																if (dmKeySel < 0) setDMKeySel(dmDCIMatches.length - 1);
 																return false;
 															}
-															if (e.code === "Enter") {
-																if (isSelected) return;
+															if (e.code === "Enter" || e.code === "Tab") {
+																if (isSelected) return false;
+																if (dmKeySel === -1) return false;
 																setDM(dmDCIMatches[dmKeySel] as DungeonMaster);
-																setDmSearch((dmDCIMatches[dmKeySel] as DungeonMaster).name);
+																setDmSearch("");
 																return false;
 															}
 														}}
