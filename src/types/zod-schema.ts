@@ -48,12 +48,12 @@ export const logSchema = z.object({
 });
 
 export const newCharacterSchema = z.object({
-  name: z.string().min(1),
-  campaign: z.string().min(1),
-  race: z.string().optional(),
-  class: z.string().optional(),
-  character_sheet_url: z.union([z.literal(""), z.string().url()]),
-  image_url: z.union([z.literal(""), z.string().url()])
+	name: z.string().min(1),
+	campaign: z.string().min(1),
+	race: z.string().optional(),
+	class: z.string().optional(),
+	character_sheet_url: z.union([z.literal(""), z.string().url()]),
+	image_url: z.union([z.literal(""), z.string().url()])
 });
 
 export const editCharacterSchema = z
@@ -61,3 +61,9 @@ export const editCharacterSchema = z
 		id: z.string()
 	})
 	.merge(newCharacterSchema);
+
+export const dungeonMasterSchema = z.object({
+	id: z.string().default(""),
+	name: z.string().default(""),
+	DCI: z.string().nullable().default(null)
+});
