@@ -5,8 +5,9 @@ import { dungeonMasterSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { mdiHome } from "@mdi/js";
+import { mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 import type { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
@@ -14,6 +15,7 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { Fragment } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -37,6 +39,8 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 };
 
 const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session }) => {
+	const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
+
 	const router = useRouter();
 	const {
 		register,
@@ -53,7 +57,7 @@ const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServ
 	);
 
 	const client = trpc.useContext();
-	const { data: dm } = trpc.useQuery(["_dms.getOne", { id: params.dmId }], {
+	const { data: dm, isFetching } = trpc.useQuery(["_dms.getOne", { id: params.dmId }], {
 		ssr: true,
 		refetchOnWindowFocus: false
 	});
@@ -72,6 +76,15 @@ const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServ
 				);
 				router.push(`/dms`);
 			}
+		},
+		onError(error) {
+			alert(error.message);
+		}
+	});
+
+	const deleteDMMutation = trpc.useMutation(["_dms.delete"], {
+		onSuccess() {
+			client.invalidateQueries(["_dms.getMany"]);
 		},
 		onError(error) {
 			alert(error.message);
@@ -162,6 +175,73 @@ const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServ
 					</div>
 				</div>
 			</form>
+
+			<div className="mt-8 flex flex-col gap-4">
+				<section>
+					<h2 className="mb-2 text-2xl">Logs</h2>
+					<div className="rounded-lg">
+						<table className="table w-full">
+							<thead>
+								<tr>
+									<th className="">Date</th>
+									<th className="">Adventure</th>
+									<th className="">Character</th>
+									<th className="print:hidden"></th>
+								</tr>
+							</thead>
+							<tbody ref={parent1}>
+								{dm.logs.length == 0 ? (
+									isFetching ? (
+										<tr>
+											<td colSpan={4} className="py-20 text-center">
+												Loading...
+											</td>
+										</tr>
+									) : (
+										<tr>
+											<td colSpan={4} className="py-20 text-center">
+												<p className="mb-4">This DM has no logs.</p>
+												<button
+													className="btn-sm btn bg-red-900"
+													onClick={async () => {
+														if (!confirm(`Are you sure you want to delete ${dm.name}? This action cannot be reversed.`)) return false;
+														deleteDMMutation.mutate({ id: dm.id });
+													}}>
+													<Icon path={mdiTrashCan} size={0.8} className="mr-2" />
+													Delete
+												</button>
+											</td>
+										</tr>
+									)
+								) : (
+									dm.logs
+										.sort((a, b) => (a.date > b.date ? 1 : -1))
+										.map(log => (
+											<Fragment key={log.id}>
+												<tr>
+													<td>{log.date.toLocaleString()}</td>
+													<td>{log.name}</td>
+													<td>
+														<Link href={`/characters/${log.character?.id}`} className="text-secondary">
+															{log.character?.name}
+														</Link>
+													</td>
+													<td className="w-8 print:hidden">
+														<div className="flex flex-row justify-center gap-2">
+															<Link href={`/characters/${log.character?.id}/log/${log.id}`} className="btn-primary btn-sm btn">
+																<Icon path={mdiPencil} size={0.8} />
+															</Link>
+														</div>
+													</td>
+												</tr>
+											</Fragment>
+										))
+								)}
+							</tbody>
+						</table>
+					</div>
+				</section>
+			</div>
 		</>
 	);
 };
