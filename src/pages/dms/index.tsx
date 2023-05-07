@@ -35,12 +35,15 @@ const DMs: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerS
 	const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
 
 	const utils = trpc.useContext();
-	const { data: dms, isFetching } = trpc.useQuery(["_dms.getDMs"], {
+	const { data: dms, isFetching } = trpc.useQuery(["_dms.getMany"], {
 		refetchOnWindowFocus: false
 	});
 	const deleteDMMutation = trpc.useMutation(["_dms.delete"], {
 		onSuccess() {
-			utils.invalidateQueries(["_dms.getDMs"]);
+			utils.invalidateQueries(["_dms.getMany"]);
+		},
+		onError(error) {
+			alert(error.message);
 		}
 	});
 
@@ -66,13 +69,13 @@ const DMs: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerS
 								{!dms || dms.length == 0 ? (
 									isFetching ? (
 										<tr>
-											<td colSpan={3} className="py-20 text-center">
+											<td colSpan={4} className="py-20 text-center">
 												Loading...
 											</td>
 										</tr>
 									) : (
 										<tr>
-											<td colSpan={3} className="py-20 text-center">
+											<td colSpan={4} className="py-20 text-center">
 												<p className="mb-4">You have no DMs.</p>
 											</td>
 										</tr>
@@ -86,13 +89,13 @@ const DMs: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerS
 												<tr>
 													<td>{dm.name}</td>
 													<td>{dm.DCI}</td>
-													<td>{dm._count.logs}</td>
+													<td>{dm.logs.length}</td>
 													<td className="w-16 print:hidden">
 														<div className="flex flex-row justify-center gap-2">
-															{/* <Link href={`/dms/${dm.id}`} className="btn-primary btn-sm btn">
+															<Link href={`/dms/${dm.id}`} className="btn-primary btn-sm btn">
 																<Icon path={mdiPencil} size={0.8} />
-															</Link> */}
-															{dm._count.logs == 0 && (
+															</Link>
+															{dm.logs.length == 0 && (
 																<button
 																	className="btn-sm btn"
 																	onClick={async () => {
