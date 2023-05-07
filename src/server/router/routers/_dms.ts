@@ -38,7 +38,7 @@ export const protectedDMsRouter = createProtectedRouter()
 		}),
 		async resolve({ input, ctx }) {
 			const dms = await getDMs(ctx.prisma, ctx.session.user.id, input.id);
-			if (dms.length === 0) throw new Error("You do not have permission to view this DM");
+			if (!dms.length) throw new Error("You do not have permission to view this DM");
 			return dms[0];
 		}
 	})
