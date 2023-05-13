@@ -3,14 +3,14 @@ import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
-import { InferPropsFromServerSideFunction } from "ddal";
-import { GetServerSidePropsContext } from "next";
+import type { InferPropsFromServerSideFunction } from "ddal";
+import type { GetServerSidePropsContext } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { Fragment } from "react";
 import { authOptions } from "../api/auth/[...nextauth]";
-import { NextPageWithLayout } from "../_app";
+import type { NextPageWithLayout } from "../_app";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	const session = await getServerSession(context.req, context.res, authOptions);

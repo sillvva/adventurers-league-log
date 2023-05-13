@@ -1,5 +1,5 @@
 import { dungeonMasterSchema } from "$src/types/zod-schema";
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import { createProtectedRouter } from "../protected-router";
 

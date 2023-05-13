@@ -1,6 +1,6 @@
 import { logSchema } from "$src/types/zod-schema";
 import { parseError } from "$src/utils/misc";
-import { DungeonMaster, Log } from "@prisma/client";
+import type { DungeonMaster, Log } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getLevels } from "../helpers";
