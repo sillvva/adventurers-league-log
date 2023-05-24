@@ -182,6 +182,17 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		if (activeName === "dm.name" && !(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name"))) return;
 		if (activeName === "dm.DCI" && !(dmDCIMatches.length === 1 && dmDCIMatches[0]?.DCI === getValues("dm.DCI"))) return;
 
+		const acp = getValues("acp");
+		if (character.total_level == 20 && acp - selectedLog.acp > 0) {
+			setError("acp", { message: "ACP cannot be gained at level 20." });
+			return;
+		}
+		const level = getValues("level") * 1;
+		if (character.total_level + level - selectedLog.level > 20 && level > 0) {
+			setError("level", { message: "Character cannot exceed level 20." });
+			return;
+		}
+
 		handleSubmit(onSubmit)(e);
 	};
 
