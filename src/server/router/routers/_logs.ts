@@ -1,9 +1,9 @@
 import { logSchema } from "$src/types/zod-schema";
+import { getLevels } from "$src/utils/logs";
 import { parseError } from "$src/utils/misc";
 import type { DungeonMaster, Log } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { getLevels } from "../helpers";
 import { createProtectedRouter } from "../protected-router";
 
 // Example router with queries that can only be hit if the user requesting is signed in

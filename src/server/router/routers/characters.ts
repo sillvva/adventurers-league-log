@@ -1,8 +1,7 @@
-import { getLogsSummary } from "$src/utils/logs";
+import { getLevels, getLogsSummary } from "$src/utils/logs";
 import type { MagicItem, PrismaClient, StoryAward } from "@prisma/client";
 import { z } from "zod";
 import { createRouter } from "../context";
-import { getLevels } from "../helpers";
 
 export const charactersRouter = createRouter()
 	.query("getAll", {
