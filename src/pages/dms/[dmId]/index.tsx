@@ -38,7 +38,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
-const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session }) => {
+const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = () => {
 	const [parent1] = useAutoAnimate<HTMLTableSectionElement>();
 
 	const router = useRouter();
