@@ -47,8 +47,10 @@ const NewCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof g
 		resolver: zodResolver(newCharacterSchema)
 	});
 
+	const utils = trpc.useContext();
 	const mutation = trpc.useMutation(["_characters.create"], {
 		onSuccess(data) {
+			utils.refetchQueries(["characters.getAll", { userId: session.user?.id || "" }]);
 			router.push(`/characters/${data.id}`);
 		}
 	});

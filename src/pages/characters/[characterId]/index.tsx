@@ -1,10 +1,10 @@
 import { Items } from "$src/components/items";
 import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
+import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { useQueryString } from "$src/utils/hooks";
-import { getLogsSummary } from "$src/utils/logs";
 import { concatenate, slugify } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -13,6 +13,7 @@ import Icon from "@mdi/react";
 import type { InferPropsFromServerSideFunction } from "ddal";
 import MiniSearch from "minisearch";
 import type { GetServerSidePropsContext } from "next";
+import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -66,6 +67,7 @@ const minisearch = new MiniSearch({
 });
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const session = await getServerSession(context.req, context.res, authOptions);
 	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
 	const character = await prisma.character.findFirst({
 		where: {
@@ -107,6 +109,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 
 	return {
 		props: {
+			session,
 			character
 			// character: {
 			// 	...character,
@@ -119,8 +122,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
-const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character }) => {
-	const session = useSession();
+const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session, character }) => {
 	const router = useRouter();
 	const [parent1] = useAutoAnimate<HTMLDivElement>();
 	const [parent2] = useAutoAnimate<HTMLTableSectionElement>();
@@ -156,7 +158,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 	// 	[character.logs]
 	// );
 
-	const myCharacter = character.user?.id === session.data?.user?.id;
+	const myCharacter = character.user?.id === session?.user?.id;
 	const [descriptions, setDescriptions] = useState(true);
 
 	const utils = trpc.useContext();
@@ -164,6 +166,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 		onSuccess() {
 			utils.invalidateQueries(["characters.getLogs", { characterId: params.characterId }]);
 			utils.invalidateQueries(["_dms.getMany"]);
+			utils.refetchQueries(["characters.getAll", { userId: session?.user?.id || "" }]);
 		}
 	});
 

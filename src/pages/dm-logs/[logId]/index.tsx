@@ -190,6 +190,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 					});
 					utils.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
 				} else await utils.invalidateQueries(["characters.getLogs", { characterId: log.characterId }]);
+				utils.invalidateQueries(["characters.getAll"]);
 			}
 			router.push(`/dm-logs`);
 		},

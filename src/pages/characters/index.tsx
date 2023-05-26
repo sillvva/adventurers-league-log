@@ -48,8 +48,8 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 	const [parent] = useAutoAnimate<HTMLTableSectionElement>();
 	const [search, setSearch] = useState("");
 	const { data: characters, isFetching } = trpc.useQuery(["characters.getAll", { userId: session.user?.id || "" }], {
-		enabled: !!session.user,
-		refetchOnWindowFocus: false
+		refetchOnWindowFocus: false,
+		refetchOnMount: false
 	});
 
 	const indexed = useMemo(

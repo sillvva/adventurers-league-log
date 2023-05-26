@@ -26,16 +26,31 @@ import { z } from "zod";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	let session = await getServerSession(context.req, context.res, authOptions);
+
+	if (!session) {
+		return {
+			redirect: {
+				destination: "/",
+				permanent: false
+			}
+		};
+	}
+
 	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
 	const character = await getOne(prisma, characterId);
 
+	if (character.userId !== session.user?.id) {
+		return {
+			redirect: {
+				destination: `/characters/${characterId}`,
+				permanent: false
+			}
+		};
+	}
+
 	return {
-		...(!session
-			? { redirect: { destination: "/", permanent: false } }
-			: character.userId !== session.user?.id
-			? { redirect: { destination: `/characters/${characterId}`, permanent: false } }
-			: null),
 		props: {
+			session,
 			character: {
 				...character,
 				logs: character.logs.map(log => ({
@@ -50,7 +65,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
-const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character }) => {
+const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session, character }) => {
 	const router = useRouter();
 	const { data: params } = useQueryString(
 		z.object({
@@ -166,6 +181,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 					});
 					utils.setQueryData(["characters.getLogs", { characterId: log.characterId }], getLogsSummary(logData.logs));
 				} else await utils.invalidateQueries(["characters.getLogs", { characterId: log.characterId }]);
+				utils.refetchQueries(["characters.getAll", { userId: session.user?.id || "" }]);
 			}
 			router.push(`/characters/${params.characterId}`);
 		},
@@ -274,7 +290,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 					</li>
 					<li>
 						<Link href={`/characters/${params.characterId}`} className="text-secondary">
-							{character?.name}
+							{character.name}
 						</Link>
 					</li>
 					{selectedLog.name ? (
