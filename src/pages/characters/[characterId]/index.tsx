@@ -1,6 +1,7 @@
 import { Items } from "$src/components/items";
 import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
+import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { useQueryString } from "$src/utils/hooks";
@@ -12,6 +13,7 @@ import Icon from "@mdi/react";
 import type { InferPropsFromServerSideFunction } from "ddal";
 import MiniSearch from "minisearch";
 import type { GetServerSidePropsContext } from "next";
+import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -65,6 +67,7 @@ const minisearch = new MiniSearch({
 });
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+	const session = await getServerSession(context.req, context.res, authOptions);
 	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
 	const character = await prisma.character.findFirst({
 		where: {
@@ -79,20 +82,47 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 			race: true,
 			class: true,
 			user: true
+			// logs: {
+			// 	include: {
+			// 		dm: true,
+			// 		magic_items_gained: true,
+			// 		magic_items_lost: true,
+			// 		story_awards_gained: true,
+			// 		story_awards_lost: true
+			// 	},
+			// 	orderBy: {
+			// 		date: "asc"
+			// 	}
+			// }
 		}
 	});
 
 	if (!character) return { redirect: { destination: "/characters", permanent: false } };
 
+	// const logSummary = getLogsSummary(character.logs);
+	// const logs = logSummary.logs.map(log => ({
+	// 	...log,
+	// 	date: log.date.toISOString(),
+	// 	applied_date: log.applied_date?.toISOString() || null,
+	// 	created_at: log.created_at.toISOString()
+	// }));
+
 	return {
 		props: {
+			session,
 			character
+			// character: {
+			// 	...character,
+			// 	logs: {
+			// 		...logSummary,
+			// 		logs: logs
+			// 	}
+			// }
 		}
 	};
 };
 
-const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ character }) => {
-	const session = useSession();
+const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session, character }) => {
 	const router = useRouter();
 	const [parent1] = useAutoAnimate<HTMLDivElement>();
 	const [parent2] = useAutoAnimate<HTMLTableSectionElement>();
@@ -109,12 +139,26 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 		})
 	);
 
+	// const logsLoading = false;
 	const { data: logs, isLoading: logsLoading } = trpc.useQuery(["characters.getLogs", { characterId: params.characterId }], {
 		refetchOnWindowFocus: false,
 		refetchOnMount: false
 	});
 
-	const myCharacter = character.user?.id === session.data?.user?.id;
+	// const logs = useMemo(
+	// 	() => ({
+	// 		...character.logs,
+	// 		logs: character.logs.logs.map(log => ({
+	// 			...log,
+	// 			date: new Date(log.date),
+	// 			applied_date: log.applied_date ? new Date(log.applied_date) : null,
+	// 			created_at: new Date(log.created_at)
+	// 		}))
+	// 	}),
+	// 	[character.logs]
+	// );
+
+	const myCharacter = character.user?.id === session?.user?.id;
 	const [descriptions, setDescriptions] = useState(true);
 
 	const utils = trpc.useContext();
@@ -122,6 +166,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 		onSuccess() {
 			utils.invalidateQueries(["characters.getLogs", { characterId: params.characterId }]);
 			utils.invalidateQueries(["_dms.getMany"]);
+			utils.refetchQueries(["characters.getAll", { userId: session?.user?.id || "" }]);
 		}
 	});
 
@@ -227,7 +272,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						<Link href={`/characters/${params.characterId}/edit`} className="btn-primary btn-sm btn hidden sm:flex">
 							Edit
 						</Link>
-						<div className="dropdown-end dropdown">
+						<div className="dropdown dropdown-end">
 							<label tabIndex={1} className="btn-sm btn">
 								<Icon path={mdiDotsHorizontal} size={1} />
 							</label>
@@ -384,7 +429,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													}>
 													<SearchResults text={log.name} search={search} />
 												</p>
-												<p className="text-netural-content mb-2 text-xs font-normal">
+												<p className="text-netural-content mb-2 text-xs font-normal" suppressHydrationWarning>
 													{new Date(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
 												</p>
 												{log.dm && log.type === "game" && log.dm.uid !== character.user.id && (
@@ -573,7 +618,11 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 				{modal && (
 					<label className="modal-box relative">
 						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
-						{modal.date && <p className="text-xs ">{modal.date.toLocaleString()}</p>}
+						{modal.date && (
+							<p className="text-xs" suppressHydrationWarning>
+								{modal.date.toLocaleString()}
+							</p>
+						)}
 						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
 							{modal.description}
 						</ReactMarkdown>

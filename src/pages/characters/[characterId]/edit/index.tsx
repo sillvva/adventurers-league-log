@@ -15,11 +15,18 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "react-query";
 import { z } from "zod";
+import { prisma } from "$src/server/db/client";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	const session = await getServerSession(context.req, context.res, authOptions);
+
+	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
+	const character = await prisma.character.findFirst({
+		where: {
+			id: characterId
+		}
+	});
 
 	if (!session) {
 		return {
@@ -32,12 +39,16 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 
 	return {
 		props: {
-			session
+			session,
+			character: {
+				...character,
+				created_at: character?.created_at.toISOString() || ""
+			}
 		}
 	};
 };
 
-const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session }) => {
+const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerSideProps>> = ({ session, character }) => {
 	const router = useRouter();
 	const {
 		register,
@@ -53,23 +64,15 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 		})
 	);
 
-	const client = useQueryClient();
-	const { data: character } = trpc.useQuery(["characters.getOne", { characterId: params.characterId }], {
-		ssr: true,
-		refetchOnWindowFocus: false
-	});
-
 	if (character && character.userId !== session.user?.id) {
 		router.replace(`/characters/${params.characterId}`);
 		return <div>Not authorized</div>;
 	}
 
+	const utils = trpc.useContext();
 	const mutation = trpc.useMutation(["_characters.edit"], {
-		onSuccess(data) {
-			client.setQueryData(["characters.getOne", { characterId: params.characterId }], {
-				...character,
-				...data
-			});
+		onSuccess() {
+			utils.refetchQueries(["characters.getAll", { userId: session.user?.id || "" }]);
 			router.push(`/characters/${params.characterId}`);
 		}
 	});
