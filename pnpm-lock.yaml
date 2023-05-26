@@ -6,7 +6,7 @@ specifiers:
   '@mdi/js': ^7.0.96
   '@mdi/react': ^1.6.1
   '@next-auth/prisma-adapter': ^1.0.4
-  '@prisma/client': ^4.13.0
+  '@prisma/client': ^4.14.0
   '@trpc/client': ^9.26.2
   '@trpc/next': ^9.26.2
   '@trpc/react': ^9.26.2
@@ -29,7 +29,7 @@ specifiers:
   postcss: ^8.4.16
   prettier: ^2.7.1
   prettier-plugin-tailwindcss: ^0.1.13
-  prisma: ^4.13.0
+  prisma: ^4.14.0
   qs: ^6.11.0
   react: 18.2.0
   react-dom: 18.2.0
@@ -47,8 +47,8 @@ dependencies:
   '@hookform/resolvers': 2.9.11_react-hook-form@7.43.2
   '@mdi/js': 7.1.96
   '@mdi/react': 1.6.1
-  '@next-auth/prisma-adapter': 1.0.5_oepcvsqksohpkajtof7phr2p4e
-  '@prisma/client': 4.13.0_prisma@4.13.0
+  '@next-auth/prisma-adapter': 1.0.5_33iogzzk4icw7kpuikgiaqrlti
+  '@prisma/client': 4.14.0_prisma@4.14.0
   '@trpc/client': 9.27.4_@trpc+server@9.27.4
   '@trpc/next': 9.27.4_qjxxbbocr2r3hkqeaa3thrcl54
   '@trpc/react': 9.27.4_2g6rn7sj2da6xgohvi4oglgmnq
@@ -82,7 +82,7 @@ devDependencies:
   postcss: 8.4.21
   prettier: 2.8.4
   prettier-plugin-tailwindcss: 0.1.13_prettier@2.8.4
-  prisma: 4.13.0
+  prisma: 4.14.0
   tailwindcss: 3.2.7_postcss@8.4.21
   typescript: 4.7.4
 
@@ -148,13 +148,13 @@ packages:
       prop-types: 15.8.1
     dev: false
 
-  /@next-auth/prisma-adapter/1.0.5_oepcvsqksohpkajtof7phr2p4e:
+  /@next-auth/prisma-adapter/1.0.5_33iogzzk4icw7kpuikgiaqrlti:
     resolution: {integrity: sha512-VqMS11IxPXrPGXw6Oul6jcyS/n8GLOWzRMrPr3EMdtD6eOalM6zz05j08PcNiis8QzkfuYnCv49OvufTuaEwYQ==}
     peerDependencies:
       '@prisma/client': '>=2.26.0 || >=3'
       next-auth: ^4
     dependencies:
-      '@prisma/client': 4.13.0_prisma@4.13.0
+      '@prisma/client': 4.14.0_prisma@4.14.0
       next-auth: 4.19.2_c3hne4hwj64hb7tofigd3bvkji
     dev: false
 
@@ -307,8 +307,8 @@ packages:
     resolution: {integrity: sha512-003xWiCuvePbLaPHT+CRuaV4GlyCAVm6XYSbBZDHoWZGn1mNkVKFaDbGJjjxmEFvizUwlCoM6O18FCBMMky2zQ==}
     dev: false
 
-  /@prisma/client/4.13.0_prisma@4.13.0:
-    resolution: {integrity: sha512-YaiiICcRB2hatxsbnfB66uWXjcRw3jsZdlAVxmx0cFcTc/Ad/sKdHCcWSnqyDX47vAewkjRFwiLwrOUjswVvmA==}
+  /@prisma/client/4.14.0_prisma@4.14.0:
+    resolution: {integrity: sha512-MK/XaA2sFdfaOa7I9MjNKz6dxeIEdeZlnpNRoF2w3JuRLlFJLkpp6cD3yaqw2nUUhbrn3Iqe3ZpVV+VuGGil7Q==}
     engines: {node: '>=14.17'}
     requiresBuild: true
     peerDependencies:
@@ -317,16 +317,16 @@ packages:
       prisma:
         optional: true
     dependencies:
-      '@prisma/engines-version': 4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a
-      prisma: 4.13.0
+      '@prisma/engines-version': 4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c
+      prisma: 4.14.0
     dev: false
 
-  /@prisma/engines-version/4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a:
-    resolution: {integrity: sha512-fsQlbkhPJf08JOzKoyoD9atdUijuGBekwoOPZC3YOygXEml1MTtgXVpnUNchQlRSY82OQ6pSGQ9PxUe4arcSLQ==}
+  /@prisma/engines-version/4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c:
+    resolution: {integrity: sha512-3jum8/YSudeSN0zGW5qkpz+wAN2V/NYCQ+BPjvHYDfWatLWlQkqy99toX0GysDeaUoBIJg1vaz2yKqiA3CFcQw==}
     dev: false
 
-  /@prisma/engines/4.13.0:
-    resolution: {integrity: sha512-HrniowHRZXHuGT9XRgoXEaP2gJLXM5RMoItaY2PkjvuZ+iHc0Zjbm/302MB8YsPdWozAPHHn+jpFEcEn71OgPw==}
+  /@prisma/engines/4.14.0:
+    resolution: {integrity: sha512-PDNlhP/1vyTgmNyiucGqGCdXIp7HIkkvKO50si3y3PcceeHvqtiKPaH1iJdz63jCWMVMbj2MElSxXPOeBvEVIQ==}
     requiresBuild: true
 
   /@rushstack/eslint-patch/1.2.0:
@@ -2669,13 +2669,13 @@ packages:
     resolution: {integrity: sha512-WuxUnVtlWL1OfZFQFuqvnvs6MiAGk9UNsBostyBOB0Is9wb5uRESevA6rnl/rkksXaGX3GzZhPup5d6Vp1nFew==}
     dev: false
 
-  /prisma/4.13.0:
-    resolution: {integrity: sha512-L9mqjnSmvWIRCYJ9mQkwCtj4+JDYYTdhoyo8hlsHNDXaZLh/b4hR0IoKIBbTKxZuyHQzLopb/+0Rvb69uGV7uA==}
+  /prisma/4.14.0:
+    resolution: {integrity: sha512-+5dMl1uxMQb4RepndY6AwR9xi1cDcaGFICu+ws6/Nmgt93mFPNj8tYxSfTdmfg+rkNrUId9rk/Ac2vTgLe/oXA==}
     engines: {node: '>=14.17'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@prisma/engines': 4.13.0
+      '@prisma/engines': 4.14.0
 
   /prop-types/15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}

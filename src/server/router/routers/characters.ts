@@ -1,8 +1,7 @@
-import { getLogsSummary } from "$src/utils/logs";
+import { getLevels, getLogsSummary } from "$src/utils/logs";
 import type { MagicItem, PrismaClient, StoryAward } from "@prisma/client";
 import { z } from "zod";
 import { createRouter } from "../context";
-import { getLevels } from "../helpers";
 
 export const charactersRouter = createRouter()
 	.query("getAll", {
@@ -26,7 +25,21 @@ export const charactersRouter = createRouter()
 			characterId: z.string()
 		}),
 		async resolve({ input, ctx }) {
-			return await getLogs(ctx.prisma, input.characterId);
+			const logs = await ctx.prisma.log.findMany({
+				include: {
+					dm: true,
+					magic_items_gained: true,
+					magic_items_lost: true,
+					story_awards_gained: true,
+					story_awards_lost: true
+				},
+				orderBy: {
+					date: "asc"
+				},
+				where: { characterId: input.characterId }
+			});
+
+			return getLogsSummary(logs);
 		}
 	});
 
@@ -54,24 +67,6 @@ export async function getOne(prisma: PrismaClient, characterId: string) {
 		...character,
 		...getLogsSummary(character.logs || [])
 	};
-}
-
-export async function getLogs(prisma: PrismaClient, characterId: string) {
-	const logs = await prisma.log.findMany({
-		include: {
-			dm: true,
-			magic_items_gained: true,
-			magic_items_lost: true,
-			story_awards_gained: true,
-			story_awards_lost: true
-		},
-		orderBy: {
-			date: "asc"
-		},
-		where: { characterId: characterId }
-	});
-
-	return getLogsSummary(logs);
 }
 
 export async function getAll(prisma: PrismaClient, userId: string) {

@@ -3,7 +3,7 @@ import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
-import { getLogs, getOne } from "$src/server/router/routers/characters";
+import { getOne } from "$src/server/router/routers/characters";
 import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
 import { getLogsSummary } from "$src/utils/logs";
@@ -28,7 +28,6 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	let session = await getServerSession(context.req, context.res, authOptions);
 	const characterId = typeof context.query.characterId === "string" ? context.query.characterId : "";
 	const character = await getOne(prisma, characterId);
-	const logs = await getLogs(prisma, characterId);
 
 	return {
 		...(!session
@@ -39,8 +38,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 		props: {
 			character: {
 				...character,
-				...logs,
-				logs: logs.logs.map(log => ({
+				logs: character.logs.map(log => ({
 					...log,
 					date: log.date.toISOString(),
 					created_at: log.created_at.toISOString(),
@@ -183,6 +181,17 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		const activeName = document.activeElement?.getAttribute("name");
 		if (activeName === "dm.name" && !(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name"))) return;
 		if (activeName === "dm.DCI" && !(dmDCIMatches.length === 1 && dmDCIMatches[0]?.DCI === getValues("dm.DCI"))) return;
+
+		const acp = getValues("acp");
+		if (character.total_level == 20 && acp - selectedLog.acp > 0) {
+			setError("acp", { message: "ACP cannot be gained at level 20." });
+			return;
+		}
+		const level = getValues("level") * 1;
+		if (character.total_level + level - selectedLog.level > 20 && level > 0) {
+			setError("level", { message: "Character cannot exceed level 20." });
+			return;
+		}
 
 		handleSubmit(onSubmit)(e);
 	};
