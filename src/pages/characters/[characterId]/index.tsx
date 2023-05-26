@@ -4,6 +4,7 @@ import Layout from "$src/layouts/main";
 import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { useQueryString } from "$src/utils/hooks";
+import { getLogsSummary } from "$src/utils/logs";
 import { concatenate, slugify } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -79,14 +80,41 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 			race: true,
 			class: true,
 			user: true
+			// logs: {
+			// 	include: {
+			// 		dm: true,
+			// 		magic_items_gained: true,
+			// 		magic_items_lost: true,
+			// 		story_awards_gained: true,
+			// 		story_awards_lost: true
+			// 	},
+			// 	orderBy: {
+			// 		date: "asc"
+			// 	}
+			// }
 		}
 	});
 
 	if (!character) return { redirect: { destination: "/characters", permanent: false } };
 
+	// const logSummary = getLogsSummary(character.logs);
+	// const logs = logSummary.logs.map(log => ({
+	// 	...log,
+	// 	date: log.date.toISOString(),
+	// 	applied_date: log.applied_date?.toISOString() || null,
+	// 	created_at: log.created_at.toISOString()
+	// }));
+
 	return {
 		props: {
 			character
+			// character: {
+			// 	...character,
+			// 	logs: {
+			// 		...logSummary,
+			// 		logs: logs
+			// 	}
+			// }
 		}
 	};
 };
@@ -109,10 +137,24 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 		})
 	);
 
+	// const logsLoading = false;
 	const { data: logs, isLoading: logsLoading } = trpc.useQuery(["characters.getLogs", { characterId: params.characterId }], {
 		refetchOnWindowFocus: false,
 		refetchOnMount: false
 	});
+
+	// const logs = useMemo(
+	// 	() => ({
+	// 		...character.logs,
+	// 		logs: character.logs.logs.map(log => ({
+	// 			...log,
+	// 			date: new Date(log.date),
+	// 			applied_date: log.applied_date ? new Date(log.applied_date) : null,
+	// 			created_at: new Date(log.created_at)
+	// 		}))
+	// 	}),
+	// 	[character.logs]
+	// );
 
 	const myCharacter = character.user?.id === session.data?.user?.id;
 	const [descriptions, setDescriptions] = useState(true);
@@ -227,7 +269,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						<Link href={`/characters/${params.characterId}/edit`} className="btn-primary btn-sm btn hidden sm:flex">
 							Edit
 						</Link>
-						<div className="dropdown-end dropdown">
+						<div className="dropdown dropdown-end">
 							<label tabIndex={1} className="btn-sm btn">
 								<Icon path={mdiDotsHorizontal} size={1} />
 							</label>
@@ -384,7 +426,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													}>
 													<SearchResults text={log.name} search={search} />
 												</p>
-												<p className="text-netural-content mb-2 text-xs font-normal">
+												<p className="text-netural-content mb-2 text-xs font-normal" suppressHydrationWarning>
 													{new Date(log.is_dm_log && log.applied_date ? log.applied_date : log.date).toLocaleString()}
 												</p>
 												{log.dm && log.type === "game" && log.dm.uid !== character.user.id && (
@@ -573,7 +615,11 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 				{modal && (
 					<label className="modal-box relative">
 						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
-						{modal.date && <p className="text-xs ">{modal.date.toLocaleString()}</p>}
+						{modal.date && (
+							<p className="text-xs" suppressHydrationWarning>
+								{modal.date.toLocaleString()}
+							</p>
+						)}
 						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
 							{modal.description}
 						</ReactMarkdown>
