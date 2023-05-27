@@ -39,7 +39,7 @@ export default function AutoFillSelect({
 			setValSearch("");
 			onSelect(matches[key]?.key || "");
 		},
-		[matches, valSearch, onSelect]
+		[matches, onSelect]
 	);
 
 	return (
