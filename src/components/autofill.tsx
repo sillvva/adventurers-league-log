@@ -1,8 +1,9 @@
 import { concatenate } from "$src/utils/misc";
 import { useCallback, useMemo, useState } from "react";
+
 import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
 
-export function AutoFillSelect({
+export default function AutoFillSelect({
 	type,
 	value,
 	values,
@@ -52,21 +53,24 @@ export function AutoFillSelect({
 					}}
 					onKeyDown={e => {
 						const isSearching = parsedValues && parsedValues.length > 0 && valSearch.trim();
-						if (!isSearching) return;
+						if (!isSearching) return false;
 						const isSelected = matches.length === 1 && matches[0]?.key === value;
 						if (e.code === "ArrowDown") {
-							if (isSelected) return;
+							e.preventDefault();
+							if (isSelected) return false;
 							setKeySel(keySel + 1);
 							if (keySel >= matches.length) setKeySel(0);
 							return false;
 						}
 						if (e.code === "ArrowUp") {
-							if (isSelected) return;
+							e.preventDefault();
+							if (isSelected) return false;
 							setKeySel(keySel - 1);
 							if (keySel < 0) setKeySel(matches.length - 1);
 							return false;
 						}
 						if (e.code === "Enter" || e.code === "Tab") {
+							e.preventDefault();
 							if (isSelected) return false;
 							selectHandler(keySel);
 							setValSearch("");

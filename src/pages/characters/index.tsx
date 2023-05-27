@@ -1,18 +1,20 @@
-import { SearchResults } from "$src/components/search";
-import Layout from "$src/layouts/main";
-import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import { trpc } from "$src/utils/trpc";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { mdiDotsHorizontal, mdiHome, mdiPlus } from "@mdi/js";
-import Icon from "@mdi/react";
+import { SearchResults } from '$src/components/search';
+import Layout from '$src/layouts/main';
+import { authOptions } from '$src/pages/api/auth/[...nextauth]';
+import { trpc } from '$src/utils/trpc';
+import MiniSearch from 'minisearch';
+import { getServerSession } from 'next-auth';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { mdiDotsHorizontal, mdiHome, mdiPlus } from '@mdi/js';
+import Icon from '@mdi/react';
+
 import type { InferPropsFromServerSideFunction } from "ddal";
-import MiniSearch from "minisearch";
 import type { GetServerSidePropsContext } from "next";
-import { getServerSession } from "next-auth";
-import Head from "next/head";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import type { NextPageWithLayout } from "../_app";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {

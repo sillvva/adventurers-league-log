@@ -1,29 +1,31 @@
+import AutoFillSelect from "$src/components/autofill";
 import AutoResizeTextArea from "$src/components/textarea";
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
 import { getLogsSummary } from "$src/utils/logs";
 import { concatenate, formatDate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
-import Icon from "@mdi/react";
-import type { Character, LogType } from "@prisma/client";
-import type { InferPropsFromServerSideFunction } from "ddal";
-import type { GetServerSidePropsContext } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import type { SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { AutoFillSelect } from "$src/components/autofill";
+
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
+import Icon from "@mdi/react";
+
+import type { NextPageWithLayout } from "$src/pages/_app";
+import type { Character, LogType } from "@prisma/client";
+import type { InferPropsFromServerSideFunction } from "ddal";
+import type { GetServerSidePropsContext } from "next";
+import type { SubmitHandler } from "react-hook-form";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	const session = await getServerSession(context.req, context.res, authOptions);

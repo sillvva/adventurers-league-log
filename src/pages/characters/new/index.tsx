@@ -1,14 +1,8 @@
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import type { NextPageWithLayout } from "$src/pages/_app";
 import { newCharacterSchema } from "$src/types/zod-schema";
 import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { mdiHome } from "@mdi/js";
-import Icon from "@mdi/react";
-import type { InferPropsFromServerSideFunction } from "ddal";
-import type { GetServerSidePropsContext } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
@@ -16,6 +10,14 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { mdiHome } from "@mdi/js";
+import Icon from "@mdi/react";
+
+import type { NextPageWithLayout } from "$src/pages/_app";
+import type { InferPropsFromServerSideFunction } from "ddal";
+import type { GetServerSidePropsContext } from "next";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	const session = await getServerSession(context.req, context.res, authOptions);

@@ -1,9 +1,12 @@
 import { concatenate } from "$src/utils/misc";
+import { useState } from "react";
+
 import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
 import Icon from "@mdi/react";
-import type { MagicItem, StoryAward } from "@prisma/client";
-import { useState } from "react";
+
 import { SearchResults } from "./search";
+
+import type { MagicItem, StoryAward } from "@prisma/client";
 
 export function Items({
 	items,

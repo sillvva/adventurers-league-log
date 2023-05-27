@@ -1,14 +1,16 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import type { GetServerSidePropsContext, NextPage } from "next";
-import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import { getServerSession } from "next-auth";
-import { signIn } from "next-auth/react";
-import Image from "next/future/image";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import background from "../../public/images/barovia-gate.jpg";
-import google from "../../public/images/google.svg";
+import { authOptions } from '$src/pages/api/auth/[...nextauth]';
+import { getServerSession } from 'next-auth';
+import { signIn } from 'next-auth/react';
+import Image from 'next/future/image';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
 
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+
+import background from '../../public/images/barovia-gate.jpg';
+import google from '../../public/images/google.svg';
+
+import type { GetServerSidePropsContext, NextPage } from "next";
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	const session = await getServerSession(context.req, context.res, authOptions);
 
