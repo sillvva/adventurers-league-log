@@ -1,5 +1,4 @@
 import { concatenate } from "$src/utils/misc";
-import { on } from "events";
 import { useCallback, useMemo, useState } from "react";
 
 import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
