@@ -1,22 +1,25 @@
 import { Items } from "$src/components/items";
 import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
-import type { NextPageWithLayout } from "$src/pages/_app";
 import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
-import Icon from "@mdi/react";
 import MiniSearch from "minisearch";
-import type { GetServerSidePropsContext } from "next";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
+import Icon from "@mdi/react";
+
 import { authOptions } from "../api/auth/[...nextauth]";
 import { components } from "../characters/[characterId]";
+
+import type { NextPageWithLayout } from "$src/pages/_app";
+import type { GetServerSidePropsContext } from "next";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	const session = await getServerSession(context.req, context.res, authOptions);

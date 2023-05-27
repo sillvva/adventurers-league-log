@@ -2,29 +2,30 @@ import { Items } from "$src/components/items";
 import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
-import type { NextPageWithLayout } from "$src/pages/_app";
 import { prisma } from "$src/server/db/client";
 import { useQueryString } from "$src/utils/hooks";
 import { concatenate, slugify } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiPlus, mdiTrashCan } from "@mdi/js";
-import Icon from "@mdi/react";
-import type { InferPropsFromServerSideFunction } from "ddal";
 import MiniSearch from "minisearch";
-import type { GetServerSidePropsContext } from "next";
 import { getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { CSSProperties } from "react";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import type { SpecialComponents } from "react-markdown/lib/ast-to-react";
-import type { NormalComponents } from "react-markdown/lib/complex-types";
 import remarkGfm from "remark-gfm";
 import { z } from "zod";
+
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiPlus, mdiTrashCan } from "@mdi/js";
+import Icon from "@mdi/react";
+
+import type { NextPageWithLayout } from "$src/pages/_app";
+import type { InferPropsFromServerSideFunction } from "ddal";
+import type { GetServerSidePropsContext } from "next";
+import type { CSSProperties } from "react";
+import type { SpecialComponents } from "react-markdown/lib/ast-to-react";
+import type { NormalComponents } from "react-markdown/lib/complex-types";
 
 export const components: Partial<Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents> = {
 	h1({ children }) {
