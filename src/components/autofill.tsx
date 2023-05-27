@@ -1,4 +1,5 @@
 import { concatenate } from "$src/utils/misc";
+import { on } from "events";
 import { useCallback, useMemo, useState } from "react";
 
 import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
@@ -28,7 +29,7 @@ export default function AutoFillSelect({
 						.filter(v => `${searchBy == "key" ? v.key : v.value}`.toLowerCase().includes(valSearch.toLowerCase()))
 						.sort((a, b) => (a.value > b.value ? 1 : -1))
 				: [],
-		[values, valSearch]
+		[values, valSearch, searchBy]
 	);
 
 	const parsedValues = useMemo(() => values.map(v => ({ key: v.key ?? v.value, value: v.value })).filter(v => v.key !== null), [values]);
@@ -38,7 +39,7 @@ export default function AutoFillSelect({
 			setValSearch("");
 			onSelect(matches[key]?.key || "");
 		},
-		[matches, valSearch]
+		[matches, valSearch, onSelect]
 	);
 
 	return (
