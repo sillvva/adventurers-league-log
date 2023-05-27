@@ -1,4 +1,5 @@
 import AutoResizeTextArea from "$src/components/textarea";
+import { AutoFillSelect } from "$src/components/autofill";
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "$src/pages/_app";
@@ -74,15 +75,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		})
 	);
 
-	const {
-		register,
-		clearErrors,
-		formState: { errors },
-		getValues,
-		setValue,
-		setError,
-		handleSubmit
-	} = useForm<z.infer<typeof logSchema>>({
+	const form = useForm<z.infer<typeof logSchema>>({
 		resolver: zodResolver(logSchema)
 	});
 
@@ -128,11 +121,9 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 
 	const [parent1] = useAutoAnimate<HTMLDivElement>();
 	const [parent2] = useAutoAnimate<HTMLDivElement>();
-	const [dmKeySel, setDMKeySel] = useState<number>(0);
 	const [season, setSeason] = useState<1 | 8 | 9>(selectedLog?.experience ? 1 : selectedLog?.acp ? 8 : 9);
 	const [type, setType] = useState<LogType>(selectedLog.type || "game");
 	const [saving, setSaving] = useState(false);
-	const [dmSearch, setDmSearch] = useState("");
 	const [magicItemsGained, setMagicItemsGained] = useState(
 		selectedLog.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
 	);
@@ -146,16 +137,6 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	const { data: dms } = trpc.useQuery(["_characters.getDMs"], {
 		refetchOnWindowFocus: false
 	});
-
-	const dmNameMatches = useMemo(
-		() => (dms && dms.length > 0 && dmSearch.trim() ? dms.filter(dm => dm.name.toLowerCase().includes(dmSearch.toLowerCase())) : []),
-		[dms, dmSearch]
-	);
-
-	const dmDCIMatches = useMemo(
-		() => (dms && dms.length > 0 && dmSearch.trim() ? dms.filter(dm => dm.DCI !== null && dm.DCI.includes(dmSearch)) : []),
-		[dms, dmSearch]
-	);
 
 	const utils = trpc.useContext();
 	const mutation = trpc.useMutation(["_logs.save"], {
@@ -195,27 +176,27 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		e.preventDefault();
 
 		const activeName = document.activeElement?.getAttribute("name");
-		if (activeName === "dm.name" && !(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name"))) return;
-		if (activeName === "dm.DCI" && !(dmDCIMatches.length === 1 && dmDCIMatches[0]?.DCI === getValues("dm.DCI"))) return;
+		if (activeName === "dm.name" && !form.getValues("dm.name")) return;
+		if (activeName === "dm.DCI" && !form.getValues("dm.DCI")) return;
 
-		const acp = getValues("acp");
+		const acp = form.getValues("acp");
 		if (character.total_level == 20 && acp - selectedLog.acp > 0) {
-			setError("acp", { message: "ACP cannot be gained at level 20." });
+			form.setError("acp", { message: "ACP cannot be gained at level 20." });
 			return;
 		}
-		const level = getValues("level") * 1;
+		const level = form.getValues("level") * 1;
 		if (character.total_level + level - selectedLog.level > 20 && level > 0) {
-			setError("level", { message: "Character cannot exceed level 20." });
+			form.setError("level", { message: "Character cannot exceed level 20." });
 			return;
 		}
 
-		handleSubmit(onSubmit)(e);
+		form.handleSubmit(onSubmit)(e);
 	};
 
 	const onSubmit: SubmitHandler<z.infer<typeof logSchema>> = e => {
-		clearErrors();
+		form.clearErrors();
 
-		const values = getValues();
+		const values = form.getValues();
 		values.type = type;
 		values.magic_items_gained = magicItemsGained;
 		values.magic_items_lost = magicItemsLost;
@@ -236,15 +217,15 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 			result.error.issues.forEach(issue => {
 				const issueFields = ["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"] as const;
 				if (issueFields.find(i => i == issue.path.join("."))) {
-					setError(issue.path.join(".") as (typeof issueFields)[number], {
+					form.setError(issue.path.join(".") as (typeof issueFields)[number], {
 						message: issue.message
 					});
 				}
 				if (issue.path[0] == "magic_items_gained" && typeof issue.path[1] == "number" && issue.path[2] == "name") {
-					setError(`magic_items_gained.${issue.path[1]}.name`, { message: issue.message });
+					form.setError(`magic_items_gained.${issue.path[1]}.name`, { message: issue.message });
 				}
 				if (issue.path[0] == "story_awards_gained" && typeof issue.path[1] == "number" && issue.path[2] == "name") {
-					setError(`story_awards_gained.${issue.path[1]}.name`, { message: issue.message });
+					form.setError(`story_awards_gained.${issue.path[1]}.name`, { message: issue.message });
 				}
 			});
 		}
@@ -267,9 +248,9 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	const removeLostStoryAward = (index: number) => setStoryAwardsLost(storyAwardsLost.filter((_, i) => i !== index));
 
 	const setDM = (dm: DungeonMaster) => {
-		setValue("dm.id", dm.id);
-		setValue("dm.name", dm.name);
-		setValue("dm.DCI", dm.DCI);
+		form.setValue("dm.id", dm.id);
+		form.setValue("dm.name", dm.name);
+		form.setValue("dm.DCI", dm.DCI);
 	};
 
 	return (
@@ -311,9 +292,9 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 			)}
 
 			<form onSubmit={submitHandler}>
-				<input type="hidden" {...register("characterId", { value: params.characterId })} />
-				<input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
-				<input type="hidden" {...register("is_dm_log", { value: selectedLog.is_dm_log })} />
+				<input type="hidden" {...form.register("characterId", { value: params.characterId })} />
+				<input type="hidden" {...form.register("logId", { value: params.logId === "new" ? "" : params.logId })} />
+				<input type="hidden" {...form.register("is_dm_log", { value: selectedLog.is_dm_log })} />
 				<div className="grid grid-cols-12 gap-4">
 					{!selectedLog.is_dm_log && (
 						<div className="form-control col-span-12 sm:col-span-4">
@@ -335,12 +316,12 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						</label>
 						<input
 							type="text"
-							{...register("name", { required: true, value: selectedLog.name, disabled: saving })}
+							{...form.register("name", { required: true, value: selectedLog.name, disabled: saving })}
 							className="input-bordered input w-full focus:border-primary"
-							aria-invalid={errors.name ? "true" : "false"}
+							aria-invalid={form.formState.errors.name ? "true" : "false"}
 						/>
 						<label className="label">
-							<span className="label-text-alt text-error">{errors.name?.message}</span>
+							<span className="label-text-alt text-error">{form.formState.errors.name?.message}</span>
 						</label>
 					</div>
 					<div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6" : "sm:col-span-4")}>
@@ -352,28 +333,28 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						</label>
 						<input
 							type="datetime-local"
-							{...register("date", {
+							{...form.register("date", {
 								required: true,
 								value: formatDate(selectedLog.date),
 								disabled: saving,
 								setValueAs: (v: string) => new Date(v || formatDate(selectedLog.date)).toISOString()
 							})}
 							className="input-bordered input w-full focus:border-primary"
-							aria-invalid={errors.date ? "true" : "false"}
+							aria-invalid={form.formState.errors.date ? "true" : "false"}
 						/>
 						<label className="label">
-							<span className="label-text-alt text-error">{errors.date?.message}</span>
+							<span className="label-text-alt text-error">{form.formState.errors.date?.message}</span>
 						</label>
 					</div>
 					<div className="col-span-12 grid grid-cols-12 gap-4" ref={parent1}>
 						{type === "game" && (
 							<>
-								<input type="hidden" {...register("dm.id", { value: selectedLog.dm?.id || "" })} />
+								<input type="hidden" {...form.register("dm.id", { value: selectedLog.dm?.id || "" })} />
 								{selectedLog.is_dm_log ? (
 									<>
-										<input type="hidden" {...register("dm.name", { value: selectedLog.dm?.name || "" })} />
-										<input type="hidden" {...register("dm.DCI", { value: selectedLog.dm?.DCI || "" })} />
-										<input type="hidden" {...register("dm.uid", { value: selectedLog.dm?.uid || "" })} />
+										<input type="hidden" {...form.register("dm.name", { value: selectedLog.dm?.name || "" })} />
+										<input type="hidden" {...form.register("dm.DCI", { value: selectedLog.dm?.DCI || "" })} />
+										<input type="hidden" {...form.register("dm.uid", { value: selectedLog.dm?.uid || "" })} />
 									</>
 								) : (
 									<>
@@ -381,120 +362,42 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 											<label className="label">
 												<span className="label-text">DM Name</span>
 											</label>
-											<div className="dropdown">
-												<label>
-													<input
-														type="text"
-														{...register("dm.name", {
-															value: selectedLog.dm?.name || "",
-															onChange: e => setDmSearch(e.target.value),
-															disabled: saving
-														})}
-														onKeyDown={e => {
-															const isSearching = dms && dms.length > 0 && dmSearch.trim();
-															if (!isSearching) return;
-															const isSelected = dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name");
-															if (e.code === "ArrowDown") {
-																if (isSelected) return;
-																setDMKeySel(dmKeySel + 1);
-																if (dmKeySel >= dmNameMatches.length) setDMKeySel(0);
-																return false;
-															}
-															if (e.code === "ArrowUp") {
-																if (isSelected) return;
-																setDMKeySel(dmKeySel - 1);
-																if (dmKeySel < 0) setDMKeySel(dmNameMatches.length - 1);
-																return false;
-															}
-															if (e.code === "Enter" || e.code === "Tab") {
-																if (isSelected) return;
-																setDM(dmNameMatches[dmKeySel] as DungeonMaster);
-																setDmSearch("");
-																return false;
-															}
-														}}
-														onBlur={e => setDMKeySel(-1)}
-														className="input-bordered input w-full focus:border-primary"
-													/>
-												</label>
-												{dms && dms.length > 0 && dmSearch.trim() && !(dmNameMatches.length === 1 && dmNameMatches[0]?.name === getValues("dm.name")) && (
-													<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
-														{dmNameMatches
-															.map((dm, i) => (
-																<li key={dm.id} className={concatenate(dmKeySel === i && "bg-primary text-primary-content")}>
-																	<a onMouseDown={() => setDM(dm)}>
-																		{dm.name}
-																		{dm.DCI && ` (${dm.DCI})`}
-																	</a>
-																</li>
-															))
-															.slice(0, 8)}
-													</ul>
-												)}
-											</div>
+											<AutoFillSelect
+												type="text"
+												inputProps={form.register("dm.name", {
+													value: selectedLog.dm?.name || "",
+													disabled: saving
+												})}
+												value={form.getValues("dm.name")}
+												values={dms?.map(dm => ({ key: dm.name, value: dm.name + (dm.DCI ? ` (${dm.DCI})` : "") })) || []}
+												onSelect={val => {
+													const dm = dms?.find(dm => dm.name === val);
+													if (dm) setDM(dm);
+												}}
+											/>
 											<label className="label">
-												<span className="label-text-alt text-error">{errors.dm?.name?.message}</span>
+												<span className="label-text-alt text-error">{form.formState.errors.dm?.name?.message}</span>
 											</label>
 										</div>
 										<div className="form-control col-span-12 sm:col-span-6">
 											<label className="label">
 												<span className="label-text">DM DCI</span>
 											</label>
-											<div className="dropdown">
-												<label>
-													<input
-														type="number"
-														{...register("dm.DCI", {
-															value: selectedLog.dm?.DCI || null,
-															onChange: e => setDmSearch(e.target.value),
-															disabled: saving
-														})}
-														min="0"
-														onKeyDown={e => {
-															const isSearching = dms && dms.length > 0 && dmSearch.trim();
-															if (!isSearching) return false;
-															const isSelected = dmDCIMatches.length === 1 && dmDCIMatches[0]?.DCI === getValues("dm.DCI");
-															if (e.code === "ArrowDown") {
-																if (isSelected) return false;
-																setDMKeySel(dmKeySel + 1);
-																if (dmKeySel >= dmDCIMatches.length) setDMKeySel(0);
-																return false;
-															}
-															if (e.code === "ArrowUp") {
-																if (isSelected) return false;
-																setDMKeySel(dmKeySel - 1);
-																if (dmKeySel < 0) setDMKeySel(dmDCIMatches.length - 1);
-																return false;
-															}
-															if (e.code === "Enter" || e.code === "Tab") {
-																if (isSelected) return false;
-																if (dmKeySel === -1) return false;
-																setDM(dmDCIMatches[dmKeySel] as DungeonMaster);
-																setDmSearch("");
-																return false;
-															}
-														}}
-														onBlur={e => setDMKeySel(-1)}
-														className="input-bordered input w-full focus:border-primary"
-													/>
-												</label>
-												{dms && dms.length > 0 && dmSearch.trim() && (
-													<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
-														{dmDCIMatches
-															.map(dm => (
-																<li key={dm.id}>
-																	<a onMouseDown={() => setDM(dm)}>
-																		{dm.name}
-																		{dm.DCI && ` (${dm.DCI})`}
-																	</a>
-																</li>
-															))
-															.slice(0, 8)}
-													</ul>
-												)}
-											</div>
+											<AutoFillSelect
+												type="number"
+												inputProps={form.register("dm.DCI", {
+													value: selectedLog.dm?.DCI || null,
+													disabled: saving
+												})}
+												value={form.getValues("dm.DCI")}
+												values={dms?.map(dm => ({ key: dm.DCI, value: dm.name + (dm.DCI ? ` (${dm.DCI})` : "") })) || []}
+												onSelect={val => {
+													const dm = dms?.find(dm => dm.DCI === val);
+													if (dm) setDM(dm);
+												}}
+											/>
 											<label className="label">
-												<span className="label-text-alt text-error">{errors.dm?.DCI?.message}</span>
+												<span className="label-text-alt text-error">{form.formState.errors.dm?.DCI?.message}</span>
 											</label>
 										</div>
 									</>
@@ -520,11 +423,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 										<input
 											type="number"
-											{...register("experience", { value: selectedLog.experience, disabled: saving, valueAsNumber: true })}
+											{...form.register("experience", { value: selectedLog.experience, disabled: saving, valueAsNumber: true })}
 											className="input-bordered input w-full focus:border-primary"
 										/>
 										<label className="label">
-											<span className="label-text-alt text-error">{errors.experience?.message}</span>
+											<span className="label-text-alt text-error">{form.formState.errors.experience?.message}</span>
 										</label>
 									</div>
 								)}
@@ -537,7 +440,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 											type="number"
 											min="0"
 											max={Math.max(selectedLog.level, character ? 20 - character.total_level : 19)}
-											{...register("level", {
+											{...form.register("level", {
 												value: selectedLog.level,
 												min: 0,
 												max: Math.max(selectedLog.level, character ? 20 - character.total_level : 19),
@@ -547,7 +450,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 											className="input-bordered input w-full focus:border-primary"
 										/>
 										<label className="label">
-											<span className="label-text-alt text-error">{errors.level?.message}</span>
+											<span className="label-text-alt text-error">{form.formState.errors.level?.message}</span>
 										</label>
 									</div>
 								)}
@@ -562,11 +465,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 										<input
 											type="number"
-											{...register("acp", { value: selectedLog.acp, disabled: saving, valueAsNumber: true })}
+											{...form.register("acp", { value: selectedLog.acp, disabled: saving, valueAsNumber: true })}
 											className="input-bordered input w-full focus:border-primary"
 										/>
 										<label className="label">
-											<span className="label-text-alt text-error">{errors.acp?.message}</span>
+											<span className="label-text-alt text-error">{form.formState.errors.acp?.message}</span>
 										</label>
 									</div>
 								)}
@@ -576,11 +479,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									</label>
 									<input
 										type="number"
-										{...register("tcp", { value: selectedLog.tcp, disabled: saving, valueAsNumber: true })}
+										{...form.register("tcp", { value: selectedLog.tcp, disabled: saving, valueAsNumber: true })}
 										className="input-bordered input w-full focus:border-primary"
 									/>
 									<label className="label">
-										<span className="label-text-alt text-error">{errors.tcp?.message}</span>
+										<span className="label-text-alt text-error">{form.formState.errors.tcp?.message}</span>
 									</label>
 								</div>
 							</>
@@ -591,11 +494,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							</label>
 							<input
 								type="number"
-								{...register("gold", { value: selectedLog.gold, disabled: saving, valueAsNumber: true })}
+								{...form.register("gold", { value: selectedLog.gold, disabled: saving, valueAsNumber: true })}
 								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
-								<span className="label-text-alt text-error">{errors.gold?.message}</span>
+								<span className="label-text-alt text-error">{form.formState.errors.gold?.message}</span>
 							</label>
 						</div>
 						<div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-2" : "col-span-4")}>
@@ -604,11 +507,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							</label>
 							<input
 								type="number"
-								{...register("dtd", { value: selectedLog.dtd, disabled: saving, valueAsNumber: true })}
+								{...form.register("dtd", { value: selectedLog.dtd, disabled: saving, valueAsNumber: true })}
 								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
-								<span className="label-text-alt text-error">{errors.dtd?.message}</span>
+								<span className="label-text-alt text-error">{form.formState.errors.dtd?.message}</span>
 							</label>
 						</div>
 					</div>
@@ -617,11 +520,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<span className="label-text">Notes</span>
 						</label>
 						<AutoResizeTextArea
-							{...register("description", { value: selectedLog.description || "", disabled: saving })}
+							{...form.register("description", { value: selectedLog.description || "", disabled: saving })}
 							className="textarea-bordered textarea w-full focus:border-primary"
 						/>
 						<label className="label">
-							<span className="label-text-alt text-error">{errors.description?.message}</span>
+							<span className="label-text-alt text-error">{form.formState.errors.description?.message}</span>
 							<span className="label-text-alt">Markdown Allowed</span>
 						</label>
 					</div>
@@ -667,7 +570,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												className="input-bordered input w-full focus:border-primary"
 											/>
 											<label className="label">
-												<span className="label-text-alt text-error">{(errors.magic_items_gained || [])[index]?.name?.message}</span>
+												<span className="label-text-alt text-error">{(form.formState.errors.magic_items_gained || [])[index]?.name?.message}</span>
 											</label>
 										</div>
 										<button type="button" className="btn-danger btn mt-9" onClick={() => removeMagicItem(index)}>
@@ -718,7 +621,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												))}
 											</select>
 											<label className="label">
-												<span className="label-text-alt text-error">{(errors.magic_items_lost || [])[index]?.message}</span>
+												<span className="label-text-alt text-error">{(form.formState.errors.magic_items_lost || [])[index]?.message}</span>
 											</label>
 										</div>
 										<button type="button" className="btn-danger btn mt-9" onClick={() => removeLostMagicItem(index)}>
@@ -749,7 +652,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												style={{ resize: "none" }}
 											/>
 											<label className="label">
-												<span className="label-text-alt text-error">{(errors.story_awards_gained || [])[index]?.name?.message}</span>
+												<span className="label-text-alt text-error">{(form.formState.errors.story_awards_gained || [])[index]?.name?.message}</span>
 											</label>
 										</div>
 										<button type="button" className="btn-danger btn mt-9" onClick={() => removeStoryAward(index)}>
@@ -798,7 +701,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												))}
 											</select>
 											<label className="label">
-												<span className="label-text-alt text-error">{(errors.story_awards_lost || [])[index]?.message}</span>
+												<span className="label-text-alt text-error">{(form.formState.errors.story_awards_lost || [])[index]?.message}</span>
 											</label>
 										</div>
 										<button type="button" className="btn-danger btn mt-9" onClick={() => removeLostStoryAward(index)}>

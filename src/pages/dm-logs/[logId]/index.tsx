@@ -23,6 +23,7 @@ import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { AutoFillSelect } from "$src/components/autofill";
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
 	const session = await getServerSession(context.req, context.res, authOptions);
@@ -80,17 +81,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		})
 	);
 
-	const {
-		register,
-		clearErrors,
-		formState: { errors },
-		getValues,
-		setValue,
-		setError,
-		watch,
-		handleSubmit,
-		trigger
-	} = useForm<z.infer<typeof logSchema>>({
+	const form = useForm<z.infer<typeof logSchema>>({
 		resolver: zodResolver(logSchema)
 	});
 
@@ -136,9 +127,6 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 
 	const [parent1] = useAutoAnimate<HTMLDivElement>();
 	const [parent2] = useAutoAnimate<HTMLDivElement>();
-	const [charSearch, setCharSearch] = useState("");
-	const [charIndex, setCharIndex] = useState(0);
-	const [charSel, setCharSel] = useState<typeof characters>([]);
 	const [season, setSeason] = useState<1 | 8 | 9>(selectedLog?.experience ? 1 : selectedLog?.acp ? 8 : 9);
 	const [magicItemsGained, setMagicItemsGained] = useState(
 		selectedLog.magic_items_gained.map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
@@ -147,24 +135,6 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		(selectedLog?.story_awards_gained || []).map(mi => ({ id: mi.id, name: mi.name, description: mi.description || "" }))
 	);
 	const [mutError, setMutError] = useState<string | null>(null);
-
-	const updateCharSearch = (name: string) => {
-		if (!name.trim()) setCharId(null);
-		setCharSearch(name);
-
-		const chars: InferPropsFromServerSideFunction<typeof getServerSideProps>["characters"] = [];
-		characters.forEach(character => {
-			const match = character.name.toLowerCase().includes((name || "undefined").toLocaleLowerCase());
-			if (match) chars.push(character);
-		});
-
-		setCharSel(chars);
-	};
-
-	const setCharId = (character: (typeof characters)[number] | null) => {
-		setValue("characterId", character?.id || "");
-		setValue("characterName", character?.name || "");
-	};
 
 	const utils = trpc.useContext();
 	const mutation = trpc.useMutation(["_logs.save"], {
@@ -203,15 +173,15 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		e.preventDefault();
 
 		const activeName = document.activeElement?.getAttribute("name");
-		if (activeName === "characterName" && !(charSel.length === 1 && charSel[0]?.name === getValues("characterName"))) return;
+		if (activeName === "characterName" && !form.getValues("characterId")) return;
 
-		handleSubmit(onSubmit)(e);
+		form.handleSubmit(onSubmit)(e);
 	};
 
 	const onSubmit: SubmitHandler<z.infer<typeof logSchema>> = e => {
-		clearErrors();
+		form.clearErrors();
 
-		const values = getValues();
+		const values = form.getValues();
 		values.type = "game";
 		values.is_dm_log = true;
 		values.magic_items_gained = magicItemsGained;
@@ -226,15 +196,15 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 			result.error.issues.forEach(issue => {
 				const issueFields = ["date", "name", "dm.name", "description", "characterId", "experience", "acp", "tcp", "level", "gold"] as const;
 				if (issueFields.find(i => i == issue.path.join("."))) {
-					setError(issue.path.join(".") as (typeof issueFields)[number], {
+					form.setError(issue.path.join(".") as (typeof issueFields)[number], {
 						message: issue.message
 					});
 				}
 				if (issue.path[0] == "magic_items_gained" && typeof issue.path[1] == "number" && issue.path[2] == "name") {
-					setError(`magic_items_gained.${issue.path[1]}.name`, { message: issue.message });
+					form.setError(`magic_items_gained.${issue.path[1]}.name`, { message: issue.message });
 				}
 				if (issue.path[0] == "story_awards_gained" && typeof issue.path[1] == "number" && issue.path[2] == "name") {
-					setError(`story_awards_gained.${issue.path[1]}.name`, { message: issue.message });
+					form.setError(`story_awards_gained.${issue.path[1]}.name`, { message: issue.message });
 				}
 			});
 		}
@@ -280,11 +250,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 			)}
 
 			<form onSubmit={submitHandler}>
-				<input type="hidden" {...register("logId", { value: params.logId === "new" ? "" : params.logId })} />
-				<input type="hidden" {...register("dm.id", { value: selectedLog.dm?.id || "" })} />
-				<input type="hidden" {...register("dm.DCI", { value: null })} />
-				<input type="hidden" {...register("dm.name", { value: selectedLog.dm?.name || session?.user?.name || "" })} />
-				<input type="hidden" {...register("dm.uid", { value: selectedLog.dm?.uid || session?.user?.id || "" })} />
+				<input type="hidden" {...form.register("logId", { value: params.logId === "new" ? "" : params.logId })} />
+				<input type="hidden" {...form.register("dm.id", { value: selectedLog.dm?.id || "" })} />
+				<input type="hidden" {...form.register("dm.DCI", { value: null })} />
+				<input type="hidden" {...form.register("dm.name", { value: selectedLog.dm?.name || session?.user?.name || "" })} />
+				<input type="hidden" {...form.register("dm.uid", { value: selectedLog.dm?.uid || session?.user?.id || "" })} />
 				<div className="grid grid-cols-12 gap-4">
 					<div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
 						<label className="label">
@@ -295,12 +265,12 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						</label>
 						<input
 							type="text"
-							{...register("name", { required: true, value: selectedLog.name, disabled: mutation.isLoading })}
+							{...form.register("name", { required: true, value: selectedLog.name, disabled: mutation.isLoading })}
 							className="input-bordered input w-full focus:border-primary"
-							aria-invalid={errors.name ? "true" : "false"}
+							aria-invalid={form.formState.errors.name ? "true" : "false"}
 						/>
 						<label className="label">
-							<span className="label-text-alt text-error">{errors.name?.message}</span>
+							<span className="label-text-alt text-error">{form.formState.errors.name?.message}</span>
 						</label>
 					</div>
 					<div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
@@ -313,7 +283,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						<input
 							type="datetime-local"
 							className="input-bordered input w-full focus:border-primary"
-							{...register("date", {
+							{...form.register("date", {
 								value: formatDate(selectedLog.date),
 								required: true,
 								setValueAs: (v: string) => new Date(v || formatDate(selectedLog.date)).toISOString(),
@@ -321,102 +291,63 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							})}
 						/>
 						<label className="label">
-							<span className="label-text-alt text-error">{errors.date?.message}</span>
+							<span className="label-text-alt text-error">{form.formState.errors.date?.message}</span>
 						</label>
 					</div>
-					<input type="hidden" {...register("characterId", { value: selectedLog.characterId || "", required: !!watch().applied_date })} />
+					<input type="hidden" {...form.register("characterId", { value: selectedLog.characterId || "", required: !!form.watch().applied_date })} />
 					<div className="form-control col-span-12 sm:col-span-6 lg:col-span-3">
 						<label className="label">
 							<span className="label-text">
 								Assigned Character
-								{!!watch().applied_date && <span className="text-error">*</span>}
+								{!!form.watch().applied_date && <span className="text-error">*</span>}
 							</span>
 						</label>
-						<div className="dropdown">
-							<label>
-								<input
-									type="text"
-									{...register("characterName", {
-										value: characters.find(c => c.id === selectedLog.characterId)?.name || "",
-										onChange: e => {
-											updateCharSearch(e.target.value);
-											setValue("characterId", "");
-											setValue("applied_date", null);
-											trigger("applied_date");
-										},
-										disabled: mutation.isLoading,
-										required: !!watch().applied_date
-									})}
-									className="input-bordered input w-full focus:border-primary"
-									onKeyDown={e => {
-										const isSearching = charSel.length > 0 && charSearch.trim();
-										if (!isSearching) return false;
-										const isSelected = charSel.length === 1 && charSel[0]?.name === getValues("characterName");
-										if (e.code === "ArrowDown") {
-											if (isSelected) return false;
-											setCharIndex(charIndex + 1);
-											if (charIndex >= charSel.length) setCharIndex(0);
-											return false;
-										}
-										if (e.code === "ArrowUp") {
-											if (isSelected) return false;
-											setCharIndex(charIndex - 1);
-											if (charIndex < 0) setCharIndex(charSel.length - 1);
-											return false;
-										}
-										if (e.code === "Enter" || e.code === "Tab") {
-											if (isSelected) return false;
-											setCharId(charSel[charIndex] || null);
-											updateCharSearch("");
-											setValue("applied_date", "");
-											trigger("applied_date");
-											return false;
-										}
-									}}
-									onBlur={e => setCharIndex(-1)}
-								/>
-							</label>
-							{charSel.length > 0 && charSearch.trim() && !(charSel.length === 1 && charSel[0]?.name === getValues("characterName")) && (
-								<ul className="dropdown-content menu rounded-lg bg-base-100 p-2 shadow">
-									{charSel.map((character, i) => (
-										<li key={character.id} className={concatenate(charIndex === i && "bg-primary text-primary-content")}>
-											<a
-												onMouseDown={() => {
-													setCharId(character);
-													setValue("applied_date", "");
-													trigger("applied_date");
-												}}>
-												{character.name}
-											</a>
-										</li>
-									))}
-								</ul>
-							)}
-						</div>
+						<AutoFillSelect
+							type="text"
+							inputProps={form.register("characterName", {
+								value: characters.find(c => c.id === selectedLog.characterId)?.name || "",
+								disabled: mutation.isLoading,
+								onChange: e => {
+									form.setValue("characterId", "");
+									form.setValue("applied_date", null);
+									form.trigger("applied_date");
+								}
+							})}
+							value={form.getValues("characterName")}
+							values={characters?.map(char => ({ key: char.id, value: char.name })) || []}
+							searchBy="value"
+							onSelect={val => {
+								const character = characters.find(c => c.id === val);
+								form.setValue("characterName", character?.name || "");
+								form.setValue("characterId", val);
+								form.setValue("applied_date", null);
+								form.trigger("applied_date");
+							}}
+						/>
 						<label className="label">
-							<span className="label-text-alt text-error">{errors.characterId?.message}</span>
+							<span className="label-text-alt text-error">{form.formState.errors.characterId?.message}</span>
 						</label>
 					</div>
 					<div className={concatenate("form-control col-span-12", "sm:col-span-6 lg:col-span-3")}>
 						<label className="label">
 							<span className="label-text">
 								Assigned Date
-								{!!watch().characterId && <span className="text-error">*</span>}
+								{!!form.watch().characterId && <span className="text-error">*</span>}
 							</span>
 						</label>
 						<input
 							type="datetime-local"
-							{...register("applied_date", {
+							{...form.register("applied_date", {
 								value: selectedLog.applied_date ? formatDate(selectedLog.applied_date) : null,
-								required: !!watch().characterId,
-								setValueAs: (v: string) => (!watch().characterId ? null : formatDate(v) == "Invalid Date" ? "" : new Date(v).toISOString()),
+								required: !!form.watch().characterId,
+								setValueAs: (v: string) => (!form.watch().characterId ? null : formatDate(v) == "Invalid Date" ? "" : new Date(v).toISOString()),
 								disabled: mutation.isLoading
 							})}
 							className="input-bordered input w-full focus:border-primary"
-							aria-invalid={errors.applied_date ? "true" : "false"}
+							aria-invalid={form.formState.errors.applied_date ? "true" : "false"}
 						/>
 						<label className="label">
-							<span className="label-text-alt text-error">{errors.applied_date?.message}</span>
+							<span className="label-text-alt text-error">{form.formState.errors.applied_date?.message}</span>
 						</label>
 					</div>
 					<div className="col-span-12 grid grid-cols-12 gap-4" ref={parent1}>
@@ -441,7 +372,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								</label>
 								<input
 									type="number"
-									{...register("experience", {
+									{...form.register("experience", {
 										value: selectedLog.experience,
 										disabled: mutation.isLoading,
 										valueAsNumber: true
@@ -449,7 +380,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									className="input-bordered input w-full focus:border-primary"
 								/>
 								<label className="label">
-									<span className="label-text-alt text-error">{errors.experience?.message}</span>
+									<span className="label-text-alt text-error">{form.formState.errors.experience?.message}</span>
 								</label>
 							</div>
 						)}
@@ -462,7 +393,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									type="number"
 									min="0"
 									max="1"
-									{...register("level", {
+									{...form.register("level", {
 										value: selectedLog.level,
 										min: 0,
 										max: 1,
@@ -472,7 +403,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									className="input-bordered input w-full focus:border-primary"
 								/>
 								<label className="label">
-									<span className="label-text-alt text-error">{errors.level?.message}</span>
+									<span className="label-text-alt text-error">{form.formState.errors.level?.message}</span>
 								</label>
 							</div>
 						)}
@@ -484,11 +415,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									</label>
 									<input
 										type="number"
-										{...register("acp", { value: selectedLog.acp, disabled: mutation.isLoading, valueAsNumber: true })}
+										{...form.register("acp", { value: selectedLog.acp, disabled: mutation.isLoading, valueAsNumber: true })}
 										className="input-bordered input w-full focus:border-primary"
 									/>
 									<label className="label">
-										<span className="label-text-alt text-error">{errors.acp?.message}</span>
+										<span className="label-text-alt text-error">{form.formState.errors.acp?.message}</span>
 									</label>
 								</div>
 								<div className={concatenate("form-control w-full", "col-span-6 sm:col-span-2")}>
@@ -497,11 +428,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									</label>
 									<input
 										type="number"
-										{...register("tcp", { value: selectedLog.tcp, disabled: mutation.isLoading, valueAsNumber: true })}
+										{...form.register("tcp", { value: selectedLog.tcp, disabled: mutation.isLoading, valueAsNumber: true })}
 										className="input-bordered input w-full focus:border-primary"
 									/>
 									<label className="label">
-										<span className="label-text-alt text-error">{errors.tcp?.message}</span>
+										<span className="label-text-alt text-error">{form.formState.errors.tcp?.message}</span>
 									</label>
 								</div>
 							</>
@@ -512,11 +443,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							</label>
 							<input
 								type="number"
-								{...register("gold", { value: selectedLog.gold, disabled: mutation.isLoading, valueAsNumber: true })}
+								{...form.register("gold", { value: selectedLog.gold, disabled: mutation.isLoading, valueAsNumber: true })}
 								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
-								<span className="label-text-alt text-error">{errors.gold?.message}</span>
+								<span className="label-text-alt text-error">{form.formState.errors.gold?.message}</span>
 							</label>
 						</div>
 						<div className={concatenate("form-control w-full", "col-span-12 sm:col-span-2")}>
@@ -525,11 +456,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							</label>
 							<input
 								type="number"
-								{...register("dtd", { value: selectedLog.dtd, disabled: mutation.isLoading, valueAsNumber: true })}
+								{...form.register("dtd", { value: selectedLog.dtd, disabled: mutation.isLoading, valueAsNumber: true })}
 								className="input-bordered input w-full focus:border-primary"
 							/>
 							<label className="label">
-								<span className="label-text-alt text-error">{errors.dtd?.message}</span>
+								<span className="label-text-alt text-error">{form.formState.errors.dtd?.message}</span>
 							</label>
 						</div>
 					</div>
@@ -538,11 +469,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<span className="label-text">Notes</span>
 						</label>
 						<AutoResizeTextArea
-							{...register("description", { value: selectedLog.description || "", disabled: mutation.isLoading })}
+							{...form.register("description", { value: selectedLog.description || "", disabled: mutation.isLoading })}
 							className="textarea-bordered textarea w-full focus:border-primary"
 						/>
 						<label className="label">
-							<span className="label-text-alt text-error">{errors.description?.message}</span>
+							<span className="label-text-alt text-error">{form.formState.errors.description?.message}</span>
 							<span className="label-text-alt">Markdown Allowed</span>
 						</label>
 					</div>
@@ -574,7 +505,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												className="input-bordered input w-full focus:border-primary"
 											/>
 											<label className="label">
-												<span className="label-text-alt text-error">{(errors.magic_items_gained || [])[index]?.name?.message}</span>
+												<span className="label-text-alt text-error">{(form.formState.errors.magic_items_gained || [])[index]?.name?.message}</span>
 											</label>
 										</div>
 										<button type="button" className="btn-danger btn mt-9" onClick={() => removeMagicItem(index)} disabled={mutation.isLoading}>
@@ -621,7 +552,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												className="input-bordered input w-full focus:border-primary"
 											/>
 											<label className="label">
-												<span className="label-text-alt text-error">{(errors.story_awards_gained || [])[index]?.name?.message}</span>
+												<span className="label-text-alt text-error">{(form.formState.errors.story_awards_gained || [])[index]?.name?.message}</span>
 											</label>
 										</div>
 										<button type="button" className="btn-danger btn mt-9" onClick={() => removeStoryAward(index)} disabled={mutation.isLoading}>
