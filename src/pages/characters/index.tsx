@@ -36,11 +36,12 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
+let stopWords = new Set(["and", "or", "to", "in", "a", "the"]);
 const minisearch = new MiniSearch({
 	fields: ["characterName", "campaign", "race", "class", "magicItems", "tier", "level"],
 	idField: "characterId",
+	processTerm: term => (stopWords.has(term) ? null : term.toLowerCase()),
 	searchOptions: {
-		boost: { characterName: 2 },
 		prefix: true
 	}
 });

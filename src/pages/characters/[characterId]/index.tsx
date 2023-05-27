@@ -58,11 +58,12 @@ export const components: Partial<Omit<NormalComponents, keyof SpecialComponents>
 	}
 };
 
+let stopWords = new Set(["and", "or", "to", "in", "a", "the"]);
 const minisearch = new MiniSearch({
 	fields: ["logName", "magicItems", "storyAwards"],
 	idField: "logId",
+	processTerm: term => (stopWords.has(term) ? null : term.toLowerCase()),
 	searchOptions: {
-		boost: { logName: 2 },
 		prefix: true
 	}
 });
