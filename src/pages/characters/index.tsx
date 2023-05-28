@@ -1,17 +1,17 @@
-import { SearchResults } from '$src/components/search';
-import Layout from '$src/layouts/main';
-import { authOptions } from '$src/pages/api/auth/[...nextauth]';
-import { trpc } from '$src/utils/trpc';
-import MiniSearch from 'minisearch';
-import { getServerSession } from 'next-auth';
-import Head from 'next/head';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { SearchResults } from "$src/components/search";
+import Layout from "$src/layouts/main";
+import { authOptions } from "$src/pages/api/auth/[...nextauth]";
+import { trpc } from "$src/utils/trpc";
+import MiniSearch from "minisearch";
+import { getServerSession } from "next-auth";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { mdiDotsHorizontal, mdiHome, mdiPlus } from '@mdi/js';
-import Icon from '@mdi/react';
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { mdiDotsHorizontal, mdiHome, mdiPlus } from "@mdi/js";
+import Icon from "@mdi/react";
 
 import type { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
@@ -36,11 +36,12 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 	};
 };
 
+let stopWords = new Set(["and", "or", "to", "in", "a", "the"]);
 const minisearch = new MiniSearch({
 	fields: ["characterName", "campaign", "race", "class", "magicItems", "tier", "level"],
 	idField: "characterId",
+	processTerm: term => (stopWords.has(term) ? null : term.toLowerCase()),
 	searchOptions: {
-		boost: { characterName: 2 },
 		prefix: true
 	}
 });
@@ -206,7 +207,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 														src={character.image_url || ""}
 														width={48}
 														height={48}
-														className="object-cover object-top transition-all hover:scale-125"
+														className="h-full w-full object-cover object-top transition-all hover:scale-125"
 														alt={character.name}
 													/>
 												</div>
