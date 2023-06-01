@@ -1,26 +1,27 @@
-import AutoFillSelect from '$src/components/autofill';
-import AutoResizeTextArea from '$src/components/textarea';
-import Layout from '$src/layouts/main';
-import { authOptions } from '$src/pages/api/auth/[...nextauth]';
-import { prisma } from '$src/server/db/client';
-import { getOne } from '$src/server/router/routers/characters';
-import { logSchema } from '$src/types/zod-schema';
-import { useQueryString } from '$src/utils/hooks';
-import { getLogsSummary } from '$src/utils/logs';
-import { concatenate, formatDate } from '$src/utils/misc';
-import { trpc } from '$src/utils/trpc';
-import { getServerSession } from 'next-auth';
-import Head from 'next/head';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useMemo, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { z } from 'zod';
+import AutoFillSelect from "$src/components/autofill";
+import AutoResizeTextArea from "$src/components/textarea";
+import Layout from "$src/layouts/main";
+import { authOptions } from "$src/pages/api/auth/[...nextauth]";
+import { prisma } from "$src/server/db/client";
+import { getOne } from "$src/server/router/routers/characters";
+import { logSchema } from "$src/types/zod-schema";
+import { useQueryString } from "$src/utils/hooks";
+import { getLogsSummary } from "$src/utils/logs";
+import { formatDate } from "$src/utils/misc";
+import { trpc } from "$src/utils/trpc";
+import { getServerSession } from "next-auth";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useMemo, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { twMerge } from "tailwind-merge";
+import { z } from "zod";
 
-import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { mdiAlertCircle, mdiHome, mdiTrashCan } from '@mdi/js';
-import Icon from '@mdi/react';
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
+import Icon from "@mdi/react";
 
 import type { NextPageWithLayout } from "$src/pages/_app";
 import type { DungeonMaster, LogType, MagicItem } from "@prisma/client";
@@ -309,7 +310,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							</select>
 						</div>
 					)}
-					<div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6" : "sm:col-span-4")}>
+					<div className={twMerge("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6" : "sm:col-span-4")}>
 						<label className="label">
 							<span className="label-text">
 								Title
@@ -326,7 +327,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<span className="label-text-alt text-error">{form.formState.errors.name?.message}</span>
 						</label>
 					</div>
-					<div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6" : "sm:col-span-4")}>
+					<div className={twMerge("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6" : "sm:col-span-4")}>
 						<label className="label">
 							<span className="label-text">
 								Date
@@ -475,7 +476,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										</label>
 									</div>
 								)}
-								<div className={concatenate("form-control w-full", type === "nongame" ? "col-span-4" : "col-span-6 sm:col-span-2")}>
+								<div className={twMerge("form-control w-full", type === "nongame" ? "col-span-4" : "col-span-6 sm:col-span-2")}>
 									<label className="label">
 										<span className="label-text">TCP</span>
 									</label>
@@ -490,7 +491,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								</div>
 							</>
 						)}
-						<div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-2" : "col-span-4")}>
+						<div className={twMerge("form-control w-full", type === "game" ? "col-span-12 sm:col-span-2" : "col-span-4")}>
 							<label className="label">
 								<span className="label-text">Gold</span>
 							</label>
@@ -503,7 +504,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								<span className="label-text-alt text-error">{form.formState.errors.gold?.message}</span>
 							</label>
 						</div>
-						<div className={concatenate("form-control w-full", type === "game" ? "col-span-12 sm:col-span-2" : "col-span-4")}>
+						<div className={twMerge("form-control w-full", type === "game" ? "col-span-12 sm:col-span-2" : "col-span-4")}>
 							<label className="label">
 								<span className="label-text overflow-hidden text-ellipsis whitespace-nowrap">Downtime Days</span>
 							</label>
@@ -716,7 +717,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						))}
 					</div>
 					<div className="col-span-12 text-center">
-						<button type="submit" className={concatenate("btn-primary btn", saving && "loading")} disabled={saving}>
+						<button type="submit" className={twMerge("btn-primary btn", saving && "loading")} disabled={saving}>
 							Save Log
 						</button>
 					</div>

@@ -4,7 +4,7 @@ import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { prisma } from "$src/server/db/client";
 import { useQueryString } from "$src/utils/hooks";
-import { concatenate, slugify } from "$src/utils/misc";
+import { slugify } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import MiniSearch from "minisearch";
 import { getServerSession } from "next-auth";
@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -412,9 +413,9 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 							<tbody ref={parent2}>
 								{results.map(log => (
 									<Fragment key={log.id}>
-										<tr className={concatenate("print:text-sm", log.saving && "opacity-50")}>
+										<tr className={twMerge("print:text-sm", log.saving && "opacity-50")}>
 											<td
-												className={concatenate(
+												className={twMerge(
 													"!static align-top print:p-2",
 													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -481,7 +482,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												</div>
 											</td>
 											<td
-												className={concatenate(
+												className={twMerge(
 													"hidden align-top print:table-cell print:p-2 sm:table-cell",
 													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -508,7 +509,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												)}
 											</td>
 											<td
-												className={concatenate(
+												className={twMerge(
 													"hidden align-top print:table-cell print:p-2 sm:table-cell",
 													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -533,7 +534,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												)}
 											</td>
 											<td
-												className={concatenate(
+												className={twMerge(
 													"hidden align-top print:!hidden md:table-cell",
 													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -549,7 +550,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 											</td>
 											{myCharacter && (
 												<td
-													className={concatenate(
+													className={twMerge(
 														"w-8 align-top print:hidden",
 														log.saving && "bg-neutral-focus",
 														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -557,7 +558,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													<div className="flex flex-col justify-center gap-2">
 														<Link
 															href={`/characters/${params.characterId}/log/${log.id}`}
-															className={concatenate("btn-primary btn-sm btn", log.saving && "btn-disabled")}>
+															className={twMerge("btn-primary btn-sm btn", log.saving && "btn-disabled")}>
 															<Icon path={mdiPencil} size={0.8} />
 														</Link>
 														<button
@@ -574,10 +575,10 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 											)}
 										</tr>
 										{(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
-											<tr className={concatenate(!descriptions && "hidden print:table-row")}>
+											<tr className={twMerge(!descriptions && "hidden print:table-row")}>
 												<td
 													colSpan={100}
-													className={concatenate(
+													className={twMerge(
 														"max-w-[calc(100vw_-_50px)] whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs",
 														log.saving && "bg-neutral-focus"
 													)}>
@@ -616,7 +617,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 				</div>
 			)}
 
-			<label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
+			<label className={twMerge("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
 				{modal && (
 					<label className="modal-box relative">
 						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>

@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import qs from "qs";
+import { twMerge } from "tailwind-merge";
 import { ZodSchema } from "zod";
 
 const parseObjectPrimitives = (obj: Record<string, any>): any => {
@@ -33,10 +34,6 @@ export const qsParse = <T>(queryString: string | Record<string, any>, schema: Zo
 	};
 };
 
-export const concatenate = (...str: (string | boolean | null | undefined)[]) => {
-	return str.filter(s => !!s && typeof s == "string").join(" ");
-};
-
 export const parseError = (e: unknown) => {
 	if (e instanceof Error) return e.message;
 	if (typeof e === "string") return e;
@@ -62,7 +59,7 @@ export const slugify = (text: string) => {
 
 export const tooltipClasses = (text?: string | null, align = "center") => {
 	if (!text) return "";
-	return concatenate(
+	return twMerge(
 		"before:hidden before:lg:block before:max-h-[50vh] before:overflow-hidden before:text-ellipsis",
 		"before:z-20 before:whitespace-normal before:![content:attr(data-tip)]",
 		align == "left" && "before:left-0 before:translate-x-0",

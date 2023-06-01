@@ -1,7 +1,6 @@
 import { Items } from "$src/components/items";
 import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
-import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import MiniSearch from "minisearch";
 import { getServerSession } from "next-auth";
@@ -10,6 +9,7 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { twMerge } from "tailwind-merge";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
@@ -176,7 +176,7 @@ const Characters: NextPageWithLayout = () => {
 										<Fragment key={log.id}>
 											<tr>
 												<th
-													className={concatenate(
+													className={twMerge(
 														"!static align-top",
 														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
 													)}>
@@ -237,7 +237,7 @@ const Characters: NextPageWithLayout = () => {
 													</div>
 												</th>
 												<td
-													className={concatenate(
+													className={twMerge(
 														"hidden align-top print:table-cell sm:table-cell",
 														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
 													)}>
@@ -267,7 +267,7 @@ const Characters: NextPageWithLayout = () => {
 													)}
 												</td>
 												<td
-													className={concatenate(
+													className={twMerge(
 														"hidden align-top print:table-cell sm:table-cell",
 														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "print:border-b-0"
 													)}>
@@ -288,7 +288,7 @@ const Characters: NextPageWithLayout = () => {
 													)}
 												</td>
 												<td
-													className={concatenate(
+													className={twMerge(
 														"hidden align-top print:!hidden md:table-cell",
 														(log.description?.trim() || log.story_awards_gained.length > 0) && "print:border-b-0"
 													)}>
@@ -345,7 +345,7 @@ const Characters: NextPageWithLayout = () => {
 				</section>
 			</div>
 
-			<label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
+			<label className={twMerge("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
 				{modal && (
 					<label className="modal-box relative">
 						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>

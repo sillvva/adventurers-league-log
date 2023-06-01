@@ -1,5 +1,5 @@
-import { concatenate } from "$src/utils/misc";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
 
@@ -104,7 +104,7 @@ export default function AutoFillSelect({
 				<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
 					{matches
 						.map((kv, i) => (
-							<li key={kv.key} className={concatenate(keySel === i && "bg-primary text-primary-content")}>
+							<li key={kv.key} className={twMerge(keySel === i && "bg-primary text-primary-content")}>
 								<a onMouseDown={() => selectHandler(keySel)}>{kv.value}</a>
 							</li>
 						))

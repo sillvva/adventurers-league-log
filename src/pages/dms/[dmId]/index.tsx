@@ -2,7 +2,6 @@ import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { dungeonMasterSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
-import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
@@ -10,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment } from "react";
 import { useForm } from "react-hook-form";
+import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -171,7 +171,7 @@ const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServ
 						</div>
 					</div>
 					<div className="m-4 basis-full text-center">
-						<button type="submit" className={concatenate("btn-primary btn", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
+						<button type="submit" className={twMerge("btn-primary btn", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
 							Update
 						</button>
 					</div>
