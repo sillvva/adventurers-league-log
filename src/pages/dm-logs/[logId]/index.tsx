@@ -177,6 +177,11 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		const activeName = document.activeElement?.getAttribute("name");
 		if (activeName === "characterName" && !form.getValues("characterId")) return;
 
+		if (!(characters || []).map(c => c.id).find(c => form.getValues("characterId"))) {
+			form.setError("characterId", { type: "manual", message: "Character not found" });
+			return;
+		}
+
 		form.handleSubmit(onSubmit)(e);
 	};
 
@@ -324,6 +329,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								form.setValue("characterId", val);
 								form.setValue("applied_date", null);
 								form.trigger("applied_date");
+								form.setError("characterId", { type: "manual", message: "" });
 							}}
 						/>
 						<label className="label">
