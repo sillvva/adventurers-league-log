@@ -1,5 +1,5 @@
 import { concatenate } from "$src/utils/misc";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
 
@@ -20,6 +20,7 @@ export default function AutoFillSelect({
 }) {
 	const [keySel, setKeySel] = useState<number>(0);
 	const [valSearch, setValSearch] = useState("");
+	const [selected, setSelected] = useState(false);
 
 	const matches = useMemo(
 		() =>
@@ -35,11 +36,15 @@ export default function AutoFillSelect({
 
 	const selectHandler = useCallback(
 		(key: number) => {
+			setKeySel(key);
 			setValSearch("");
+			setSelected(true);
 			onSelect(matches[key]?.key || "");
 		},
 		[matches, onSelect]
 	);
+
+	useEffect(() => {});
 
 	return (
 		<div className="dropdown">
@@ -47,41 +52,55 @@ export default function AutoFillSelect({
 				<input
 					type={type}
 					{...inputProps}
+					value={value || ""}
 					onChange={e => {
 						setValSearch(e.target.value);
+						setKeySel(0);
+						setSelected(false);
 						if (inputProps.onChange) inputProps.onChange(e);
 					}}
 					onKeyDown={e => {
 						const isSearching = parsedValues && parsedValues.length > 0 && valSearch.trim();
 						if (!isSearching) return false;
-						const isSelected = matches.length === 1 && matches[0]?.key === value;
 						if (e.code === "ArrowDown") {
 							e.preventDefault();
-							if (isSelected) return false;
+							if (selected) return false;
 							setKeySel(keySel + 1);
 							if (keySel >= matches.length) setKeySel(0);
 							return false;
 						}
 						if (e.code === "ArrowUp") {
 							e.preventDefault();
-							if (isSelected) return false;
+							if (selected) return false;
 							setKeySel(keySel - 1);
 							if (keySel < 0) setKeySel(matches.length - 1);
 							return false;
 						}
 						if (e.code === "Enter" || e.code === "Tab") {
 							e.preventDefault();
-							if (isSelected) return false;
+							if (selected) return false;
 							selectHandler(keySel);
+							return false;
+						}
+						if (e.code === "Escape") {
+							e.preventDefault();
+							if (selected) return false;
 							setValSearch("");
 							return false;
 						}
 					}}
-					onBlur={e => setKeySel(-1)}
+					onFocus={e => {
+						if (inputProps.onFocus) inputProps.onFocus(e);
+						if (!selected) setValSearch(e.target.value);
+					}}
+					onBlur={e => {
+						if (inputProps.onBlur) inputProps.onBlur(e);
+						if (!selected) setValSearch("");
+					}}
 					className="input-bordered input w-full focus:border-primary"
 				/>
 			</label>
-			{parsedValues && parsedValues.length > 0 && valSearch.trim() && !(matches.length === 1 && matches[0]?.key === value) && (
+			{parsedValues && parsedValues.length > 0 && valSearch.trim() && !selected && (
 				<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
 					{matches
 						.map((kv, i) => (

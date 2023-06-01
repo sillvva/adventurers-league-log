@@ -335,7 +335,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								<div className="relative hidden flex-col items-end justify-center print:hidden md:flex">
 									<a href={character.image_url} target="_blank" rel="noreferrer noopener" className="mask mask-squircle mx-auto h-52 w-full bg-primary">
 										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img src={character.image_url} className="h-full w-full object-cover object-top transition-all hover:scale-110" alt={character.name} />
+										<img src={character.image_url} className="h-full w-full object-cover object-top transition-all" alt={character.name} />
 									</a>
 								</div>
 							)}
