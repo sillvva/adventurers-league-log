@@ -120,7 +120,7 @@ const Characters: NextPageWithLayout = () => {
 							</Link>
 						</div>
 					)}
-					<div className="dropdown dropdown-end">
+					<div className="dropdown-end dropdown">
 						<label tabIndex={1} className="btn-sm btn">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
@@ -139,10 +139,10 @@ const Characters: NextPageWithLayout = () => {
 				</div>
 
 				<section>
-					<div className="rounded-lg">
+					<div className="w-full overflow-x-auto rounded-lg bg-base-100">
 						<table className="table w-full">
 							<thead>
-								<tr>
+								<tr className="bg-base-300">
 									<th className="table-cell print:hidden sm:hidden">Game</th>
 									<th className="hidden print:table-cell sm:table-cell">Title</th>
 									<th className="hidden print:table-cell sm:table-cell">Advancement</th>

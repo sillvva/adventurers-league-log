@@ -181,10 +181,10 @@ const EditDM: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServ
 			<div className="mt-8 flex flex-col gap-4">
 				<section>
 					<h2 className="mb-2 text-2xl">Logs</h2>
-					<div className="rounded-lg">
+					<div className="w-full overflow-x-auto rounded-lg bg-base-100">
 						<table className="table w-full">
 							<thead>
-								<tr>
+								<tr className="bg-base-300">
 									<th className="">Date</th>
 									<th className="">Adventure</th>
 									<th className="">Character</th>

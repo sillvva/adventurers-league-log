@@ -1,15 +1,15 @@
-import Layout from '$src/layouts/main';
-import { trpc } from '$src/utils/trpc';
-import { getServerSession } from 'next-auth';
-import Head from 'next/head';
-import Link from 'next/link';
-import { Fragment } from 'react';
+import Layout from "$src/layouts/main";
+import { trpc } from "$src/utils/trpc";
+import { getServerSession } from "next-auth";
+import Head from "next/head";
+import Link from "next/link";
+import { Fragment } from "react";
 
-import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { mdiPencil, mdiTrashCan } from '@mdi/js';
-import Icon from '@mdi/react';
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { mdiPencil, mdiTrashCan } from "@mdi/js";
+import Icon from "@mdi/react";
 
-import { authOptions } from '../api/auth/[...nextauth]';
+import { authOptions } from "../api/auth/[...nextauth]";
 
 import type { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
@@ -58,10 +58,10 @@ const DMs: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getServerS
 
 			<div className="flex flex-col gap-4">
 				<section>
-					<div className="rounded-lg">
+					<div className="w-full overflow-x-auto rounded-lg bg-base-100">
 						<table className="table w-full">
 							<thead>
-								<tr>
+								<tr className="bg-base-300">
 									<th className="">Name</th>
 									<th className="">DCI</th>
 									<th className="">Logs</th>

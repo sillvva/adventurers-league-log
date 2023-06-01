@@ -20,7 +20,7 @@
 		"@trpc/next": "^9.26.2",
 		"@trpc/react": "^9.26.2",
 		"@trpc/server": "^9.26.2",
-		"daisyui": "^2.22.0",
+		"daisyui": "^3.0.0",
 		"dayjs": "^1.11.5",
 		"minisearch": "^5.0.0",
 		"next": "12.3.0",

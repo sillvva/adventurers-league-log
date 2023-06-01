@@ -138,7 +138,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 							<Icon path={mdiPlus} className="inline w-4 sm:hidden" />
 						</Link>
 					)}
-					<div className="dropdown dropdown-end">
+					<div className="dropdown-end dropdown">
 						<label tabIndex={1} className="btn-sm btn">
 							<Icon path={mdiDotsHorizontal} size={1} />
 						</label>
@@ -170,7 +170,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 				<div className="w-full overflow-x-auto rounded-lg">
 					<table className="table-compact table w-full">
 						<thead className="hidden sm:table-header-group">
-							<tr>
+							<tr className="bg-base-200">
 								<th className="w-12"></th>
 								<th>Name</th>
 								<th>Campaign</th>
@@ -180,13 +180,13 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						</thead>
 						<tbody ref={parent}>
 							{isFetching ? (
-								<tr>
+								<tr className="bg-base-100">
 									<td colSpan={5} className="py-20 text-center">
 										Loading...
 									</td>
 								</tr>
 							) : !characters || characters.length == 0 ? (
-								<tr>
+								<tr className="bg-base-100">
 									<td colSpan={5} className="py-20 text-center">
 										<p className="mb-4">You have no log sheets.</p>
 										<p>
@@ -198,7 +198,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								</tr>
 							) : (
 								results.map(character => (
-									<tr key={character.id} className="img-grow hover cursor-pointer" onClick={() => router.push(`/characters/${character.id}`)}>
+									<tr key={character.id} className="img-grow hover cursor-pointer bg-base-100" onClick={() => router.push(`/characters/${character.id}`)}>
 										<td className="w-12 pr-0 transition-colors sm:pr-2">
 											<div className="avatar">
 												<div className="mask mask-squircle h-12 w-12 bg-primary">

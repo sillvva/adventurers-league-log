@@ -275,7 +275,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						<Link href={`/characters/${params.characterId}/edit`} className="btn-primary btn-sm btn hidden sm:flex">
 							Edit
 						</Link>
-						<div className="dropdown dropdown-end">
+						<div className="dropdown-end dropdown">
 							<label tabIndex={1} className="btn-sm btn">
 								<Icon path={mdiDotsHorizontal} size={1} />
 							</label>
@@ -294,7 +294,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								</li>
 								<li>
 									<a
-										className="bg-red-600 text-white"
+										className="bg-red-600 text-white hover:bg-red-900"
 										onClick={() => {
 											if (confirm("Are you sure you want to delete this character? This action cannot be undone.")) {
 												deleteCharacterMutation.mutate({
@@ -399,10 +399,10 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 			</section>
 			{logs ? (
 				<section className="mt-6">
-					<div className="rounded-lg bg-base-100">
+					<div className="w-full overflow-x-auto rounded-lg bg-base-100">
 						<table className="table w-full">
 							<thead>
-								<tr>
+								<tr className="bg-base-300">
 									<td className="print:p-2">Log Entry</td>
 									<td className="hidden print:table-cell print:p-2 sm:table-cell">Advancement</td>
 									<td className="hidden print:table-cell print:p-2 sm:table-cell">Treasure</td>
@@ -413,7 +413,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 							<tbody ref={parent2}>
 								{results.map(log => (
 									<Fragment key={log.id}>
-										<tr className={twMerge("print:text-sm", log.saving && "opacity-50")}>
+										<tr className={twMerge("border-b-0 border-t-2 border-t-base-200 print:text-sm", log.saving && "opacity-50")}>
 											<td
 												className={twMerge(
 													"!static align-top print:p-2",
