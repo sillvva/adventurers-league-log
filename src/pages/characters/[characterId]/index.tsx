@@ -4,7 +4,7 @@ import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { prisma } from "$src/server/db/client";
 import { useQueryString } from "$src/utils/hooks";
-import { concatenate, slugify } from "$src/utils/misc";
+import { slugify } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import MiniSearch from "minisearch";
 import { getServerSession } from "next-auth";
@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -274,7 +275,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 						<Link href={`/characters/${params.characterId}/edit`} className="btn-primary btn-sm btn hidden sm:flex">
 							Edit
 						</Link>
-						<div className="dropdown dropdown-end">
+						<div className="dropdown-end dropdown">
 							<label tabIndex={1} className="btn-sm btn">
 								<Icon path={mdiDotsHorizontal} size={1} />
 							</label>
@@ -293,7 +294,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								</li>
 								<li>
 									<a
-										className="bg-red-600 text-white"
+										className="bg-red-600 text-white hover:bg-red-900"
 										onClick={() => {
 											if (confirm("Are you sure you want to delete this character? This action cannot be undone.")) {
 												deleteCharacterMutation.mutate({
@@ -398,10 +399,10 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 			</section>
 			{logs ? (
 				<section className="mt-6">
-					<div className="rounded-lg bg-base-100">
+					<div className="w-full overflow-x-auto rounded-lg bg-base-100">
 						<table className="table w-full">
 							<thead>
-								<tr>
+								<tr className="bg-base-300">
 									<td className="print:p-2">Log Entry</td>
 									<td className="hidden print:table-cell print:p-2 sm:table-cell">Advancement</td>
 									<td className="hidden print:table-cell print:p-2 sm:table-cell">Treasure</td>
@@ -412,9 +413,9 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 							<tbody ref={parent2}>
 								{results.map(log => (
 									<Fragment key={log.id}>
-										<tr className={concatenate("print:text-sm", log.saving && "opacity-50")}>
+										<tr className={twMerge("border-b-0 border-t-2 border-t-base-200 print:text-sm", log.saving && "opacity-50")}>
 											<td
-												className={concatenate(
+												className={twMerge(
 													"!static align-top print:p-2",
 													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -423,6 +424,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													className="whitespace-pre-wrap font-semibold text-accent-content"
 													onClick={() =>
 														log.description &&
+														!descriptions &&
 														setModal({
 															name: log.name,
 															description: log.description,
@@ -481,7 +483,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												</div>
 											</td>
 											<td
-												className={concatenate(
+												className={twMerge(
 													"hidden align-top print:table-cell print:p-2 sm:table-cell",
 													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -508,7 +510,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												)}
 											</td>
 											<td
-												className={concatenate(
+												className={twMerge(
 													"hidden align-top print:table-cell print:p-2 sm:table-cell",
 													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -533,7 +535,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 												)}
 											</td>
 											<td
-												className={concatenate(
+												className={twMerge(
 													"hidden align-top print:!hidden md:table-cell",
 													log.saving && "bg-neutral-focus",
 													(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -549,7 +551,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 											</td>
 											{myCharacter && (
 												<td
-													className={concatenate(
+													className={twMerge(
 														"w-8 align-top print:hidden",
 														log.saving && "bg-neutral-focus",
 														(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && "border-b-0"
@@ -557,7 +559,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													<div className="flex flex-col justify-center gap-2">
 														<Link
 															href={`/characters/${params.characterId}/log/${log.id}`}
-															className={concatenate("btn-primary btn-sm btn", log.saving && "btn-disabled")}>
+															className={twMerge("btn-primary btn-sm btn", log.saving && "btn-disabled")}>
 															<Icon path={mdiPencil} size={0.8} />
 														</Link>
 														<button
@@ -574,10 +576,10 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 											)}
 										</tr>
 										{(log.description?.trim() || log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
-											<tr className={concatenate(!descriptions && "hidden print:table-row")}>
+											<tr className={twMerge(!descriptions && "hidden print:table-row")}>
 												<td
 													colSpan={100}
-													className={concatenate(
+													className={twMerge(
 														"max-w-[calc(100vw_-_50px)] whitespace-pre-wrap pt-0 text-sm print:p-2 print:text-xs",
 														log.saving && "bg-neutral-focus"
 													)}>
@@ -616,21 +618,21 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 				</div>
 			)}
 
-			<label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
+			<div className={twMerge("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
 				{modal && (
-					<label className="modal-box relative">
-						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
+					<div className="modal-box relative cursor-default drop-shadow-lg" onClick={e => e.stopPropagation()}>
+						<h3 className="cursor-text text-lg font-bold text-accent-content">{modal.name}</h3>
 						{modal.date && (
-							<p className="text-xs" suppressHydrationWarning>
+							<p className="cursor-text text-xs" suppressHydrationWarning>
 								{modal.date.toLocaleString()}
 							</p>
 						)}
-						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
+						<ReactMarkdown className="cursor-text whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
 							{modal.description}
 						</ReactMarkdown>
-					</label>
+					</div>
 				)}
-			</label>
+			</div>
 		</>
 	);
 };

@@ -3,13 +3,13 @@ import { authOptions } from "$src/pages/api/auth/[...nextauth]";
 import { prisma } from "$src/server/db/client";
 import { newCharacterSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
-import { concatenate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -217,7 +217,7 @@ const EditCharacter: NextPageWithLayout<InferPropsFromServerSideFunction<typeof 
 						</div>
 					</div>
 					<div className="m-4 basis-full text-center">
-						<button type="submit" className={concatenate("btn-primary btn", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
+						<button type="submit" className={twMerge("btn-primary btn", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
 							Update
 						</button>
 					</div>

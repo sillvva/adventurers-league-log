@@ -1,6 +1,3 @@
-import { concatenate } from "$src/utils/misc";
-import { mdiGithub, mdiMenu } from "@mdi/js";
-import Icon from "@mdi/react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Image from "next/future/image";
@@ -9,6 +6,11 @@ import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import * as NProgress from "nprogress";
 import { PropsWithChildren, useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
+
+import { mdiGithub, mdiMenu } from "@mdi/js";
+import Icon from "@mdi/react";
+
 import background from "../../public/images/barovia-gate.jpg";
 import google from "../../public/images/google.svg";
 
@@ -92,7 +94,7 @@ const Layout = (props: PropsWithChildren) => {
 								</a>
 								{session.data?.user ? (
 									<>
-										<div className="dropdown-end dropdown">
+										<div className="dropdown dropdown-end">
 											<label tabIndex={0} className="flex cursor-pointer">
 												<div className="hidden items-center px-4 text-accent-content print:flex sm:flex">{session.data.user.name}</div>
 												<div className="avatar">
@@ -176,7 +178,7 @@ const Layout = (props: PropsWithChildren) => {
 						</p>
 					</div>
 				</footer>
-				<div className={concatenate("fixed top-0 bottom-0 -left-72 z-50 w-72 bg-neutral py-4 px-4 transition-all", drawer && "left-0")}>
+				<div className={twMerge("fixed top-0 bottom-0 -left-72 z-50 w-72 bg-neutral py-4 px-4 transition-all", drawer && "left-0")}>
 					<ul className="menu w-full" onClick={() => setDrawer(false)}>
 						<li>
 							<Link href="/characters">Character Logs</Link>
@@ -195,7 +197,7 @@ const Layout = (props: PropsWithChildren) => {
 					</ul>
 				</div>
 				<div
-					className={concatenate("fixed inset-0 bg-black/50 transition-all", drawer ? "z-40 opacity-100" : "-z-10 opacity-0")}
+					className={twMerge("fixed inset-0 bg-black/50 transition-all", drawer ? "z-40 opacity-100" : "-z-10 opacity-0")}
 					onClick={() => setDrawer(false)}
 				/>
 			</div>

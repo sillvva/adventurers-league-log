@@ -1,5 +1,5 @@
-import { concatenate } from "$src/utils/misc";
 import { useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
 import Icon from "@mdi/react";
@@ -26,14 +26,14 @@ export function Items({
 
 	return (
 		<>
-			<div className={concatenate("flex-1 flex-col", collapsible && !items.length ? "hidden md:flex" : "flex")}>
+			<div className={twMerge("flex-1 flex-col", collapsible && !items.length ? "hidden md:flex" : "flex")}>
 				{title && (
 					<h4 className="flex font-semibold" onClick={collapsible ? () => setCollapsed(!collapsed) : () => {}}>
 						<span className="flex-1">{title}</span>
 						{collapsible && <Icon path={collapsed ? mdiChevronDown : mdiChevronUp} className="ml-2 inline w-4 justify-self-end print:hidden md:hidden" />}
 					</h4>
 				)}
-				<p className={concatenate("divide-x whitespace-pre-wrap text-sm print:text-xs", collapsed ? "hidden print:block md:block" : "")}>
+				<p className={twMerge("divide-x whitespace-pre-wrap text-sm print:text-xs", collapsed ? "hidden print:block md:block" : "")}>
 					{items.length
 						? items.map(mi => (
 								<span
@@ -53,15 +53,15 @@ export function Items({
 						: "None"}
 				</p>
 			</div>
-			<label className={concatenate("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
+			<div className={twMerge("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
 				{modal && (
-					<label className="modal-box relative">
-						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
+					<div className="modal-box relative cursor-default drop-shadow-lg" onClick={e => e.stopPropagation()}>
+						<h3 className="cursor-text text-lg font-bold text-accent-content">{modal.name}</h3>
 						{modal.date && <p className="text-xs">{modal.date.toLocaleString()}</p>}
-						<p className="whitespace-pre-wrap pt-4 text-xs sm:text-sm">{modal.description}</p>
-					</label>
+						<p className="cursor-text whitespace-pre-wrap pt-4 text-xs sm:text-sm">{modal.description}</p>
+					</div>
 				)}
-			</label>
+			</div>
 		</>
 	);
 }

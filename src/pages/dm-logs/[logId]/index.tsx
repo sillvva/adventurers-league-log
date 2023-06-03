@@ -6,7 +6,7 @@ import { prisma } from "$src/server/db/client";
 import { logSchema } from "$src/types/zod-schema";
 import { useQueryString } from "$src/utils/hooks";
 import { getLogsSummary } from "$src/utils/logs";
-import { concatenate, formatDate } from "$src/utils/misc";
+import { formatDate } from "$src/utils/misc";
 import { trpc } from "$src/utils/trpc";
 import { getServerSession } from "next-auth";
 import Head from "next/head";
@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -263,7 +264,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 				<input type="hidden" {...form.register("dm.name", { value: selectedLog.dm?.name || session?.user?.name || "" })} />
 				<input type="hidden" {...form.register("dm.uid", { value: selectedLog.dm?.uid || session?.user?.id || "" })} />
 				<div className="grid grid-cols-12 gap-4">
-					<div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
+					<div className={twMerge("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
 						<label className="label">
 							<span className="label-text">
 								Title
@@ -280,7 +281,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<span className="label-text-alt text-error">{form.formState.errors.name?.message}</span>
 						</label>
 					</div>
-					<div className={concatenate("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
+					<div className={twMerge("form-control col-span-12", selectedLog.is_dm_log ? "sm:col-span-6 lg:col-span-3" : "sm:col-span-4")}>
 						<label className="label">
 							<span className="label-text">
 								Date
@@ -336,7 +337,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							<span className="label-text-alt text-error">{form.formState.errors.characterId?.message}</span>
 						</label>
 					</div>
-					<div className={concatenate("form-control col-span-12", "sm:col-span-6 lg:col-span-3")}>
+					<div className={twMerge("form-control col-span-12", "sm:col-span-6 lg:col-span-3")}>
 						<label className="label">
 							<span className="label-text">
 								Assigned Date
@@ -430,7 +431,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 										<span className="label-text-alt text-error">{form.formState.errors.acp?.message}</span>
 									</label>
 								</div>
-								<div className={concatenate("form-control w-full", "col-span-6 sm:col-span-2")}>
+								<div className={twMerge("form-control w-full", "col-span-6 sm:col-span-2")}>
 									<label className="label">
 										<span className="label-text">TCP</span>
 									</label>
@@ -445,7 +446,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								</div>
 							</>
 						)}
-						<div className={concatenate("form-control w-full", "col-span-12 sm:col-span-2")}>
+						<div className={twMerge("form-control w-full", "col-span-12 sm:col-span-2")}>
 							<label className="label">
 								<span className="label-text">Gold</span>
 							</label>
@@ -458,7 +459,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 								<span className="label-text-alt text-error">{form.formState.errors.gold?.message}</span>
 							</label>
 						</div>
-						<div className={concatenate("form-control w-full", "col-span-12 sm:col-span-2")}>
+						<div className={twMerge("form-control w-full", "col-span-12 sm:col-span-2")}>
 							<label className="label">
 								<span className="label-text overflow-hidden text-ellipsis whitespace-nowrap">Downtime Days</span>
 							</label>
@@ -589,7 +590,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 						))}
 					</div>
 					<div className="col-span-12 text-center">
-						<button type="submit" className={concatenate("btn-primary btn", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
+						<button type="submit" className={twMerge("btn-primary btn", mutation.isLoading && "loading")} disabled={mutation.isLoading}>
 							Save Log
 						</button>
 					</div>
