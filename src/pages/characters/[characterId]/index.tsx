@@ -424,6 +424,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 													className="whitespace-pre-wrap font-semibold text-accent-content"
 													onClick={() =>
 														log.description &&
+														!descriptions &&
 														setModal({
 															name: log.name,
 															description: log.description,
@@ -617,21 +618,21 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 				</div>
 			)}
 
-			<label className={twMerge("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
+			<div className={twMerge("modal cursor-pointer", modal && "modal-open")} onClick={() => setModal(null)}>
 				{modal && (
-					<label className="modal-box relative">
-						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
+					<div className="modal-box relative cursor-default drop-shadow-lg" onClick={e => e.stopPropagation()}>
+						<h3 className="cursor-text text-lg font-bold text-accent-content">{modal.name}</h3>
 						{modal.date && (
-							<p className="text-xs" suppressHydrationWarning>
+							<p className="cursor-text text-xs" suppressHydrationWarning>
 								{modal.date.toLocaleString()}
 							</p>
 						)}
-						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
+						<ReactMarkdown className="cursor-text whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
 							{modal.description}
 						</ReactMarkdown>
-					</label>
+					</div>
 				)}
-			</label>
+			</div>
 		</>
 	);
 };
