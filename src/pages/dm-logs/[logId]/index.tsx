@@ -321,7 +321,6 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 									form.trigger("applied_date");
 								}
 							})}
-							value={form.getValues("characterName")}
 							values={characters?.map(char => ({ key: char.id, value: char.name })) || []}
 							searchBy="value"
 							onSelect={val => {

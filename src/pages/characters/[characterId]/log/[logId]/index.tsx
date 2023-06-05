@@ -371,7 +371,6 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 													value: selectedLog.dm?.name || "",
 													disabled: saving
 												})}
-												value={form.getValues("dm.name")}
 												values={dms?.map(dm => ({ key: dm.name, value: dm.name + (dm.DCI ? ` (${dm.DCI})` : "") })) || []}
 												onSelect={val => {
 													const dm = dms?.find(dm => dm.name === val);
@@ -392,7 +391,6 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 													value: selectedLog.dm?.DCI || null,
 													disabled: saving
 												})}
-												value={form.getValues("dm.DCI")}
 												values={dms?.map(dm => ({ key: dm.DCI, value: dm.name + (dm.DCI ? ` (${dm.DCI})` : "") })) || []}
 												onSelect={val => {
 													const dm = dms?.find(dm => dm.DCI === val);
