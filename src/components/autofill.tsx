@@ -5,14 +5,12 @@ import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
 
 export default function AutoFillSelect({
 	type,
-	value,
 	values,
 	inputProps,
 	onSelect,
 	searchBy = "key"
 }: {
 	type: "text" | "number";
-	value?: string | null;
 	values: { key?: string | null; value: string }[];
 	inputProps: DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 	onSelect: (value: string) => void;
@@ -44,15 +42,13 @@ export default function AutoFillSelect({
 		[matches, onSelect]
 	);
 
-	useEffect(() => {});
-
 	return (
 		<div className="dropdown">
 			<label>
 				<input
 					type={type}
 					{...inputProps}
-					value={value || ""}
+					value={inputProps.value}
 					onChange={e => {
 						setValSearch(e.target.value);
 						setKeySel(0);
@@ -61,7 +57,7 @@ export default function AutoFillSelect({
 					}}
 					onKeyDown={e => {
 						const isSearching = parsedValues && parsedValues.length > 0 && valSearch.trim();
-						if (!isSearching) return false;
+						if (!isSearching) return;
 						if (e.code === "ArrowDown") {
 							e.preventDefault();
 							if (selected) return false;
@@ -94,6 +90,15 @@ export default function AutoFillSelect({
 						if (!selected) setValSearch(e.target.value);
 					}}
 					onBlur={e => {
+						const match = parsedValues.find(v => v.key.toLowerCase() === e.target.value.toLowerCase());
+						if (match) {
+							setSelected(true);
+							onSelect(match.key);
+							setValSearch("");
+							setSelected(true);
+						} else {
+							inputProps.value = "";
+						}
 						if (inputProps.onBlur) inputProps.onBlur(e);
 						if (!selected) setValSearch("");
 					}}
