@@ -107,8 +107,8 @@ export default function AutoFillSelect({
 				<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
 					{matches
 						.map((kv, i) => (
-							<li key={kv.key} className={twMerge(keySel === i && "bg-primary text-primary-content")}>
-								<a className="rounded-lg px-4 py-2" onMouseDown={() => selectHandler(i)}>
+							<li key={kv.key} className={twMerge("hover:bg-primary/50", keySel === i && "bg-primary text-primary-content")}>
+								<a className="rounded-none px-4 py-2" onMouseDown={() => selectHandler(i)}>
 									{kv.value}
 								</a>
 							</li>
