@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
@@ -11,9 +11,9 @@ export default function AutoFillSelect({
 	searchBy = "key"
 }: {
 	type: "text" | "number";
-	values: { key?: string | null; value: string }[];
+	values: { key?: string | number | null; value: string }[];
 	inputProps: DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
-	onSelect: (value: string) => void;
+	onSelect: (value: string | number) => void;
 	searchBy?: "key" | "value";
 }) {
 	const [keySel, setKeySel] = useState<number>(0);
@@ -34,10 +34,10 @@ export default function AutoFillSelect({
 
 	const selectHandler = useCallback(
 		(key: number) => {
+			onSelect(matches[key]?.key || "");
 			setKeySel(key);
 			setValSearch("");
 			setSelected(true);
-			onSelect(matches[key]?.key || "");
 		},
 		[matches, onSelect]
 	);
@@ -48,11 +48,10 @@ export default function AutoFillSelect({
 				<input
 					type={type}
 					{...inputProps}
-					value={inputProps.value}
 					onChange={e => {
+						setSelected(false);
 						setValSearch(e.target.value);
 						setKeySel(0);
-						setSelected(false);
 						if (inputProps.onChange) inputProps.onChange(e);
 					}}
 					onKeyDown={e => {
@@ -90,14 +89,13 @@ export default function AutoFillSelect({
 						if (!selected) setValSearch(e.target.value);
 					}}
 					onBlur={e => {
-						const match = parsedValues.find(v => v.key.toLowerCase() === e.target.value.toLowerCase());
+						const match = parsedValues.find(v => v.key.toString().toLowerCase() === e.target.value.toLowerCase());
 						if (match) {
-							setSelected(true);
 							onSelect(match.key);
-							setValSearch("");
 							setSelected(true);
 						} else {
-							inputProps.value = "";
+							onSelect("");
+							setSelected(false);
 						}
 						if (inputProps.onBlur) inputProps.onBlur(e);
 						if (!selected) setValSearch("");
@@ -109,8 +107,10 @@ export default function AutoFillSelect({
 				<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
 					{matches
 						.map((kv, i) => (
-							<li key={kv.key} className={twMerge(keySel === i && "bg-primary text-primary-content")}>
-								<a onMouseDown={() => selectHandler(keySel)}>{kv.value}</a>
+							<li key={kv.key} className={twMerge("hover:bg-primary/50", keySel === i && "bg-primary text-primary-content")}>
+								<a className="rounded-none px-4 py-2" onMouseDown={() => selectHandler(i)}>
+									{kv.value}
+								</a>
 							</li>
 						))
 						.slice(0, 8)}

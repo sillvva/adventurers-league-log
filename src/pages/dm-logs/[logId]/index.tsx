@@ -325,11 +325,16 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 							searchBy="value"
 							onSelect={val => {
 								const character = characters.find(c => c.id === val);
-								form.setValue("characterName", character?.name || "");
-								form.setValue("characterId", val);
+								if (character) {
+									form.setValue("characterName", character?.name || "");
+									form.setValue("characterId", val.toString());
+									form.setError("characterId", { type: "manual", message: "" });
+								} else {
+									form.setValue("characterName", "");
+									form.setValue("characterId", "");
+								}
 								form.setValue("applied_date", null);
 								form.trigger("applied_date");
-								form.setError("characterId", { type: "manual", message: "" });
 							}}
 						/>
 						<label className="label">
