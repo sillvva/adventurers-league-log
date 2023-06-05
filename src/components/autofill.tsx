@@ -92,11 +92,9 @@ export default function AutoFillSelect({
 						const match = parsedValues.find(v => v.key.toString().toLowerCase() === e.target.value.toLowerCase());
 						if (match) {
 							onSelect(match.key);
-							setValSearch("");
 							setSelected(true);
 						} else {
 							onSelect("");
-							setValSearch("");
 							setSelected(false);
 						}
 						if (inputProps.onBlur) inputProps.onBlur(e);
@@ -110,7 +108,7 @@ export default function AutoFillSelect({
 					{matches
 						.map((kv, i) => (
 							<li key={kv.key} className={twMerge(keySel === i && "bg-primary text-primary-content")}>
-								<a className="px-4 py-2" onMouseDown={() => selectHandler(keySel)}>
+								<a className="rounded-lg px-4 py-2" onMouseDown={() => selectHandler(i)}>
 									{kv.value}
 								</a>
 							</li>
