@@ -250,10 +250,10 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 	const addLostStoryAward = () => setStoryAwardsLost([...storyAwardsLost, storyAwards[0]?.id || ""]);
 	const removeLostStoryAward = (index: number) => setStoryAwardsLost(storyAwardsLost.filter((_, i) => i !== index));
 
-	const setDM = (dm: DungeonMaster) => {
-		form.setValue("dm.id", dm.id);
-		form.setValue("dm.name", dm.name);
-		form.setValue("dm.DCI", dm.DCI);
+	const setDM = (dm?: DungeonMaster) => {
+		form.setValue("dm.id", dm?.id || "");
+		form.setValue("dm.name", dm?.name || "");
+		form.setValue("dm.DCI", dm?.DCI || null);
 	};
 
 	return (
@@ -373,8 +373,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												})}
 												values={dms?.map(dm => ({ key: dm.name, value: dm.name + (dm.DCI ? ` (${dm.DCI})` : "") })) || []}
 												onSelect={val => {
-													const dm = dms?.find(dm => dm.name === val);
-													if (dm) setDM(dm);
+													setDM(dms?.find(dm => dm.name === val));
 												}}
 											/>
 											<label className="label">
@@ -393,8 +392,7 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 												})}
 												values={dms?.map(dm => ({ key: dm.DCI, value: dm.name + (dm.DCI ? ` (${dm.DCI})` : "") })) || []}
 												onSelect={val => {
-													const dm = dms?.find(dm => dm.DCI === val);
-													if (dm) setDM(dm);
+													setDM(dms?.find(dm => dm.DCI === val));
 												}}
 											/>
 											<label className="label">
