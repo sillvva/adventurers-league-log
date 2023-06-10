@@ -20,24 +20,25 @@ export default function AutoFillSelect({
 	const [valSearch, setValSearch] = useState("");
 	const [selected, setSelected] = useState(false);
 
+	const parsedValues = useMemo(() => values.map(v => ({ key: v.key ?? v.value, value: v.value })).filter(v => v.key !== null), [values]);
+
 	const matches = useMemo(
 		() =>
-			values && values.length > 0 && valSearch.trim()
-				? values
+			parsedValues && parsedValues.length > 0 && valSearch.trim()
+				? parsedValues
 						.filter(v => `${searchBy == "key" ? v.key : v.value}`.toLowerCase().includes(valSearch.toLowerCase()))
 						.sort((a, b) => (a.value > b.value ? 1 : -1))
 				: [],
-		[values, valSearch, searchBy]
+		[parsedValues, valSearch, searchBy]
 	);
-
-	const parsedValues = useMemo(() => values.map(v => ({ key: v.key ?? v.value, value: v.value })).filter(v => v.key !== null), [values]);
 
 	const selectHandler = useCallback(
 		(key: number) => {
-			onSelect(matches[key]?.key || "");
-			setKeySel(key);
+			const match = matches[key];
+			onSelect(match?.key || "");
+			setKeySel(match ? key : 0);
+			setSelected(!!match);
 			setValSearch("");
-			setSelected(true);
 		},
 		[matches, onSelect]
 	);
@@ -55,8 +56,7 @@ export default function AutoFillSelect({
 						if (inputProps.onChange) inputProps.onChange(e);
 					}}
 					onKeyDown={e => {
-						const isSearching = parsedValues && parsedValues.length > 0 && valSearch.trim();
-						if (!isSearching) return;
+						if (!parsedValues.length || !valSearch.trim()) return;
 						if (e.code === "ArrowDown") {
 							e.preventDefault();
 							if (selected) return false;
@@ -80,25 +80,13 @@ export default function AutoFillSelect({
 						if (e.code === "Escape") {
 							e.preventDefault();
 							if (selected) return false;
-							setValSearch("");
+							selectHandler(-1);
 							return false;
 						}
 					}}
-					onFocus={e => {
-						if (inputProps.onFocus) inputProps.onFocus(e);
-						if (!selected) setValSearch(e.target.value);
-					}}
 					onBlur={e => {
-						const match = parsedValues.find(v => v.key.toString().toLowerCase() === e.target.value.toLowerCase());
-						if (match) {
-							onSelect(match.key);
-							setSelected(true);
-						} else {
-							onSelect("");
-							setSelected(false);
-						}
+						if (!selected) selectHandler(matches.findIndex(v => v.key.toString().toLowerCase() === e.target.value.toLowerCase()));
 						if (inputProps.onBlur) inputProps.onBlur(e);
-						if (!selected) setValSearch("");
 					}}
 					className="input-bordered input w-full focus:border-primary"
 				/>
@@ -107,7 +95,7 @@ export default function AutoFillSelect({
 				<ul className="dropdown-content menu w-full rounded-lg bg-base-100 p-2 shadow dark:bg-base-200">
 					{matches
 						.map((kv, i) => (
-							<li key={kv.key} className={twMerge("hover:bg-primary/50", keySel === i && "bg-primary text-primary-content")}>
+							<li key={`${kv.key}${i}`} className={twMerge("hover:bg-primary/50", keySel === i && "bg-primary text-primary-content")}>
 								<a className="rounded-none px-4 py-2" onMouseDown={() => selectHandler(i)}>
 									{kv.value}
 								</a>
