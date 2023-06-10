@@ -51,6 +51,13 @@ export const protectedCharactersRouter = createProtectedRouter()
 						}
 					}
 				});
+				await ctx.prisma.log.deleteMany({
+					where: {
+						id: {
+							in: logIds
+						}
+					}
+				});
 				return await ctx.prisma.character.delete({
 					where: { id: input.id }
 				});
