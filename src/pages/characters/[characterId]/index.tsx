@@ -1,4 +1,5 @@
 import { Items } from "$src/components/items";
+import { Markdown } from "$src/components/markdown";
 import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
 import { authOptions } from "$src/pages/api/auth/[...nextauth]";
@@ -12,8 +13,6 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 
@@ -25,39 +24,6 @@ import type { NextPageWithLayout } from "$src/pages/_app";
 import type { InferPropsFromServerSideFunction } from "ddal";
 import type { GetServerSidePropsContext } from "next";
 import type { CSSProperties } from "react";
-import type { SpecialComponents } from "react-markdown/lib/ast-to-react";
-import type { NormalComponents } from "react-markdown/lib/complex-types";
-
-export const components: Partial<Omit<NormalComponents, keyof SpecialComponents> & SpecialComponents> = {
-	h1({ children }) {
-		return <h1 className="text-3xl font-bold">{children}</h1>;
-	},
-	h2({ children }) {
-		return <h2 className="text-2xl font-bold">{children}</h2>;
-	},
-	h3({ children }) {
-		return <h3 className="text-xl font-semibold">{children}</h3>;
-	},
-	table({ children }) {
-		return <table className="table-compact table">{children}</table>;
-	},
-	th({ children }) {
-		return <th className="whitespace-pre-wrap bg-base-200 print:p-2">{children}</th>;
-	},
-	td({ children }) {
-		return <td className="whitespace-pre-wrap print:p-2">{children}</td>;
-	},
-	a({ children, href }) {
-		return (
-			<a href={href} className="overflow-hidden text-ellipsis text-secondary" target="_blank" rel="noreferrer noopener">
-				{children}
-			</a>
-		);
-	},
-	p({ children }) {
-		return <p className="mb-2 overflow-hidden text-ellipsis">{children}</p>;
-	}
-};
 
 let stopWords = new Set(["and", "or", "to", "in", "a", "the"]);
 const minisearch = new MiniSearch({
@@ -584,9 +550,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 														log.saving && "bg-neutral-focus"
 													)}>
 													<h4 className="text-base font-semibold">Notes:</h4>
-													<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-														{log.description || ""}
-													</ReactMarkdown>
+													<Markdown>{log.description || ""}</Markdown>
 													{(log.story_awards_gained.length > 0 || log.story_awards_lost.length > 0) && (
 														<div>
 															{log.story_awards_gained.map(mi => (
@@ -595,9 +559,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 																		{mi.name}
 																		{mi.description ? ":" : ""}
 																	</span>
-																	<ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-																		{mi.description || ""}
-																	</ReactMarkdown>
+																	<Markdown>{mi.description || ""}</Markdown>
 																</div>
 															))}
 															<p className="whitespace-pre-wrap text-sm line-through">{log.story_awards_lost.map(mi => mi.name).join(" | ")}</p>
@@ -627,9 +589,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 								{modal.date.toLocaleString()}
 							</p>
 						)}
-						<ReactMarkdown className="cursor-text whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
-							{modal.description}
-						</ReactMarkdown>
+						<Markdown className="cursor-text whitespace-pre-wrap pt-4 text-xs sm:text-sm">{modal.description}</Markdown>
 					</div>
 				)}
 			</div>
