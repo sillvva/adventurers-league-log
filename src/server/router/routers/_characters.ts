@@ -37,22 +37,31 @@ export const protectedCharactersRouter = createProtectedRouter()
 			});
 			if (character && character.userId !== ctx.session.user.id) {
 				const logIds = character.logs.map(log => log.id);
-				await ctx.prisma.magicItem.deleteMany({
-					where: {
-						logGainedId: {
-							in: logIds
+				return await ctx.prisma.$transaction(async tx => {
+					await tx.magicItem.deleteMany({
+						where: {
+							logGainedId: {
+								in: logIds
+							}
 						}
-					}
-				});
-				await ctx.prisma.storyAward.deleteMany({
-					where: {
-						logGainedId: {
-							in: logIds
+					});
+					await tx.storyAward.deleteMany({
+						where: {
+							logGainedId: {
+								in: logIds
+							}
 						}
-					}
-				});
-				return await ctx.prisma.character.delete({
-					where: { id: input.id }
+					});
+					await tx.log.deleteMany({
+						where: {
+							id: {
+								in: logIds
+							}
+						}
+					});
+					return await tx.character.delete({
+						where: { id: input.id }
+					});
 				});
 			} else return false;
 		}

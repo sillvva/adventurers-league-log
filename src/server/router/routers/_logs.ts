@@ -1,11 +1,13 @@
 import { logSchema } from "$src/types/zod-schema";
 import { getLevels } from "$src/utils/logs";
 import { parseError } from "$src/utils/misc";
-import type { DungeonMaster, Log } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
+import { TRPCError } from "@trpc/server";
+
 import { createProtectedRouter } from "../protected-router";
 
+import type { DungeonMaster, Log } from "@prisma/client";
 export const protectedLogsRouter = createProtectedRouter()
 	.mutation("save", {
 		input: logSchema,
@@ -94,143 +96,148 @@ export const protectedLogsRouter = createProtectedRouter()
 				gold: input.gold,
 				dtd: input.dtd
 			};
-			const log: Log = await ctx.prisma.log.upsert({
-				where: {
-					id: input.logId
-				},
-				update: data,
-				create: data
-			});
 
-			if (!log.id) throw new TRPCError({ message: "Could not save log", code: "INTERNAL_SERVER_ERROR" });
-
-			const itemsToUpdate = input.magic_items_gained.filter(item => item.id);
-
-			await ctx.prisma.magicItem.deleteMany({
-				where: {
-					logGainedId: log.id,
-					id: {
-						notIn: itemsToUpdate.map(item => item.id)
-					}
-				}
-			});
-
-			await ctx.prisma.magicItem.createMany({
-				data: input.magic_items_gained
-					.filter(item => !item.id)
-					.map(item => ({
-						name: item.name,
-						description: item.description,
-						logGainedId: log.id
-					}))
-			});
-
-			for (let item of itemsToUpdate) {
-				await ctx.prisma.magicItem.update({
+			const log = await ctx.prisma.$transaction(async tx => {
+				const log: Log = await tx.log.upsert({
 					where: {
-						id: item.id
+						id: input.logId
 					},
-					data: {
-						name: item.name,
-						description: item.description
+					update: data,
+					create: data
+				});
+
+				if (!log.id) throw new Error("Could not save log");
+
+				const itemsToUpdate = input.magic_items_gained.filter(item => item.id);
+
+				await tx.magicItem.deleteMany({
+					where: {
+						logGainedId: log.id,
+						id: {
+							notIn: itemsToUpdate.map(item => item.id)
+						}
 					}
 				});
-			}
 
-			await ctx.prisma.magicItem.updateMany({
-				where: {
-					logLostId: log.id,
-					id: {
-						notIn: input.magic_items_lost
-					}
-				},
-				data: {
-					logLostId: null
+				await tx.magicItem.createMany({
+					data: input.magic_items_gained
+						.filter(item => !item.id)
+						.map(item => ({
+							name: item.name,
+							description: item.description,
+							logGainedId: log.id
+						}))
+				});
+
+				for (let item of itemsToUpdate) {
+					await tx.magicItem.update({
+						where: {
+							id: item.id
+						},
+						data: {
+							name: item.name,
+							description: item.description
+						}
+					});
 				}
-			});
 
-			await ctx.prisma.magicItem.updateMany({
-				where: {
-					id: {
-						in: input.magic_items_lost
-					}
-				},
-				data: {
-					logLostId: log.id
-				}
-			});
-
-			const storyAwardsToUpdate = input.story_awards_gained.filter(item => item.id);
-
-			await ctx.prisma.storyAward.deleteMany({
-				where: {
-					logGainedId: log.id,
-					id: {
-						notIn: storyAwardsToUpdate.map(item => item.id)
-					}
-				}
-			});
-
-			await ctx.prisma.storyAward.createMany({
-				data: input.story_awards_gained
-					.filter(item => !item.id)
-					.map(item => ({
-						name: item.name,
-						description: item.description,
-						logGainedId: log.id
-					}))
-			});
-
-			for (let item of storyAwardsToUpdate) {
-				await ctx.prisma.storyAward.update({
+				await tx.magicItem.updateMany({
 					where: {
-						id: item.id
+						logLostId: log.id,
+						id: {
+							notIn: input.magic_items_lost
+						}
 					},
 					data: {
-						name: item.name,
-						description: item.description
+						logLostId: null
 					}
 				});
-			}
-			await ctx.prisma.storyAward.updateMany({
-				where: {
-					logLostId: log.id,
-					id: {
-						notIn: input.story_awards_lost
-					}
-				},
-				data: {
-					logLostId: null
-				}
-			});
 
-			await ctx.prisma.storyAward.updateMany({
-				where: {
-					id: {
-						in: input.story_awards_lost
+				await tx.magicItem.updateMany({
+					where: {
+						id: {
+							in: input.magic_items_lost
+						}
+					},
+					data: {
+						logLostId: log.id
 					}
-				},
-				data: {
-					logLostId: log.id
-				}
-			});
+				});
 
-			const updated = await ctx.prisma.log.findFirst({
-				where: {
-					id: log.id
-				},
-				include: {
-					dm: true,
-					magic_items_gained: true,
-					magic_items_lost: true,
-					story_awards_gained: true,
-					story_awards_lost: true
+				const storyAwardsToUpdate = input.story_awards_gained.filter(item => item.id);
+
+				await tx.storyAward.deleteMany({
+					where: {
+						logGainedId: log.id,
+						id: {
+							notIn: storyAwardsToUpdate.map(item => item.id)
+						}
+					}
+				});
+
+				await tx.storyAward.createMany({
+					data: input.story_awards_gained
+						.filter(item => !item.id)
+						.map(item => ({
+							name: item.name,
+							description: item.description,
+							logGainedId: log.id
+						}))
+				});
+
+				for (let item of storyAwardsToUpdate) {
+					await tx.storyAward.update({
+						where: {
+							id: item.id
+						},
+						data: {
+							name: item.name,
+							description: item.description
+						}
+					});
 				}
+				await tx.storyAward.updateMany({
+					where: {
+						logLostId: log.id,
+						id: {
+							notIn: input.story_awards_lost
+						}
+					},
+					data: {
+						logLostId: null
+					}
+				});
+
+				await tx.storyAward.updateMany({
+					where: {
+						id: {
+							in: input.story_awards_lost
+						}
+					},
+					data: {
+						logLostId: log.id
+					}
+				});
+
+				const updated = await tx.log.findFirst({
+					where: {
+						id: log.id
+					},
+					include: {
+						dm: true,
+						magic_items_gained: true,
+						magic_items_lost: true,
+						story_awards_gained: true,
+						story_awards_lost: true
+					}
+				});
+
+				return updated;
 			});
 
 			return (
-				updated && {
-					...updated,
+				log && {
+					...log,
 					saving: true
 				}
 			);
@@ -241,36 +248,38 @@ export const protectedLogsRouter = createProtectedRouter()
 			logId: z.string()
 		}),
 		async resolve({ input, ctx }) {
-			await ctx.prisma.magicItem.updateMany({
-				where: {
-					logLostId: input.logId
-				},
-				data: {
-					logLostId: null
-				}
-			});
-			await ctx.prisma.magicItem.deleteMany({
-				where: {
-					logGainedId: input.logId
-				}
-			});
-			await ctx.prisma.storyAward.updateMany({
-				where: {
-					logLostId: input.logId
-				},
-				data: {
-					logLostId: null
-				}
-			});
-			await ctx.prisma.storyAward.deleteMany({
-				where: {
-					logGainedId: input.logId
-				}
-			});
-			return ctx.prisma.log.delete({
-				where: {
-					id: input.logId
-				}
+			return await ctx.prisma.$transaction(async tx => {
+				await tx.magicItem.updateMany({
+					where: {
+						logLostId: input.logId
+					},
+					data: {
+						logLostId: null
+					}
+				});
+				await tx.magicItem.deleteMany({
+					where: {
+						logGainedId: input.logId
+					}
+				});
+				await tx.storyAward.updateMany({
+					where: {
+						logLostId: input.logId
+					},
+					data: {
+						logLostId: null
+					}
+				});
+				await tx.storyAward.deleteMany({
+					where: {
+						logGainedId: input.logId
+					}
+				});
+				return await tx.log.delete({
+					where: {
+						id: input.logId
+					}
+				});
 			});
 		}
 	})
