@@ -8,6 +8,7 @@ import { TRPCError } from "@trpc/server";
 import { createProtectedRouter } from "../protected-router";
 
 import type { DungeonMaster, Log } from "@prisma/client";
+
 export const protectedLogsRouter = createProtectedRouter()
 	.mutation("save", {
 		input: logSchema,

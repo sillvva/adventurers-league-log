@@ -109,7 +109,7 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 	);
 
 	// const logsLoading = false;
-	const { data: logs, isLoading: logsLoading } = trpc.useQuery(["characters.getLogs", { characterId: params.characterId }], {
+	const { data: logData, isLoading: logsLoading } = trpc.useQuery(["characters.getLogs", { characterId: params.characterId }], {
 		refetchOnWindowFocus: false,
 		refetchOnMount: false
 	});
@@ -145,11 +145,11 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 		}
 	});
 
-	const logData = useMemo(() => {
+	const logs = useMemo(() => {
 		let level = 1;
-		return logs
-			? logs.logs.map(log => {
-					const level_gained = logs.log_levels.find(gl => gl.id === log.id);
+		return logData
+			? logData.logs.map(log => {
+					const level_gained = logData.log_levels.find(gl => gl.id === log.id);
 					if (level_gained) level += level_gained.levels;
 					return {
 						...log,
@@ -159,10 +159,10 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 					};
 			  })
 			: [];
-	}, [logs]);
+	}, [logData]);
 
 	const indexed = useMemo(() => {
-		return logData.map(log => ({
+		return logs.map(log => ({
 			logId: log.id,
 			logName: log.name,
 			magicItems: [...log.magic_items_gained.map(item => item.name), ...log.magic_items_lost.map(item => item.name)].join(", "),
@@ -185,10 +185,10 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 	}, []);
 
 	const results = useMemo(() => {
-		if (logData.length) {
+		if (logs.length) {
 			if (search.length > 1) {
 				const results = minisearch.search(search);
-				return logData
+				return logs
 					.filter(log => results.find(result => result.id === log.id))
 					.map(log => ({
 						...log,
@@ -196,12 +196,12 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 					}))
 					.sort((a, b) => a.date.getTime() - b.date.getTime());
 			} else {
-				return logData.sort((a, b) => a.date.getTime() - b.date.getTime());
+				return logs.sort((a, b) => a.date.getTime() - b.date.getTime());
 			}
 		} else {
 			return [];
 		}
-	}, [search, logData]);
+	}, [search, logs]);
 
 	let description = `${character.race} ${character.class}`;
 	if (!description.trim()) description = "An online log sheet made for Adventurers League characters";
@@ -308,27 +308,27 @@ const Characters: NextPageWithLayout<InferPropsFromServerSideFunction<typeof get
 							)}
 							<div className="flex">
 								<h4 className="font-semibold">Level</h4>
-								<div className="flex-1 text-right">{logs?.total_level}</div>
+								<div className="flex-1 text-right">{logData?.total_level}</div>
 							</div>
 							<div className="flex">
 								<h4 className="font-semibold">Tier</h4>
-								<div className="flex-1 text-right">{logs?.tier}</div>
+								<div className="flex-1 text-right">{logData?.tier}</div>
 							</div>
 							<div className="flex">
 								<h4 className="font-semibold">Gold</h4>
-								<div className="flex-1 text-right">{logs?.total_gold.toLocaleString("en-US")}</div>
+								<div className="flex-1 text-right">{logData?.total_gold.toLocaleString("en-US")}</div>
 							</div>
 							<div className="flex">
 								<h4 className="font-semibold">Downtime</h4>
-								<div className="flex-1 text-right">{logs?.total_dtd}</div>
+								<div className="flex-1 text-right">{logData?.total_dtd}</div>
 							</div>
 						</div>
 						<div className="divider hidden sm:divider-horizontal before:bg-neutral-content/50 after:bg-neutral-content/50 print:flex sm:flex"></div>
 						<div className="flex flex-1 basis-full flex-col print:basis-2/3 sm:basis-2/3 lg:basis-2/3">
-							{logs && (
+							{logData && (
 								<div className="flex flex-col gap-4" ref={parent1}>
-									<Items title="Story Awards" items={logs.story_awards} collapsible />
-									<Items title="Magic Items" items={logs.magic_items} collapsible formatting />
+									<Items title="Story Awards" items={logData.story_awards} collapsible />
+									<Items title="Magic Items" items={logData.magic_items} collapsible formatting />
 								</div>
 							)}
 						</div>
