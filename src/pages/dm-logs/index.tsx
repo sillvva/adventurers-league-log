@@ -1,4 +1,5 @@
 import { Items } from "$src/components/items";
+import { Markdown } from "$src/components/markdown";
 import { SearchResults } from "$src/components/search";
 import Layout from "$src/layouts/main";
 import { trpc } from "$src/utils/trpc";
@@ -7,8 +8,6 @@ import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { twMerge } from "tailwind-merge";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -16,7 +15,6 @@ import { mdiDotsHorizontal, mdiHome, mdiPencil, mdiTrashCan } from "@mdi/js";
 import Icon from "@mdi/react";
 
 import { authOptions } from "../api/auth/[...nextauth]";
-import { components } from "../characters/[characterId]";
 
 import type { NextPageWithLayout } from "$src/pages/_app";
 import type { GetServerSidePropsContext } from "next";
@@ -350,9 +348,7 @@ const Characters: NextPageWithLayout = () => {
 					<label className="modal-box relative">
 						<h3 className="text-lg font-bold text-accent-content">{modal.name}</h3>
 						{modal.date && <p className="text-xs">{modal.date.toLocaleString()}</p>}
-						<ReactMarkdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm" components={components} remarkPlugins={[remarkGfm]}>
-							{modal.description}
-						</ReactMarkdown>
+						<Markdown className="whitespace-pre-wrap pt-4 text-xs sm:text-sm">{modal.description}</Markdown>
 					</label>
 				)}
 			</label>

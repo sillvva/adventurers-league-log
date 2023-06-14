@@ -1,3 +1,4 @@
+import { Markdown } from "$src/components/markdown";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -58,7 +59,7 @@ export function Items({
 					<div className="modal-box relative cursor-default drop-shadow-lg" onClick={e => e.stopPropagation()}>
 						<h3 className="cursor-text text-lg font-bold text-accent-content">{modal.name}</h3>
 						{modal.date && <p className="text-xs">{modal.date.toLocaleString()}</p>}
-						<p className="cursor-text whitespace-pre-wrap pt-4 text-xs sm:text-sm">{modal.description}</p>
+						<Markdown className="cursor-text whitespace-pre-wrap pt-4 text-xs sm:text-sm">{modal.description}</Markdown>
 					</div>
 				)}
 			</div>

@@ -94,7 +94,7 @@ const Layout = (props: PropsWithChildren) => {
 								</a>
 								{session.data?.user ? (
 									<>
-										<div className="dropdown dropdown-end">
+										<div className="dropdown-end dropdown">
 											<label tabIndex={0} className="flex cursor-pointer">
 												<div className="hidden items-center px-4 text-accent-content print:flex sm:flex">{session.data.user.name}</div>
 												<div className="avatar">
@@ -131,7 +131,9 @@ const Layout = (props: PropsWithChildren) => {
 													</a>
 												</li>
 												<li>
-													<a onClick={() => signOut()}>Logout</a>
+													<a href="" onClick={() => signOut()}>
+														Logout
+													</a>
 												</li>
 											</ul>
 										</div>
