@@ -16,7 +16,6 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";
-
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { mdiAlertCircle, mdiHome, mdiTrashCan } from "@mdi/js";
@@ -178,8 +177,18 @@ const EditLog: NextPageWithLayout<InferPropsFromServerSideFunction<typeof getSer
 		const activeName = document.activeElement?.getAttribute("name");
 		if (activeName === "characterName" && !form.getValues("characterId")) return;
 
-		if (!(characters || []).map(c => c.id).find(c => form.getValues("characterId"))) {
+		if (form.getValues("characterId") && !(characters || []).find(c => c.id === form.getValues("characterId"))) {
 			form.setError("characterId", { type: "manual", message: "Character not found" });
+			return;
+		}
+
+		if (form.getValues("characterName") && !form.getValues("applied_date")) {
+			form.setError("applied_date", { type: "manual", message: "Applied date is required if assigned character is entered" });
+			return;
+		}
+
+		if (form.getValues("applied_date") && !form.getValues("characterId")) {
+			form.setError("characterId", { type: "manual", message: "Assigned character is required if applied date is entered" });
 			return;
 		}
 

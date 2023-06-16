@@ -13,92 +13,92 @@ export const protectedLogsRouter = createProtectedRouter()
 	.mutation("save", {
 		input: logSchema,
 		async resolve({ input, ctx }) {
-			let dm: DungeonMaster | null = null;
-			const user = ctx.session.user;
-			const isMe = input.dm.name.trim() === user.name?.trim();
-			if (input.dm.name.trim()) {
-				if (!input.dm.id) {
-					const search = await ctx.prisma.dungeonMaster.findFirst({
-						where: {
-							OR:
-								input.is_dm_log || isMe
-									? [{ uid: user.id }]
-									: input.dm.DCI === null
-									? [{ name: input.dm.name.trim() }]
-									: [{ name: input.dm.name.trim() }, { DCI: input.dm.DCI }]
-						}
-					});
-					if (search) dm = search;
-					else
-						dm = await ctx.prisma.dungeonMaster.create({
-							data: {
-								name: input.dm.name.trim(),
-								DCI: input.dm.DCI,
-								uid: input.is_dm_log || isMe ? user.id : null
-							}
-						});
-				} else {
-					try {
-						dm = await ctx.prisma.dungeonMaster.update({
+			const log = await ctx.prisma.$transaction(async tx => {
+				let dm: DungeonMaster | null = null;
+				const user = ctx.session.user;
+				const isMe = input.dm.name.trim() === user.name?.trim();
+				if (input.dm.name.trim()) {
+					if (!input.dm.id) {
+						const search = await tx.dungeonMaster.findFirst({
 							where: {
-								id: input.dm.id
-							},
-							data: {
-								name: input.dm.name.trim(),
-								DCI: input.dm.DCI,
-								uid: input.is_dm_log || isMe ? user.id : null
+								OR:
+									input.is_dm_log || isMe
+										? [{ uid: user.id }]
+										: input.dm.DCI === null
+										? [{ name: input.dm.name.trim() }]
+										: [{ name: input.dm.name.trim() }, { DCI: input.dm.DCI }]
 							}
 						});
-					} catch (err) {
-						throw new TRPCError({ message: parseError(err), code: "INTERNAL_SERVER_ERROR" });
+						if (search) dm = search;
+						else
+							dm = await tx.dungeonMaster.create({
+								data: {
+									name: input.dm.name.trim(),
+									DCI: input.dm.DCI,
+									uid: input.is_dm_log || isMe ? user.id : null
+								}
+							});
+					} else {
+						try {
+							dm = await tx.dungeonMaster.update({
+								where: {
+									id: input.dm.id
+								},
+								data: {
+									name: input.dm.name.trim(),
+									DCI: input.dm.DCI,
+									uid: input.is_dm_log || isMe ? user.id : null
+								}
+							});
+						} catch (err) {
+							throw new Error(parseError(err));
+						}
 					}
 				}
-			}
 
-			if (input.type == "game" && !dm?.id) throw new TRPCError({ message: "Could not save Dungeon Master", code: "INTERNAL_SERVER_ERROR" });
+				if (input.type == "game" && !dm?.id) throw new Error("Could not save Dungeon Master");
 
-			let applied_date: Date | null = input.is_dm_log
-				? input.characterId && input.applied_date !== null
-					? new Date(input.applied_date)
-					: null
-				: new Date(input.date);
-			if (input.characterId && applied_date === null) throw new TRPCError({ message: "Applied date is required", code: "BAD_REQUEST" });
+				let applied_date: Date | null = input.is_dm_log
+					? input.characterId && input.applied_date !== null
+						? new Date(input.applied_date)
+						: null
+					: new Date(input.date);
+				if (input.characterId && applied_date === null) throw new Error("Applied date is required");
 
-			if (input.characterId) {
-				const character = await ctx.prisma.character.findFirst({
-					include: {
-						logs: true
-					},
-					where: { id: input.characterId }
-				});
+				if (input.characterId) {
+					const character = await tx.character.findFirst({
+						include: {
+							logs: true
+						},
+						where: { id: input.characterId }
+					});
 
-				if (!character) throw new TRPCError({ message: "Character not found", code: "INTERNAL_SERVER_ERROR" });
+					if (!character) throw new Error("Character not found");
 
-				const currentLevel = getLevels(character.logs).total;
-				const logACP = character.logs.find(log => log.id === input.logId)?.acp || 0;
-				if (currentLevel == 20 && input.acp - logACP > 0) throw new TRPCError({ message: "Character is already level 20", code: "BAD_REQUEST" });
-				const logLevel = character.logs.find(log => log.id === input.logId)?.level || 0;
-				if (currentLevel + input.level - logLevel > 20) throw new TRPCError({ message: "Character cannot level past 20", code: "BAD_REQUEST" });
-			}
+					const currentLevel = getLevels(character.logs).total;
+					const logACP = character.logs.find(log => log.id === input.logId)?.acp || 0;
+					if (currentLevel == 20 && input.acp - logACP > 0) throw new Error("Character is already level 20");
+					const logLevel = character.logs.find(log => log.id === input.logId)?.level || 0;
+					if (currentLevel + input.level - logLevel > 20) throw new Error("Character cannot level past 20");
+				}
 
-			const data: Omit<Log, "id" | "created_at"> = {
-				name: input.name,
-				date: new Date(input.date),
-				description: input.description,
-				type: input.type,
-				dungeonMasterId: (dm || {}).id || null,
-				is_dm_log: input.is_dm_log,
-				applied_date: applied_date,
-				characterId: input.characterId,
-				acp: input.acp,
-				tcp: input.tcp,
-				experience: input.experience,
-				level: input.level,
-				gold: input.gold,
-				dtd: input.dtd
-			};
+				const data: Omit<Log, "id" | "created_at"> = {
+					name: input.name,
+					date: new Date(input.date),
+					description: input.description,
+					type: input.type,
+					dungeonMasterId: (dm || {}).id || null,
+					is_dm_log: input.is_dm_log,
+					applied_date: applied_date,
+					characterId: input.characterId,
+					acp: input.acp,
+					tcp: input.tcp,
+					experience: input.experience,
+					level: input.level,
+					gold: input.gold,
+					dtd: input.dtd
+				};
 
-			const log = await ctx.prisma.$transaction(async tx => {
 				const log: Log = await tx.log.upsert({
 					where: {
 						id: input.logId
